@@ -1,0 +1,205 @@
+openapi: 3.1.0
+info:
+  title: Hospital Organization API
+  version: 0.1.0
+  description: >
+    A REST API for managing hospital resources: patients, practitioners,
+    departments, appointments, and medical records.
+  contact:
+    name: API Support
+    email: support@example.org
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: Patients
+  - name: Practitioners
+  - name: Departments
+  - name: Appointments
+  - name: MedicalRecords
+
+paths:
+  /api/v1/patients:
+    get:
+      tags: [Patients]
+      summary: List patients
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 0, default: 0 }
+        - in: query
+          name: size
+          schema: { type: integer, minimum: 1, maximum: 200, default: 20 }
+        - in: query
+          name: sort
+          schema: { type: string, example: "lastName,asc" }
+        - in: query
+          name: mrn
+          description: Filter by medical record number
+          schema: { type: string }
+      responses:
+        '200':
+          description: Page of patients
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagePatient'
+    post:
+      tags: [Patients]
+      summary: Create patient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PatientCreateRequest' }
+      responses:
+        '201':
+          description: Created
+          headers:
+            Location:
+              description: URL of the created resource
+              schema: { type: string }
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Patient' }
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+  /api/v1/patients/{id}:
+    get:
+      tags: [Patients]
+      summary: Get patient by ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Patient
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Patient' }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    put:
+      tags: [Patients]
+      summary: Replace patient
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PatientUpdateRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Patient' }
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+    delete:
+      tags: [Patients]
+      summary: Delete patient
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: Deleted }
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ErrorResponse' }
+
+components:
+  schemas:
+    PagePatient:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/Patient' }
+        page: { type: integer, minimum: 0 }
+        size: { type: integer, minimum: 1 }
+        total: { type: integer, minimum: 0 }
+      required: [items, page, size, total]
+
+    Patient:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        mrn: { type: string, description: Medical Record Number }
+        firstName: { type: string }
+        lastName: { type: string }
+        dateOfBirth: { type: string, format: date }
+        gender: { type: string, enum: [male, female, other, unknown] }
+        phone: { type: string }
+        email: { type: string, format: email }
+        address: { $ref: '#/components/schemas/Address' }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, mrn, firstName, lastName, dateOfBirth]
+
+    PatientCreateRequest:
+      type: object
+      properties:
+        mrn: { type: string, minLength: 1 }
+        firstName: { type: string, minLength: 1 }
+        lastName: { type: string, minLength: 1 }
+        dateOfBirth: { type: string, format: date }
+        gender: { type: string, enum: [male, female, other, unknown] }
+        phone: { type: string }
+        email: { type: string, format: email }
+        address: { $ref: '#/components/schemas/Address' }
+      required: [mrn, firstName, lastName, dateOfBirth]
+
+    PatientUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/PatientCreateRequest'
+
+    Address:
+      type: object
+      properties:
+        line1: { type: string }
+        line2: { type: string }
+        city: { type: string }
+        state: { type: string }
+        postalCode: { type: string }
+        country: { type: string }
+
+    ErrorResponse:
+      type: object
+      properties:
+        code: { type: string, example: "validation_error" }
+        message: { type: string }
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field: { type: string }
+              message: { type: string }
+        traceId: { type: string }
+      required: [code, message]
