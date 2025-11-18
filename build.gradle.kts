@@ -19,12 +19,15 @@ repositories {
 }
 
 dependencies {
+    // spring boot necessary imports
     implementation("org.springframework.boot:spring-boot-starter")
     implementation("org.springframework.boot:spring-boot-starter-web")
     // this one is the Spring Data JPA dependency with transaction.annotation.Transactional
     // dont confuse with jakarta.transaction.Transactional
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.h2database:h2") // For Phase 1 in-memory database
+    implementation("jakarta.validation:jakarta.validation-api") // Use the latest stable version
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
