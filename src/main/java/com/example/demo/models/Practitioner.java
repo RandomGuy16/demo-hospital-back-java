@@ -34,9 +34,9 @@ public class Practitioner extends Person {
         super();
     }
 
-    public Practitioner(String firstName, String lastName, LocalDate dateOfBirth,
+    public Practitioner(String firstName, String lastName, String idNumber, LocalDate dateOfBirth,
                         String gender, String phoneNumber, String contacts) {
-        super(firstName, lastName, dateOfBirth, gender, phoneNumber, contacts);
+        super(firstName, lastName, idNumber, dateOfBirth, gender, phoneNumber, contacts);
     }
 
     // Getters and Setters

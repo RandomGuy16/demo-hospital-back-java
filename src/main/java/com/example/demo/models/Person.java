@@ -13,6 +13,9 @@ public abstract class Person {
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Column(name = "id_number", nullable = false, length = 10)
+    private String idNumber;
+
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
@@ -35,10 +38,11 @@ public abstract class Person {
     protected Person() {
     }
 
-    protected Person(String firstName, String lastName, LocalDate dateOfBirth, 
+    protected Person(String firstName, String lastName, String idNumber, LocalDate dateOfBirth,
                      String gender, String phoneNumber, String contacts) {
         this.firstName = firstName;
         this.lastName = lastName;
+        this.idNumber = idNumber;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.phoneNumber = phoneNumber;

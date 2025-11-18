@@ -14,6 +14,9 @@ public record CreatePatientRequest (
     @NotBlank
     String lastName,
 
+    @NotBlank @Size(min = 10, max = 10)
+    String idNumber,
+
     @NotBlank @Past(message = "dateOfBirth must be in the past")
     LocalDate dateOfBirth,
 
@@ -25,9 +28,6 @@ public record CreatePatientRequest (
 
     @NotBlank
     String contacts,
-
-    @NotBlank
-    String mrn,
 
     @NotBlank
     String address

@@ -1,7 +1,10 @@
 package com.example.demo.services;
 
+import com.example.demo.dto.CreatePatientRequest;
 import com.example.demo.models.Patient;
 import com.example.demo.repositories.PatientRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -28,8 +31,24 @@ public class PatientService {
         this.patientRepository = patientRepository;
     }
 
-    public Patient createPatient(Patient patient) {
-        return patientRepository.save(patient);
+    private String generateMrn(String idNumber) {
+        String random = UUID.randomUUID().toString().replace(" ", "").substring(0, 8).toUpperCase();
+        return "ShokoIeiri-" + idNumber + random;
+    }
+
+    public Patient createPatient(CreatePatientRequest patient) {
+        Patient newPatient = new Patient(
+            patient.firstName(),
+            patient.lastName(),
+            patient.idNumber(),
+            patient.dateOfBirth(),
+            patient.gender(),
+            patient.phoneNumber(),
+            patient.contacts(),
+            generateMrn(patient.idNumber()),
+            patient.address()
+        );
+        return patientRepository.save(newPatient);
     }
 
     public Optional<Patient> getPatientById(UUID id) {
@@ -53,8 +72,8 @@ public class PatientService {
             });
     }
 
-    public List<Patient> getAllPatients() {
-        return patientRepository.findAll();
+    public Page<Patient> getAllPatients(Pageable pageable) {
+        return patientRepository.findAll(pageable);
     }
 
     public Optional<Patient> deletePatientById(UUID id) {

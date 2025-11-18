@@ -25,10 +25,17 @@ public class Patient extends Person {
         super();
     }
 
-    public Patient(String firstName, String lastName, LocalDate dateOfBirth,
-                   String gender, String phoneNumber, String contacts,
-                   String mrn, String address) {
-        super(firstName, lastName, dateOfBirth, gender, phoneNumber, contacts);
+    public Patient(
+        String firstName,
+        String lastName,
+        String idNumber,
+        LocalDate dateOfBirth,
+        String gender,
+        String phoneNumber,
+        String contacts,
+        String mrn,
+        String address) {
+        super(firstName, lastName, idNumber, dateOfBirth, gender, phoneNumber, contacts);
         this.mrn = mrn;
         this.address = address;
     }
