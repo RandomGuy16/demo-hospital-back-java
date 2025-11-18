@@ -5,8 +5,8 @@ package com.example.demo;
 import com.example.demo.dto.CreatePatientRequest;
 import com.example.demo.models.Patient;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc; // the object that simulates the API calls
 import org.springframework.test.web.servlet.MvcResult;  // in testGetAllUsers, to pass the response as an argument, this is the necessary import
 import org.springframework.web.util.UriComponentsBuilder;
+import org.springframework.data.domain.Page;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -100,17 +101,19 @@ public class PatientTest {
     public void testGetAllPatients() throws Exception {
         logger.info("Starting testGetAllPatients");
         mockMvc.perform(get("/api/v1/patients"))
-                .andDo(this::verityPatientsResponse)
+                .andDo(this::verifyPatientsResponse)
                 .andExpect(status().isOk());
                 // .andExpect(jsonPath("$").value(""));
     }
 
-    private void verityPatientsResponse(MvcResult result) throws Exception {
+    private void verifyPatientsResponse(MvcResult result) throws Exception {
         logger.info("GET /api/v1/patients Response status: {}", result.getResponse().getStatus());
-        List<Patient> patients = objectMapper.readValue(
-            result.getResponse().getContentAsString(),
-            new TypeReference<List<Patient>>() {}
-        );
+        logger.info(result.getResponse().getContentAsString());
+
+        JsonNode rootNode = objectMapper.readTree(result.getResponse().getContentAsString());
+        JsonNode contentNode = rootNode.get("content");
+        List<Patient> patients = objectMapper.convertValue(contentNode, new TypeReference<List<Patient>>() {});
+
         logger.info("Patients array length: {}", patients.size());
         logger.info("Patients: {}", patients);
         Assertions.assertEquals(2, patients.size());

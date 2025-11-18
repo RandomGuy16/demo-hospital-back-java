@@ -8,7 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ import java.util.UUID;
 public class PatientService {
     private final PatientRepository patientRepository;
 
-    // once i had a problem because LSP didnt find the "bean" of PatientRepository
+    // once I had a problem because LSP didn't find the "bean" of PatientRepository,
     // it meant that spring didnt recognize it, that's why we use decorators
     /*
     @Component - Generic bean
@@ -71,6 +70,14 @@ public class PatientService {
                 return patientRepository.save(p);
             });
     }
+
+    // In order to implement pagination, at least at a basic level
+    // we need to use the Pageable interface from springboot
+    // we return a Page<Patient> instead of a List<Patient>
+    // this is because the pageable interface returns a page of objects
+    // and we pass a Pageable object to the repository method
+    // to get the page of objects
+    // theres no need to add something to the repository, since it inherits from JpaRepository
 
     public Page<Patient> getAllPatients(Pageable pageable) {
         return patientRepository.findAll(pageable);

@@ -60,6 +60,10 @@ public class PatientController {
         return ResponseEntity.created(location).body(response);
     }
 
+    // pagination is getting a lot of things, but one page at a time, basically
+    // use the interfaces, from springboot, Pageable and Page
+    // these replace the List<Patient> previously used
+
     // READ ALL - get all patients /api/v1/patients
     @GetMapping
     public ResponseEntity<Page<PatientResponse>> getAllPatients(Pageable pageable) {
