@@ -1,7 +1,7 @@
 package com.example.demo.models;
 
 public class MedicalRecord {
-    //id, patientId, encounters, diagnoses, medications (future expansion)
+    // id, patientId, encounters, diagnoses, medications (future expansion)
     private int id;
     private int patientId;
     private String encounters;

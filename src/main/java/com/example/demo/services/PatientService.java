@@ -1,6 +1,6 @@
 package com.example.demo.services;
 
-import com.example.demo.dto.CreatePatientRequest;
+import com.example.demo.dto.PatientRequest;
 import com.example.demo.models.Patient;
 import com.example.demo.repositories.PatientRepository;
 import org.springframework.data.domain.Page;
@@ -19,12 +19,16 @@ public class PatientService {
     // once I had a problem because LSP didn't find the "bean" of PatientRepository,
     // it meant that spring didnt recognize it, that's why we use decorators
     /*
-    @Component - Generic bean
-    @Service - Business logic layer (like your services)
-    @Repository - Data access layer (your repositories)
-    @Controller / @RestController - Web layer (your API controllers)
-    @Configuration - Configuration classes
-    */
+     * @Component - Generic bean
+     * 
+     * @Service - Business logic layer (like your services)
+     * 
+     * @Repository - Data access layer (your repositories)
+     * 
+     * @Controller / @RestController - Web layer (your API controllers)
+     * 
+     * @Configuration - Configuration classes
+     */
 
     public PatientService(PatientRepository patientRepository) {
         this.patientRepository = patientRepository;
@@ -35,18 +39,17 @@ public class PatientService {
         return "ShokoIeiri-" + idNumber + random;
     }
 
-    public Patient createPatient(CreatePatientRequest patient) {
+    public Patient createPatient(PatientRequest patient) {
         Patient newPatient = new Patient(
-            patient.firstName(),
-            patient.lastName(),
-            patient.idNumber(),
-            patient.dateOfBirth(),
-            patient.gender(),
-            patient.phoneNumber(),
-            patient.contacts(),
-            generateMrn(patient.idNumber()),
-            patient.address()
-        );
+                patient.firstName(),
+                patient.lastName(),
+                patient.idNumber(),
+                patient.dateOfBirth(),
+                patient.gender(),
+                patient.phoneNumber(),
+                patient.contacts(),
+                generateMrn(patient.idNumber()),
+                patient.address());
         return patientRepository.save(newPatient);
     }
 
@@ -58,17 +61,19 @@ public class PatientService {
         return patientRepository.findByMrn(mrn);
     }
 
-    public Optional<Patient> updatePatient(UUID id, Patient patient) {
+    public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {
+
         return patientRepository.findById(id)
-            .map(p -> {
-                p.setFirstName(patient.getFirstName());
-                p.setLastName(patient.getLastName());
-                p.setDateOfBirth(patient.getDateOfBirth());
-                p.setGender(patient.getGender());
-                p.setPhoneNumber(patient.getPhoneNumber());
-                p.setContacts(patient.getContacts());
-                return patientRepository.save(p);
-            });
+                .map(p -> {
+                    p.setFirstName(pRequest.firstName());
+                    p.setLastName(pRequest.lastName());
+                    p.setDateOfBirth(pRequest.dateOfBirth());
+                    p.setGender(pRequest.gender());
+                    p.setPhoneNumber(pRequest.phoneNumber());
+                    p.setContacts(pRequest.contacts());
+                    p.setAddress(pRequest.address());
+                    return patientRepository.save(p);
+                });
     }
 
     // In order to implement pagination, at least at a basic level
@@ -77,7 +82,8 @@ public class PatientService {
     // this is because the pageable interface returns a page of objects
     // and we pass a Pageable object to the repository method
     // to get the page of objects
-    // theres no need to add something to the repository, since it inherits from JpaRepository
+    // theres no need to add something to the repository, since it inherits from
+    // JpaRepository
 
     public Page<Patient> getAllPatients(Pageable pageable) {
         return patientRepository.findAll(pageable);
@@ -85,9 +91,9 @@ public class PatientService {
 
     public Optional<Patient> deletePatientById(UUID id) {
         return patientRepository.findById(id)
-            .map(patient -> {
-                patientRepository.delete(patient);
-                return patient;
-            });
+                .map(patient -> {
+                    patientRepository.delete(patient);
+                    return patient;
+                });
     }
 }

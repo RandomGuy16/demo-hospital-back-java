@@ -2,7 +2,7 @@ package com.example.demo;
 
 // to begin the test, there are a few things to import
 // first, this annotation to run a function as a test with your build tool
-import com.example.demo.dto.CreatePatientRequest;
+import com.example.demo.dto.PatientRequest;
 import com.example.demo.models.Patient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -17,7 +17,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest; // this defines a class as a test and executes its tests functions
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc; // the object that simulates the API calls
-import org.springframework.test.web.servlet.MvcResult;  // in testGetAllUsers, to pass the response as an argument, this is the necessary import
+import org.springframework.test.web.servlet.MvcResult; // in testGetAllUsers, to pass the response as an argument, this is the necessary import
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.data.domain.Page;
 
@@ -28,7 +28,6 @@ import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status; // class with static API results functions (status, isOk, jsonPath, ...)
-
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -45,7 +44,7 @@ public class PatientTest {
     @Test
     public void testCreatePatient() throws Exception {
         logger.info("Starting testCreatePatient");
-        CreatePatientRequest mockPatient = new CreatePatientRequest(
+        PatientRequest mockPatient = new PatientRequest(
                 "Lamine",
                 "Yamal",
                 "6666666666",
@@ -53,37 +52,32 @@ public class PatientTest {
                 "masculine",
                 "948232081",
                 "idk whats contacs",
-                "Trapiche 777"
-        );
+                "Trapiche 777");
         String json = objectMapper.writeValueAsString(mockPatient);
         // logger.debug("Created mock patient: {}", mockPatient);
         mockMvc.perform(post("/api/v1/patients")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andDo(result ->
-                    logger.info("POST /api/v1/patients Response: {}", result.getResponse().getContentAsString())
-                )
+                .andDo(result -> logger.info("POST /api/v1/patients Response: {}",
+                        result.getResponse().getContentAsString()))
                 .andExpect(status().isCreated());
 
-
         // test with a second patient
-        CreatePatientRequest satoruGojo = new CreatePatientRequest(
-            "Satoru",
-            "Gojo",
-            "71962299",
-            LocalDate.of(1992, 12, 10),
-            "masculine",
-            "+1 948232081",
-            "everyone",
-            "Habich123"
-        );
+        PatientRequest satoruGojo = new PatientRequest(
+                "Satoru",
+                "Gojo",
+                "71962299",
+                LocalDate.of(1992, 12, 10),
+                "masculine",
+                "+1 948232081",
+                "everyone",
+                "Habich123");
         json = objectMapper.writeValueAsString(satoruGojo);
         mockMvc.perform(post("/api/v1/patients")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andDo(result ->
-                    logger.info("POST /api/v1/patients Response: {}", result.getResponse().getContentAsString())
-                )
+                .andDo(result -> logger.info("POST /api/v1/patients Response: {}",
+                        result.getResponse().getContentAsString()))
                 .andExpect(status().isCreated());
     }
 
@@ -94,7 +88,7 @@ public class PatientTest {
         URI location = uriBuilder.path("/api/v1/patients/{id}").buildAndExpand(randomId).toUri();
         logger.info("Location: {}", location);
         mockMvc.perform(get(location))
-            .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -103,7 +97,7 @@ public class PatientTest {
         mockMvc.perform(get("/api/v1/patients"))
                 .andDo(this::verifyPatientsResponse)
                 .andExpect(status().isOk());
-                // .andExpect(jsonPath("$").value(""));
+        // .andExpect(jsonPath("$").value(""));
     }
 
     private void verifyPatientsResponse(MvcResult result) throws Exception {
@@ -112,7 +106,8 @@ public class PatientTest {
 
         JsonNode rootNode = objectMapper.readTree(result.getResponse().getContentAsString());
         JsonNode contentNode = rootNode.get("content");
-        List<Patient> patients = objectMapper.convertValue(contentNode, new TypeReference<List<Patient>>() {});
+        List<Patient> patients = objectMapper.convertValue(contentNode, new TypeReference<List<Patient>>() {
+        });
 
         logger.info("Patients array length: {}", patients.size());
         logger.info("Patients: {}", patients);
@@ -123,9 +118,7 @@ public class PatientTest {
     public void testRemoveNonExistingPatient() throws Exception {
         logger.info("Starting testRemoveNonExistingPatient");
         mockMvc.perform(delete(String.format("/api/v1/patients/%s", UUID.randomUUID())))
-                .andDo(result ->
-                    logger.info("DELETE URI: {}", String.format("/api/v1/patients/%s", UUID.randomUUID()))
-                )
+                .andDo(result -> logger.info("DELETE URI: {}", String.format("/api/v1/patients/%s", UUID.randomUUID())))
                 .andExpect(status().isNotFound());
     }
 
@@ -133,16 +126,15 @@ public class PatientTest {
     public void testRemoveExistingPatient() throws Exception {
         logger.info("Starting testRemoveExistingPatient");
         // Create a valid patient (don't inline "new Patient()", gives an error)
-        CreatePatientRequest patientToCreate = new CreatePatientRequest(
-            "Test",
-            "Patient",
-            "123456789",
-            LocalDate.of(1990, 1, 1),
-            "masculine",
-            "123456789",
-            "test@example.com",
-            "Test Address 123"
-        );
+        PatientRequest patientToCreate = new PatientRequest(
+                "Test",
+                "Patient",
+                "123456789",
+                LocalDate.of(1990, 1, 1),
+                "masculine",
+                "123456789",
+                "test@example.com",
+                "Test Address 123");
 
         // perform POST and get the result
         MvcResult createResult = mockMvc.perform(post("/api/v1/patients")
@@ -153,8 +145,7 @@ public class PatientTest {
 
         // Parse the response to get the patient ID
         Patient createdPatient = objectMapper.readValue(
-            createResult.getResponse().getContentAsString(), Patient.class
-        );
+                createResult.getResponse().getContentAsString(), Patient.class);
         UUID patientId = createdPatient.getPatientId();
 
         // perform DELETE with the correct ID

@@ -23,11 +23,16 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     // and many more!
 
     Patient save(Patient patient);
+
     Optional<Patient> findById(UUID id);
+
     Optional<Patient> findByMrn(String mrn);
 
     List<Patient> findAll();
+
     List<Patient> findByFirstNameAndLastName(@NonNull String firstName, @NonNull String lastName);
+
     List<Patient> findByLastName(@NonNull String lastName);
+
     boolean existsByMrn(@NonNull String mrn);
 }

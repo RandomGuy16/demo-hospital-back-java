@@ -1,9 +1,12 @@
 package com.example.demo.controllers;
 
-import com.example.demo.dto.CreatePatientRequest;
+import com.example.demo.dto.PatientRequest;
 import com.example.demo.dto.PatientResponse;
 import com.example.demo.models.Patient;
 import com.example.demo.services.PatientService;
+
+import jakarta.validation.Valid;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +16,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+
 import java.net.URI;
 import java.util.UUID;
 import java.util.Optional;
@@ -29,28 +33,31 @@ public class PatientController {
     }
 
     private PatientResponse patientToPatientResponse(Patient patient) {
-        /*if (patient == null) {
-            return null;
-        }*/
+        /*
+         * if (patient == null) {
+         * return null;
+         * }
+         */
         return new PatientResponse(
-            patient.getPatientId(),
-            patient.getFirstName(),
-            patient.getLastName(),
-            patient.getDateOfBirth(),
-            patient.getGender(),
-            patient.getPhoneNumber(),
-            patient.getContacts(),
-            patient.getMrn(),
-            patient.getAddress()
-        );
+                patient.getPatientId(),
+                patient.getFirstName(),
+                patient.getLastName(),
+                patient.getDateOfBirth(),
+                patient.getGender(),
+                patient.getPhoneNumber(),
+                patient.getContacts(),
+                patient.getMrn(),
+                patient.getAddress());
     }
 
     // now we are going to make some CRUD ops
+    // never forget @Valid to make useful our jakarta tags
 
     // CREATE - POST /api/v1/patients
     // they send us a patient object
     @PostMapping
-    public ResponseEntity<PatientResponse> createPatient(@RequestBody CreatePatientRequest req, UriComponentsBuilder uriBuilder) {
+    public ResponseEntity<PatientResponse> createPatient(@RequestBody @Valid PatientRequest req,
+            UriComponentsBuilder uriBuilder) {
         // the service receives the dto request and returns the patient object
         Patient created = patientService.createPatient(req);
         PatientResponse response = patientToPatientResponse(created);
@@ -68,9 +75,8 @@ public class PatientController {
     @GetMapping
     public ResponseEntity<Page<PatientResponse>> getAllPatients(Pageable pageable) {
         logger.info("GET /api/v1/patients Request");
-        Page<PatientResponse> patients = patientService.getAllPatients(pageable)
-            .map(this::patientToPatientResponse);
-        return ResponseEntity.ok(patients);
+        Page<Patient> patientPage = patientService.getAllPatients(pageable);
+        return ResponseEntity.ok(patientPage.map(this::patientToPatientResponse));
     }
 
     // READ ONE - get patient by id /api/v1/patients/{id}
@@ -78,8 +84,8 @@ public class PatientController {
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable UUID id) {
         Optional<Patient> patient = patientService.getPatientById(id);
         return patient
-            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // READ BY MRN - GET /api/v1/patients/mrn/{mrn}
@@ -87,24 +93,24 @@ public class PatientController {
     public ResponseEntity<PatientResponse> getPatientByMrn(@PathVariable String mrn) {
         Optional<Patient> patient = patientService.getPatientByMRN(mrn);
         return patient
-            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // UPDATE - PUT /api/v1/patients/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<PatientResponse> updatePatient(@PathVariable UUID id, @RequestBody CreatePatientRequest req) {
-        Optional<Patient> existingPatient = patientService.getPatientById(id);
-        return existingPatient
-            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<PatientResponse> updatePatient(@PathVariable UUID id,
+            @RequestBody @Valid PatientRequest req) {
+        return patientService.updatePatient(id, req)
+                .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // DELETE - DELETE /api/v1/patients/{id}
     @DeleteMapping("/{id}")
     public ResponseEntity<PatientResponse> deletePatient(@PathVariable UUID id) {
         return patientService.deletePatientById(id)
-            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
-            .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
