@@ -10,7 +10,7 @@ help:
 	@printf "  make clean  Remove build outputs\n"
 
 dev:
-	$(GRADLEW) bootRun
+	$(GRADLEW) bootRun -t
 
 test:
 	$(GRADLEW) test

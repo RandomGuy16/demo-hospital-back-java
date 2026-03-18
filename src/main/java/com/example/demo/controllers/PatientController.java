@@ -6,10 +6,14 @@ import com.example.demo.models.Patient;
 import com.example.demo.services.PatientService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +23,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
+import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/patients")
 @Tag(name = "Patients", description = "Endpoints for managing patients")
+@Validated
 public class PatientController {
     private final PatientService patientService;
 
@@ -38,11 +47,6 @@ public class PatientController {
     }
 
     private PatientResponse patientToPatientResponse(Patient patient) {
-        /*
-         * if (patient == null) {
-         * return null;
-         * }
-         */
         return new PatientResponse(
                 patient.getPatientId(),
                 patient.getFirstName(),
@@ -91,8 +95,17 @@ public class PatientController {
         description = "Returns paginated patients"
     )
     @ApiResponse(responseCode = "200", description = "Patients retrieved successfully")
-    public ResponseEntity<Page<PatientResponse>> getAllPatients(Pageable pageable) {
+    public ResponseEntity<Page<PatientResponse>> getAllPatients(
+            @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
+            @RequestParam(defaultValue = "0")
+            @Min(0) int page,
+            @Parameter(description = "Number of records per page", schema = @Schema(defaultValue = "20", minimum = "1", maximum = "100"))
+            @RequestParam(defaultValue = "20")
+            @Min(1) @Max(100) int size,
+            @Parameter(description = "Sorting criteria in the format field,direction", example = "lastName,asc")
+            @RequestParam(required = false) List<String> sort) {
         logger.info("GET /api/v1/patients Request");
+        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
         Page<Patient> patientPage = patientService.getAllPatients(pageable);
         return ResponseEntity.ok(patientPage.map(this::patientToPatientResponse));
     }
@@ -163,5 +176,22 @@ public class PatientController {
         return patientService.deletePatientById(id)
                 .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    private Sort parseSort(List<String> sortParams) {
+        if (sortParams == null || sortParams.isEmpty()) {
+            return Sort.unsorted();
+        }
+
+        Sort sort = Sort.unsorted();
+        for (String sortParam : sortParams) {
+            String[] tokens = sortParam.split(",");
+            String property = tokens[0].trim();
+            Sort.Direction direction = tokens.length > 1
+                    ? Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC)
+                    : Sort.Direction.ASC;
+            sort = sort.and(Sort.by(direction, property));
+        }
+        return sort;
     }
 }

@@ -34,7 +34,7 @@ public class Department {
     )
     @JsonIgnore
     @Schema(hidden = true)
-    private List<Practitioner> practitioners = new ArrayList<>();
+    private final List<Practitioner> practitioners = new ArrayList<>();
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2026-03-17T12:30:00")
     @Column(name = "created_at", nullable = false, updatable = false)

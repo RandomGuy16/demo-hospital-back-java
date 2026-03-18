@@ -2,6 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.ErrorResponse;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -35,6 +36,23 @@ public class GlobalExceptionHandler {
             .getFieldErrors()
             .stream()
             .map(err -> err.getField() + " " + err.getDefaultMessage())
+            .findFirst()
+            .orElse("Validation error");
+
+        ErrorResponse error = new ErrorResponse(
+            "VALIDATION_ERROR",
+            message,
+            Instant.now()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException ex) {
+        String message = ex.getConstraintViolations()
+            .stream()
+            .map(violation -> violation.getPropertyPath() + " " + violation.getMessage())
             .findFirst()
             .orElse("Validation error");
 

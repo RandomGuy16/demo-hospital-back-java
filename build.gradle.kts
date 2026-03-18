@@ -35,6 +35,9 @@ dependencies {
 
     // this one is for beautiful swagger docs
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+
+    // this one if to enable auto reload
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
 }
 
 tasks.withType<Test> {
