@@ -4,7 +4,7 @@ These guidelines describe how to build a robust, maintainable Spring Boot API fo
 
 ## Coding Standards
 
-- Java 17+; adhere to standard Java conventions.
+- Java 21 via the Gradle toolchain; adhere to standard Java conventions.
 - Prefer immutability; make fields `private final` when possible.
 - Use records or Lombok (optional) for DTOs to reduce boilerplate.
 - Avoid static state and singletons except where explicitly safe.

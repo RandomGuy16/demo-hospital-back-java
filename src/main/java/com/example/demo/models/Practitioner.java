@@ -1,20 +1,24 @@
 package com.example.demo.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(name = "Practitioner", description = "Practitioner record")
 @Entity
 @Table(name = "practitioners")
 public class Practitioner extends Person {
-    
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "practitioner_id")
     private UUID practitionerId;
 
+    @Schema(example = "[\"Cardiology\", \"Internal Medicine\"]")
     @ElementCollection
     @CollectionTable(name = "practitioner_specialties", 
                      joinColumns = @JoinColumn(name = "practitioner_id"))
@@ -27,6 +31,8 @@ public class Practitioner extends Person {
         joinColumns = @JoinColumn(name = "practitioner_id"),
         inverseJoinColumns = @JoinColumn(name = "department_id")
     )
+    @JsonIgnore
+    @Schema(hidden = true)
     private List<Department> departments = new ArrayList<>();
 
     // Constructors

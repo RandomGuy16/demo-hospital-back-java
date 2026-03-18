@@ -1,3 +1,5 @@
+import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.7"
@@ -30,11 +32,19 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    // this one is for beautiful swagger docs
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
 }
 
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
+    languageVersion = JavaLanguageVersion.of(21)
+}
+
 tasks.test {
     testLogging {
         events("passed", "skipped", "failed", "standardOut", "standardError")

@@ -8,12 +8,12 @@
 - Root docs include `README.md`, `PROJECT_GUIDELINES.md`, `CONTRIBUTING.md`, `SECURITY.md`, and `ROADMAP.md`.
 
 ## Build, Test, and Development Commands
-- `./gradlew bootRun` starts the API locally on `http://localhost:8080`.
+- `./gradlew bootRun` starts the API locally on `http://localhost:8080` using the configured Java 21 toolchain.
 - `./gradlew clean build test` runs a full build and the test suite.
 - `./gradlew test` runs tests only.
 
 ## Coding Style & Naming Conventions
-- Java toolchain is set to 21 in `build.gradle.kts` (use a compatible JDK).
+- Java toolchain is set to 21 in `build.gradle.kts`; Gradle can auto-resolve the required JDK.
 - Follow standard Java conventions and keep controllers thin (Controller → Service → Repository).
 - Prefer DTOs for API boundaries; avoid exposing entities directly.
 - Package naming follows `com.example.demo.<role>`.

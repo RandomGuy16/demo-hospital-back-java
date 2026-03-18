@@ -5,6 +5,10 @@ import com.example.demo.dto.PatientResponse;
 import com.example.demo.models.Patient;
 import com.example.demo.services.PatientService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
 import org.springframework.http.ResponseEntity;
@@ -23,6 +27,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/v1/patients")
+@Tag(name = "Patients", description = "Endpoints for managing patients")
 public class PatientController {
     private final PatientService patientService;
 
@@ -56,6 +61,14 @@ public class PatientController {
     // CREATE - POST /api/v1/patients
     // they send us a patient object
     @PostMapping
+    @Operation(
+        summary = "Create a new patient",
+        description = "Creates a new patient from the data passed in"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "201", description = "Patient created successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+    })
     public ResponseEntity<PatientResponse> createPatient(@RequestBody @Valid PatientRequest req,
             UriComponentsBuilder uriBuilder) {
         // the service receives the dto request and returns the patient object
@@ -73,6 +86,11 @@ public class PatientController {
 
     // READ ALL - get all patients /api/v1/patients
     @GetMapping
+    @Operation(
+        summary = "List patients",
+        description = "Returns paginated patients"
+    )
+    @ApiResponse(responseCode = "200", description = "Patients retrieved successfully")
     public ResponseEntity<Page<PatientResponse>> getAllPatients(Pageable pageable) {
         logger.info("GET /api/v1/patients Request");
         Page<Patient> patientPage = patientService.getAllPatients(pageable);
@@ -81,6 +99,14 @@ public class PatientController {
 
     // READ ONE - get patient by id /api/v1/patients/{id}
     @GetMapping("/{id}")
+    @Operation(
+        summary = "Get patient by ID",
+        description = "Returns a patient by its unique identifier"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Patient retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Patient not found"),
+    })
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable UUID id) {
         Optional<Patient> patient = patientService.getPatientById(id);
         return patient
@@ -90,6 +116,14 @@ public class PatientController {
 
     // READ BY MRN - GET /api/v1/patients/mrn/{mrn}
     @GetMapping("/mrn/{mrn}")
+    @Operation(
+        summary = "Get patient by MRN",
+        description = "Returns a patient by medical record number"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Patient retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Patient not found"),
+    })
     public ResponseEntity<PatientResponse> getPatientByMrn(@PathVariable String mrn) {
         Optional<Patient> patient = patientService.getPatientByMRN(mrn);
         return patient
@@ -99,6 +133,15 @@ public class PatientController {
 
     // UPDATE - PUT /api/v1/patients/{id}
     @PutMapping("/{id}")
+    @Operation(
+        summary = "Update a patient",
+        description = "Updates an existing patient by ID"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Patient updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "404", description = "Patient not found"),
+    })
     public ResponseEntity<PatientResponse> updatePatient(@PathVariable UUID id,
             @RequestBody @Valid PatientRequest req) {
         return patientService.updatePatient(id, req)
@@ -108,6 +151,14 @@ public class PatientController {
 
     // DELETE - DELETE /api/v1/patients/{id}
     @DeleteMapping("/{id}")
+    @Operation(
+        summary = "Delete a patient",
+        description = "Deletes a patient by ID"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Patient deleted successfully"),
+        @ApiResponse(responseCode = "404", description = "Patient not found"),
+    })
     public ResponseEntity<PatientResponse> deletePatient(@PathVariable UUID id) {
         return patientService.deletePatientById(id)
                 .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))

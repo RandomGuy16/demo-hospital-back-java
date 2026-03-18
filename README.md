@@ -5,8 +5,11 @@ A starter Spring Boot project for a hospital/health organization API. This repos
 ## Quick Start
 
 Prerequisites:
-- Java 17+
+- Java 21
 - Gradle Wrapper (included) or Gradle 8+
+
+The project uses the Gradle Java toolchain and will resolve JDK 21 automatically when needed.
+If your system `java` is newer or incompatible with the Gradle wrapper, run Gradle once with a local JDK 21 and then pin the daemon JVM with `./gradlew updateDaemonJvm`.
 
 Run the application:
 
@@ -14,10 +17,24 @@ Run the application:
 ./gradlew bootRun
 ```
 
+Or with `make`:
+
+```bash
+make dev
+```
+
 Build and run tests:
 
 ```bash
 ./gradlew clean build test
+```
+
+Useful shortcuts:
+
+```bash
+make test
+make build
+make clean
 ```
 
 The app starts on http://localhost:8080.

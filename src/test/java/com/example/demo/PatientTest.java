@@ -4,6 +4,7 @@ package com.example.demo;
 // first, this annotation to run a function as a test with your build tool
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.models.Patient;
+import com.example.demo.logging.TestLog;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc; // the object that simulates the API calls
 import org.springframework.test.web.servlet.MvcResult; // in testGetAllUsers, to pass the response as an argument, this is the necessary import
 import org.springframework.web.util.UriComponentsBuilder;
-import org.springframework.data.domain.Page;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -58,8 +58,7 @@ public class PatientTest {
         mockMvc.perform(post("/api/v1/patients")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andDo(result -> logger.info("POST /api/v1/patients Response: {}",
-                        result.getResponse().getContentAsString()))
+                .andDo(result -> TestLog.response(logger, "POST /api/v1/patients", result))
                 .andExpect(status().isCreated());
 
         // test with a second patient
@@ -76,8 +75,7 @@ public class PatientTest {
         mockMvc.perform(post("/api/v1/patients")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json))
-                .andDo(result -> logger.info("POST /api/v1/patients Response: {}",
-                        result.getResponse().getContentAsString()))
+                .andDo(result -> TestLog.response(logger, "POST /api/v1/patients", result))
                 .andExpect(status().isCreated());
     }
 
@@ -106,7 +104,7 @@ public class PatientTest {
 
         JsonNode rootNode = objectMapper.readTree(result.getResponse().getContentAsString());
         JsonNode contentNode = rootNode.get("content");
-        List<Patient> patients = objectMapper.convertValue(contentNode, new TypeReference<List<Patient>>() {
+        List<Patient> patients = objectMapper.convertValue(contentNode, new TypeReference<>() {
         });
 
         logger.info("Patients array length: {}", patients.size());

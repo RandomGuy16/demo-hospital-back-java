@@ -1,5 +1,8 @@
 package com.example.demo.models;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(name = "MedicalRecord", description = "Placeholder medical record model for future phases")
 public class MedicalRecord {
     // id, patientId, encounters, diagnoses, medications (future expansion)
     private int id;

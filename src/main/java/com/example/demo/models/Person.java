@@ -1,36 +1,46 @@
 package com.example.demo.models;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+@Schema(description = "Common person attributes shared by patients and practitioners")
 @MappedSuperclass
 public abstract class Person {
-    
+    @Schema(example = "Jane")
     @Column(nullable = false, length = 50)
     private String firstName;
 
+    @Schema(example = "Doe")
     @Column(nullable = false, length = 50)
     private String lastName;
 
+    @Schema(example = "1234567890")
     @Column(name = "id_number", nullable = false, length = 10)
     private String idNumber;
 
+    @Schema(example = "1995-04-18")
     @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
 
+    @Schema(example = "female")
     @Column(length = 20)
     private String gender;
 
+    @Schema(example = "+1 555 0100")
     @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
+    @Schema(example = "jane.doe@example.com")
     @Column(length = 200)
     private String contacts;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2026-03-17T12:30:00")
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2026-03-17T12:45:00")
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
@@ -69,6 +79,10 @@ public abstract class Person {
         return lastName;
     }
 
+    public String getIdNumber() {
+        return idNumber;
+    }
+
     public String getFullName() {
         return firstName + " " + lastName;
     }
@@ -104,6 +118,10 @@ public abstract class Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public void setIdNumber(String idNumber) {
+        this.idNumber = idNumber;
     }
 
     public void setDateOfBirth(LocalDate dateOfBirth) {

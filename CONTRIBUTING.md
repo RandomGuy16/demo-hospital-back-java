@@ -25,7 +25,7 @@ Follow Conventional Commits:
 
 ## Code Style
 
-- Java 17+
+- Java 21 via the Gradle toolchain
 - Prefer constructor injection
 - Controller → Service → Repository separation; keep controllers thin
 - Validate inputs with Bean Validation and return consistent errors
