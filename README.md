@@ -14,6 +14,7 @@ If your system `java` is newer or incompatible with the Gradle wrapper, run Grad
 Run the application:
 
 ```bash
+make db-up
 ./gradlew bootRun
 ```
 
@@ -38,6 +39,7 @@ make clean
 ```
 
 The app starts on http://localhost:8080.
+The local PostgreSQL database is `hospitaldb` on `localhost:5432`.
 
 Health check/demo endpoint:
 - GET `http://localhost:8080/api` → `{ "message": "Hello World!" }`
@@ -74,12 +76,28 @@ Open http://localhost:8081 to view the docs.
 
 - Default port: `8080`
 - Configure via `src/main/resources/application.properties` or environment variables (Spring Boot supports `SPRING_APPLICATION_JSON` and `SPRING_*` envs).
+- Default database: PostgreSQL `hospitaldb` with username `hospital` and password `hospital`
 
 Common properties:
 - `server.port=8080`
 - `spring.profiles.active=dev`
+- `SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/hospitaldb`
+- `SPRING_DATASOURCE_USERNAME=hospital`
+- `SPRING_DATASOURCE_PASSWORD=hospital`
 
 Use Spring Profiles for environment-specific configuration: `dev`, `test`, `prod`.
+
+Start only the database:
+
+```bash
+make db-up
+```
+
+Start the API and PostgreSQL together in Docker:
+
+```bash
+make docker-dev
+```
 
 ## Testing
 

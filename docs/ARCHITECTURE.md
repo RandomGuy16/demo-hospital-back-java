@@ -23,7 +23,7 @@ This document outlines a pragmatic architecture for the Hospital Organization AP
 - MedicalRecord: id, patientId, encounters, diagnoses, medications (future expansion)
 
 ## Persistence
-- Phase 1: H2 in-memory database for local dev
+- Phase 1: PostgreSQL for local dev via Docker Compose
 - Phase 2+: PostgreSQL with Flyway migrations
 - Repositories via Spring Data JPA or alternative (JDBC/QueryDSL) as complexity demands
 

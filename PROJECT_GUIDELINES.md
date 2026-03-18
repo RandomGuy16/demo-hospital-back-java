@@ -37,7 +37,7 @@ These guidelines describe how to build a robust, maintainable Spring Boot API fo
 
 ## Persistence
 
-- Start with an in-memory H2 database for dev; use PostgreSQL in prod.
+- Use PostgreSQL for local dev and production-like runs; keep H2 only for automated tests.
 - Use Spring Data JPA for convenience or switch to JDBC/QueryDSL/MyBatis depending on complexity/performance needs.
 - Migrations via Flyway or Liquibase.
 
