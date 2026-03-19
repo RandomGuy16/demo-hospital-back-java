@@ -1,5 +1,6 @@
 package com.example.demo.services;
 
+import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.models.Patient;
 import com.example.demo.repositories.PatientRepository;
@@ -74,6 +75,29 @@ public class PatientService {
                     p.setAddress(pRequest.address());
                     return patientRepository.save(p);
                 });
+    }
+
+    public Optional<Patient> patchPatient(UUID id, PatientPatchRequest pRequest) {
+        return patientRepository.findById(id)
+            .map(p -> {
+                if (pRequest.firstName() != null) p.setFirstName(pRequest.firstName());
+
+                if (pRequest.lastName() != null) p.setLastName(pRequest.lastName());
+
+                if (pRequest.idNumber() != null) p.setIdNumber(pRequest.idNumber());
+
+                if (pRequest.dateOfBirth() != null) p.setDateOfBirth(pRequest.dateOfBirth());
+
+                if (pRequest.gender() != null) p.setGender(pRequest.gender());
+
+                if (pRequest.phoneNumber() != null) p.setPhoneNumber(pRequest.phoneNumber());
+
+                if (pRequest.contacts() != null) p.setContacts(pRequest.contacts());
+
+                if (pRequest.address() != null) p.setAddress(pRequest.address());
+
+                return patientRepository.save(p);
+            });
     }
 
     // In order to implement pagination, at least at a basic level

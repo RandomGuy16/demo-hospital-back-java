@@ -1,5 +1,6 @@
 package com.example.demo.controllers;
 
+import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.dto.PatientResponse;
 import com.example.demo.models.Patient;
@@ -62,6 +63,7 @@ public class PatientController {
     // now we are going to make some CRUD ops
     // never forget @Valid to make useful our jakarta tags
 
+
     // CREATE - POST /api/v1/patients
     // they send us a patient object
     @PostMapping
@@ -83,6 +85,7 @@ public class PatientController {
 
         return ResponseEntity.created(location).body(response);
     }
+
 
     // pagination is getting a lot of things, but one page at a time, basically
     // use the interfaces, from springboot, Pageable and Page
@@ -110,6 +113,7 @@ public class PatientController {
         return ResponseEntity.ok(patientPage.map(this::patientToPatientResponse));
     }
 
+
     // READ ONE - get patient by id /api/v1/patients/{id}
     @GetMapping("/{id}")
     @Operation(
@@ -127,6 +131,7 @@ public class PatientController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
     // READ BY MRN - GET /api/v1/patients/mrn/{mrn}
     @GetMapping("/mrn/{mrn}")
     @Operation(
@@ -143,6 +148,7 @@ public class PatientController {
                 .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     // UPDATE - PUT /api/v1/patients/{id}
     @PutMapping("/{id}")
@@ -162,6 +168,26 @@ public class PatientController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+
+    // PARTIAL UPDATE - PATCH /api/v1/patients/{id}
+    @PatchMapping("/{id}")
+    @Operation(
+        summary = "Partially update a patient",
+        description = "Patially updates an existing patient by ID"
+    )
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "Patient patched successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input data"),
+        @ApiResponse(responseCode = "404", description = "Patient not found"),
+    })
+    public ResponseEntity<PatientResponse> patchPatient(@PathVariable UUID id,
+                                                        @RequestBody @Valid PatientPatchRequest req) {
+        return patientService.patchPatient(id, req)
+            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+            .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
     // DELETE - DELETE /api/v1/patients/{id}
     @DeleteMapping("/{id}")
     @Operation(
@@ -177,6 +203,7 @@ public class PatientController {
                 .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
 
     private Sort parseSort(List<String> sortParams) {
         if (sortParams == null || sortParams.isEmpty()) {
