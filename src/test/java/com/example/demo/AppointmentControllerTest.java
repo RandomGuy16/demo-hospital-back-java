@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.dto.ErrorCode;
 import com.example.demo.models.Appointment;
 import com.example.demo.models.Department;
 import com.example.demo.models.Patient;
@@ -46,20 +47,37 @@ class AppointmentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void createAppointmentWithInvalidPayloadReturnsBadRequest() throws Exception {
+    void createAppointmentWithNonExistingSubjectsReturnsNotFound() throws Exception {
         AppointmentRequest request = new AppointmentRequest(
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
-                LocalDateTime.now().minusDays(1),
                 LocalDateTime.now().plusDays(1),
-                "");
+                LocalDateTime.now().plusDays(1).plusHours(1),
+                "SCHEDULED");
 
         mockMvc.perform(post("/api/v1/appointments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
+    }
+
+    @Test
+    void createAppointmentWithInvalidPayloadReturnsBadRequest() throws Exception {
+        AppointmentRequest request = new AppointmentRequest(
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            LocalDateTime.now().minusDays(1),
+            LocalDateTime.now().plusDays(1),
+            "");
+
+        mockMvc.perform(post("/api/v1/appointments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value(ErrorCode.VALIDATION_ERROR.name()));
     }
 
     @Test

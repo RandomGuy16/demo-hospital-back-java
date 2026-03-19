@@ -39,6 +39,9 @@ dependencies {
 
     // this one if to enable auto reload
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    // enforce validations with this one
+    implementation("org.springframework.boot:spring-boot-starter-validation")
 }
 
 tasks.withType<Test> {

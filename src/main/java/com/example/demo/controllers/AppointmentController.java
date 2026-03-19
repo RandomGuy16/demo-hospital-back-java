@@ -56,6 +56,7 @@ public class AppointmentController {
     @Operation(summary = "Create an appointment", description = "Creates an appointment record")
     @ApiResponses({
             @ApiResponse(responseCode = "201", description = "Appointment created successfully"),
+            @ApiResponse(responseCode = "404", description = "Patient, practitioner or department not found"),
             @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     public ResponseEntity<AppointmentResponse> createAppointment(@RequestBody @Valid AppointmentRequest request,

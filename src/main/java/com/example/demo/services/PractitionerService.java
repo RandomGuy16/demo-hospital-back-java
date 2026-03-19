@@ -61,6 +61,8 @@ public class PractitionerService {
     public Optional<Practitioner> deletePractitioner(UUID id) {
         return practitionerRepository.findById(id)
                 .map(practitioner -> {
+                    practitioner.getSpecialties().size();
+                    practitioner.getDepartments().size();
                     practitionerRepository.delete(practitioner);
                     return practitioner;
                 });
