@@ -1,8 +1,15 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.exceptions.ResourceNotFoundException;
 import com.example.demo.models.Appointment;
 import com.example.demo.repositories.AppointmentRepository;
+import com.example.demo.repositories.PatientRepository;
+import com.example.demo.repositories.PractitionerRepository;
+import com.example.demo.repositories.DepartmentRepository;
+import com.example.demo.services.PractitionerService;
+import com.example.demo.services.PatientService;
+import com.example.demo.services.DepartmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -15,12 +22,30 @@ import java.util.UUID;
 @Transactional
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
+    private final PatientService patientService;
+    private final PractitionerService practitionerService;
+    private final DepartmentService departmentService;
 
-    public AppointmentService(AppointmentRepository appointmentRepository) {
+
+    public AppointmentService(AppointmentRepository appointmentRepository,
+                              PatientService patientService,
+                              PractitionerService practitionerService,
+                              DepartmentService departmentService) {
         this.appointmentRepository = appointmentRepository;
+        this.patientService = patientService;
+        this.practitionerService = practitionerService;
+        this.departmentService = departmentService;
     }
 
     public Appointment createAppointment(AppointmentRequest request) {
+        // Validate that the patient, practitioner, and department exist before creating the appointment
+        patientService.getPatientById(request.patientId())
+            .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
+        practitionerService.getPractitionerById(request.practitionerId())
+            .orElseThrow(() -> new ResourceNotFoundException("Practitioner not found"));
+        departmentService.getDepartmentById(request.departmentId())
+            .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+        // create the appointment
         Appointment appointment = new Appointment(
                 request.patientId(),
                 request.practitionerId(),

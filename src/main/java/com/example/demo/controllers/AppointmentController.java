@@ -2,6 +2,8 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.dto.AppointmentResponse;
+import com.example.demo.dto.ErrorCode;
+import com.example.demo.dto.ErrorResponse;
 import com.example.demo.models.Appointment;
 import com.example.demo.services.AppointmentService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.Instant;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -58,9 +62,10 @@ public class AppointmentController {
             UriComponentsBuilder uriBuilder) {
         Appointment created = appointmentService.createAppointment(request);
         URI location = uriBuilder.path("/api/v1/appointments/{id}")
-                .buildAndExpand(created.getAppointmentId())
-                .toUri();
+            .buildAndExpand(created.getAppointmentId())
+            .toUri();
         return ResponseEntity.created(location).body(appointmentToAppointmentResponse(created));
+
     }
 
     @GetMapping
@@ -123,12 +128,22 @@ public class AppointmentController {
         }
 
         Sort sort = Sort.unsorted();
-        for (String sortParam : sortParams) {
+        for (int i = 0; i < sortParams.size(); i++) {
+            String sortParam = sortParams.get(i);
             String[] tokens = sortParam.split(",");
             String property = tokens[0].trim();
-            Sort.Direction direction = tokens.length > 1
-                    ? Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC)
-                    : Sort.Direction.ASC;
+            Sort.Direction direction = Sort.Direction.ASC;
+
+            if (tokens.length > 1) {
+                direction = Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC);
+            } else if (i + 1 < sortParams.size()) {
+                Sort.Direction nextDirection = Sort.Direction.fromOptionalString(sortParams.get(i + 1).trim()).orElse(null);
+                if (nextDirection != null) {
+                    direction = nextDirection;
+                    i++;
+                }
+            }
+
             sort = sort.and(Sort.by(direction, property));
         }
         return sort;

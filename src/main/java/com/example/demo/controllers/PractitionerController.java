@@ -134,12 +134,22 @@ public class PractitionerController {
         }
 
         Sort sort = Sort.unsorted();
-        for (String sortParam : sortParams) {
+        for (int i = 0; i < sortParams.size(); i++) {
+            String sortParam = sortParams.get(i);
             String[] tokens = sortParam.split(",");
             String property = tokens[0].trim();
-            Sort.Direction direction = tokens.length > 1
-                    ? Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC)
-                    : Sort.Direction.ASC;
+            Sort.Direction direction = Sort.Direction.ASC;
+
+            if (tokens.length > 1) {
+                direction = Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC);
+            } else if (i + 1 < sortParams.size()) {
+                Sort.Direction nextDirection = Sort.Direction.fromOptionalString(sortParams.get(i + 1).trim()).orElse(null);
+                if (nextDirection != null) {
+                    direction = nextDirection;
+                    i++;
+                }
+            }
+
             sort = sort.and(Sort.by(direction, property));
         }
         return sort;

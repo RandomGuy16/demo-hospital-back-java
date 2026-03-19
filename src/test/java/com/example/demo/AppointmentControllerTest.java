@@ -2,10 +2,16 @@ package com.example.demo;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.models.Appointment;
+import com.example.demo.models.Department;
+import com.example.demo.models.Patient;
+import com.example.demo.models.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -21,10 +27,11 @@ class AppointmentControllerTest extends ControllerTestSupport {
 
     @Test
     void createAppointmentReturnsCreatedResponse() throws Exception {
+
         AppointmentRequest request = new AppointmentRequest(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
+                defaultSubjects.patient().getPatientId(),
+                defaultSubjects.practitioner().getPractitionerId(),
+                defaultSubjects.department().getDepartmentId(),
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().plusDays(2).plusMinutes(45),
                 "SCHEDULED");
@@ -51,14 +58,23 @@ class AppointmentControllerTest extends ControllerTestSupport {
         mockMvc.perform(post("/api/v1/appointments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
     }
 
     @Test
     void getAllAppointmentsReturnsSortedPage() throws Exception {
-        saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SCHEDULED");
-        saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "COMPLETED");
+        saveAppointment(
+            defaultSubjects.patient().getPatientId(),
+            defaultSubjects.practitioner().getPractitionerId(),
+            defaultSubjects.department().getDepartmentId(),
+            "SCHEDULED");
+        saveAppointment(
+            funnySubjects.patient().getPatientId(),
+            funnySubjects.practitioner().getPractitionerId(),
+            funnySubjects.department().getDepartmentId(),
+            "COMPLETED"
+        );
 
         mockMvc.perform(get("/api/v1/appointments")
                         .param("sort", "status,asc")
