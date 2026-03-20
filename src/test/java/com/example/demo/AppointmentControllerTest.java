@@ -137,9 +137,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
         Appointment appointment = saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SCHEDULED");
 
         mockMvc.perform(delete("/api/v1/appointments/{id}", appointment.getAppointmentId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.appointmentId").value(appointment.getAppointmentId().toString()))
-                .andExpect(jsonPath("$.status").value("SCHEDULED"));
+                .andExpect(status().isNoContent());
     }
 
     @Test

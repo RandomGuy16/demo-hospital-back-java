@@ -119,12 +119,12 @@ public class PractitionerController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete practitioner", description = "Deletes a practitioner by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Practitioner deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Practitioner deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Practitioner not found")
     })
-    public ResponseEntity<PractitionerResponse> deletePractitioner(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletePractitioner(@PathVariable UUID id) {
         return practitionerService.deletePractitioner(id)
-                .map(practitioner -> ResponseEntity.ok(practitionerToPractitionerResponse(practitioner)))
+                .map(practitioner -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

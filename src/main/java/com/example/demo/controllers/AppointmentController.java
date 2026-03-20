@@ -114,12 +114,12 @@ public class AppointmentController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete appointment", description = "Deletes an appointment by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Appointment deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Appointment deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Appointment not found")
     })
-    public ResponseEntity<AppointmentResponse> deleteAppointment(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteAppointment(@PathVariable UUID id) {
         return appointmentService.deleteAppointment(id)
-                .map(appointment -> ResponseEntity.ok(appointmentToAppointmentResponse(appointment)))
+                .map(appointment -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

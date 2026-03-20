@@ -107,12 +107,12 @@ public class DepartmentController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete department", description = "Deletes a department by ID")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Department deleted successfully"),
+            @ApiResponse(responseCode = "204", description = "Department deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Department not found")
     })
-    public ResponseEntity<DepartmentResponse> deleteDepartment(@PathVariable UUID id) {
+    public ResponseEntity<Void> deleteDepartment(@PathVariable UUID id) {
         return departmentService.deleteDepartment(id)
-                .map(department -> ResponseEntity.ok(departmentToDepartmentResponse(department)))
+                .map(department -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 

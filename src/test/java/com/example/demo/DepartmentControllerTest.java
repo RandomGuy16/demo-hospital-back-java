@@ -20,7 +20,9 @@ class DepartmentControllerTest extends ControllerTestSupport {
 
     @Test
     void createDepartmentReturnsCreatedResponse() throws Exception {
-        DepartmentRequest request = new DepartmentRequest("Cardiology", "Handles heart care");
+        // consider the default and funny test subjects are already inside the database
+        // so don't add "Cardiology" cuz you're gonna get an error
+        DepartmentRequest request = new DepartmentRequest("Neurosurgery", "Applies surgery to the brain");
 
         mockMvc.perform(post("/api/v1/departments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -28,8 +30,8 @@ class DepartmentControllerTest extends ControllerTestSupport {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.departmentId").isNotEmpty())
-                .andExpect(jsonPath("$.name").value("Cardiology"))
-                .andExpect(jsonPath("$.description").value("Handles heart care"));
+                .andExpect(jsonPath("$.name").value("Neurosurgery"))
+                .andExpect(jsonPath("$.description").value("Applies surgery to the brain"));
     }
 
     @Test
@@ -45,6 +47,7 @@ class DepartmentControllerTest extends ControllerTestSupport {
 
     @Test
     void getAllDepartmentsReturnsSortedPage() throws Exception {
+        cleanDatabase();
         saveDepartment("Radiology", "Imaging");
         saveDepartment("Cardiology", "Heart");
 
@@ -69,16 +72,16 @@ class DepartmentControllerTest extends ControllerTestSupport {
 
     @Test
     void updateDepartmentReturnsUpdatedDepartment() throws Exception {
-        Department department = saveDepartment("Cardio", "Initial");
-        DepartmentRequest request = new DepartmentRequest("Cardiology", "Handles heart care");
+        Department department = saveDepartment("IRadiology", "does things");
+        DepartmentRequest request = new DepartmentRequest("Interventional Radiology", "Treat diseases minimally invasively");
 
         mockMvc.perform(put("/api/v1/departments/{id}", department.getDepartmentId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.departmentId").value(department.getDepartmentId().toString()))
-                .andExpect(jsonPath("$.name").value("Cardiology"))
-                .andExpect(jsonPath("$.description").value("Handles heart care"));
+                .andExpect(jsonPath("$.name").value("Interventional Radiology"))
+                .andExpect(jsonPath("$.description").value("Treat diseases minimally invasively"));
     }
 
     @Test
@@ -86,9 +89,7 @@ class DepartmentControllerTest extends ControllerTestSupport {
         Department department = saveDepartment("Oncology", "Cancer care");
 
         mockMvc.perform(delete("/api/v1/departments/{id}", department.getDepartmentId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.departmentId").value(department.getDepartmentId().toString()))
-                .andExpect(jsonPath("$.name").value("Oncology"));
+                .andExpect(status().isNoContent());
     }
 
     @Test

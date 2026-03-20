@@ -192,9 +192,7 @@ class PatientControllerTest extends ControllerTestSupport {
         );
 
         mockMvc.perform(delete("/api/v1/patients/{id}", patient.getPatientId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.patientId").value(patient.getPatientId().toString()))
-                .andExpect(jsonPath("$.lastName").value("Me"));
+                .andExpect(status().isNoContent());
     }
 
     @Test

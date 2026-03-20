@@ -114,9 +114,7 @@ class PractitionerControllerTest extends ControllerTestSupport {
         Practitioner practitioner = savePractitioner("Delete", "Doctor", "1234567895", List.of("General"));
 
         mockMvc.perform(delete("/api/v1/practitioners/{id}", practitioner.getPractitionerId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.practitionerId").value(practitioner.getPractitionerId().toString()))
-                .andExpect(jsonPath("$.lastName").value("Doctor"));
+                .andExpect(status().isNoContent());
     }
 
     @Test

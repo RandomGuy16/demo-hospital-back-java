@@ -195,12 +195,12 @@ public class PatientController {
         description = "Deletes a patient by ID"
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Patient deleted successfully"),
+        @ApiResponse(responseCode = "204", description = "Patient deleted successfully"),
         @ApiResponse(responseCode = "404", description = "Patient not found"),
     })
-    public ResponseEntity<PatientResponse> deletePatient(@PathVariable UUID id) {
+    public ResponseEntity<Void> deletePatient(@PathVariable UUID id) {
         return patientService.deletePatientById(id)
-                .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+                .map(value -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
