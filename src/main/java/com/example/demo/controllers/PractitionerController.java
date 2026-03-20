@@ -85,7 +85,7 @@ public class PractitionerController {
             @Parameter(description = "Sorting criteria in the format field,direction", example = "lastName,asc")
             @RequestParam(required = false) List<String> sort) {
         logger.info("GET /pai/v1/practitioners Request");
-        Pageable pageable = PageRequest.of(page, size, parseSort(sort));
+        Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
         Page<Practitioner> practitionerPage = practitionerService.getAllPractitioners(pageable);
         return ResponseEntity.ok(practitionerPage.map(this::practitionerToPractitionerResponse));
     }
@@ -126,32 +126,5 @@ public class PractitionerController {
         return practitionerService.deletePractitioner(id)
                 .map(practitioner -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    private Sort parseSort(List<String> sortParams) {
-        if (sortParams == null || sortParams.isEmpty()) {
-            return Sort.unsorted();
-        }
-
-        Sort sort = Sort.unsorted();
-        for (int i = 0; i < sortParams.size(); i++) {
-            String sortParam = sortParams.get(i);
-            String[] tokens = sortParam.split(",");
-            String property = tokens[0].trim();
-            Sort.Direction direction = Sort.Direction.ASC;
-
-            if (tokens.length > 1) {
-                direction = Sort.Direction.fromOptionalString(tokens[1].trim()).orElse(Sort.Direction.ASC);
-            } else if (i + 1 < sortParams.size()) {
-                Sort.Direction nextDirection = Sort.Direction.fromOptionalString(sortParams.get(i + 1).trim()).orElse(null);
-                if (nextDirection != null) {
-                    direction = nextDirection;
-                    i++;
-                }
-            }
-
-            sort = sort.and(Sort.by(direction, property));
-        }
-        return sort;
     }
 }
