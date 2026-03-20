@@ -1,4 +1,4 @@
-package com.example.demo.dto;
+package com.example.demo.errors;
 
 public enum ErrorCode {
     NOT_FOUND,

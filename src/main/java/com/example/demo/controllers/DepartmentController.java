@@ -3,7 +3,11 @@ package com.example.demo.controllers;
 import com.example.demo.dto.DepartmentRequest;
 import com.example.demo.dto.DepartmentResponse;
 import com.example.demo.models.Department;
+import com.example.demo.paging.SortParser;
 import com.example.demo.services.DepartmentService;
+import com.example.demo.mappers.DepartmentMapper;
+import static com.example.demo.mappers.DepartmentMapper.departmentToDepartmentResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,7 +20,6 @@ import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -37,15 +40,6 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
-    private DepartmentResponse departmentToDepartmentResponse(Department department) {
-        return new DepartmentResponse(
-                department.getDepartmentId(),
-                department.getName(),
-                department.getDescription(),
-                department.getPractitioners().stream().map(doctor -> doctor.getFullName()).toList(),
-                department.getCreatedAt(),
-                department.getUpdatedAt());
-    }
 
     @PostMapping
     @Operation(summary = "Create a department", description = "Creates a department record")
@@ -75,7 +69,9 @@ public class DepartmentController {
             @Parameter(description = "Sorting criteria in the format field,direction", example = "name,asc")
             @RequestParam(required = false) List<String> sort) {
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
-        return ResponseEntity.ok(departmentService.getAllDepartments(pageable).map(this::departmentToDepartmentResponse));
+        return ResponseEntity.ok(departmentService
+            .getAllDepartments(pageable)
+            .map(DepartmentMapper::departmentToDepartmentResponse));
     }
 
     @GetMapping("/{id}")

@@ -1,7 +1,5 @@
-package com.example.demo.controllers;
+package com.example.demo.errors;
 
-import com.example.demo.dto.ErrorResponse;
-import com.example.demo.exceptions.ResourceNotFoundException;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;

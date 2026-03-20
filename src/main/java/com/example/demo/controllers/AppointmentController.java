@@ -2,10 +2,11 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.dto.AppointmentResponse;
-import com.example.demo.dto.ErrorCode;
-import com.example.demo.dto.ErrorResponse;
 import com.example.demo.models.Appointment;
+import com.example.demo.paging.SortParser;
 import com.example.demo.services.AppointmentService;
+import com.example.demo.mappers.AppointmentMapper;
+import static com.example.demo.mappers.AppointmentMapper.appointmentToAppointmentResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,15 +19,12 @@ import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.time.Instant;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,16 +39,6 @@ public class AppointmentController {
         this.appointmentService = appointmentService;
     }
 
-    private AppointmentResponse appointmentToAppointmentResponse(Appointment appointment) {
-        return new AppointmentResponse(
-                appointment.getAppointmentId(),
-                appointment.getPatientId(),
-                appointment.getPractitionerId(),
-                appointment.getDepartmentId(),
-                appointment.getStart(),
-                appointment.getEnd(),
-                appointment.getStatus());
-    }
 
     @PostMapping
     @Operation(summary = "Create an appointment", description = "Creates an appointment record")
@@ -81,8 +69,12 @@ public class AppointmentController {
             @Min(1) @Max(100) int size,
             @Parameter(description = "Sorting criteria in the format field,direction", example = "start,asc")
             @RequestParam(required = false) List<String> sort) {
+
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
-        return ResponseEntity.ok(appointmentService.getAllAppointments(pageable).map(this::appointmentToAppointmentResponse));
+        return ResponseEntity.ok(
+            appointmentService
+                .getAllAppointments(pageable)
+                .map(AppointmentMapper::appointmentToAppointmentResponse));
     }
 
     @GetMapping("/{id}")

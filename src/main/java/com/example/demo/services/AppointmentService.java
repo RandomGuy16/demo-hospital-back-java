@@ -1,15 +1,9 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.AppointmentRequest;
-import com.example.demo.exceptions.ResourceNotFoundException;
+import com.example.demo.errors.ResourceNotFoundException;
 import com.example.demo.models.Appointment;
 import com.example.demo.repositories.AppointmentRepository;
-import com.example.demo.repositories.PatientRepository;
-import com.example.demo.repositories.PractitionerRepository;
-import com.example.demo.repositories.DepartmentRepository;
-import com.example.demo.services.PractitionerService;
-import com.example.demo.services.PatientService;
-import com.example.demo.services.DepartmentService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

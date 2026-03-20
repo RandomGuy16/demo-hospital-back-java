@@ -1,18 +1,12 @@
 package com.example.demo;
 
 import com.example.demo.dto.AppointmentRequest;
-import com.example.demo.dto.ErrorCode;
+import com.example.demo.errors.ErrorCode;
 import com.example.demo.models.Appointment;
-import com.example.demo.models.Department;
-import com.example.demo.models.Patient;
-import com.example.demo.models.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.hasSize;

@@ -1,15 +1,15 @@
-package com.example.demo.controllers;
+package com.example.demo.paging;
 
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
 
-final class SortParser {
+public final class SortParser {
 
     private SortParser() {
     }
 
-    static Sort parse(List<String> sortParams) {
+    public static Sort parse(List<String> sortParams) {
         if (sortParams == null || sortParams.isEmpty()) {
             return Sort.unsorted();
         }

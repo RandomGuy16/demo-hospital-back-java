@@ -4,7 +4,10 @@ import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.dto.PatientResponse;
 import com.example.demo.models.Patient;
+import com.example.demo.paging.SortParser;
 import com.example.demo.services.PatientService;
+import com.example.demo.mappers.PatientMapper;
+import static com.example.demo.mappers.PatientMapper.patientToPatientResponse;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -26,7 +29,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
@@ -47,18 +49,6 @@ public class PatientController {
         this.patientService = patientService;
     }
 
-    private PatientResponse patientToPatientResponse(Patient patient) {
-        return new PatientResponse(
-                patient.getPatientId(),
-                patient.getFirstName(),
-                patient.getLastName(),
-                patient.getDateOfBirth(),
-                patient.getGender(),
-                patient.getPhoneNumber(),
-                patient.getContacts(),
-                patient.getMrn(),
-                patient.getAddress());
-    }
 
     // now we are going to make some CRUD ops
     // never forget @Valid to make useful our jakarta tags
@@ -110,7 +100,7 @@ public class PatientController {
         logger.info("GET /api/v1/patients Request");
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
         Page<Patient> patientPage = patientService.getAllPatients(pageable);
-        return ResponseEntity.ok(patientPage.map(this::patientToPatientResponse));
+        return ResponseEntity.ok(patientPage.map(PatientMapper::patientToPatientResponse));
     }
 
 

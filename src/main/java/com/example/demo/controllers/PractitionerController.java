@@ -3,7 +3,11 @@ package com.example.demo.controllers;
 import com.example.demo.dto.PractitionerRequest;
 import com.example.demo.dto.PractitionerResponse;
 import com.example.demo.models.Practitioner;
+import com.example.demo.paging.SortParser;
 import com.example.demo.services.PractitionerService;
+import com.example.demo.mappers.PractitionerMapper;
+import static com.example.demo.mappers.PractitionerMapper.practitionerToPractitionerResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,19 +41,6 @@ public class PractitionerController {
 
     private final PractitionerService practitionerService;
 
-    private PractitionerResponse practitionerToPractitionerResponse(Practitioner practitioner) {
-        return new PractitionerResponse(
-            practitioner.getPractitionerId(),
-            practitioner.getFirstName(),
-            practitioner.getLastName(),
-            practitioner.getDateOfBirth(),
-            practitioner.getGender(),
-            practitioner.getPhoneNumber(),
-            practitioner.getContacts(),
-            practitioner.getSpecialties(),
-            practitioner.getDepartments().stream().map(department -> department.getName()).toList()
-        );
-    }
 
     public PractitionerController(PractitionerService practitionerService) {
         this.practitionerService = practitionerService;
@@ -84,11 +74,14 @@ public class PractitionerController {
             @Min(1) @Max(100) int size,
             @Parameter(description = "Sorting criteria in the format field,direction", example = "lastName,asc")
             @RequestParam(required = false) List<String> sort) {
+
         logger.info("GET /pai/v1/practitioners Request");
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
         Page<Practitioner> practitionerPage = practitionerService.getAllPractitioners(pageable);
-        return ResponseEntity.ok(practitionerPage.map(this::practitionerToPractitionerResponse));
+        return ResponseEntity.ok(practitionerPage.map(
+            PractitionerMapper::practitionerToPractitionerResponse));
     }
+
 
     @GetMapping("/{id}")
     @Operation(summary = "Get practitioner by ID", description = "Returns a single practitioner by its identifier")
