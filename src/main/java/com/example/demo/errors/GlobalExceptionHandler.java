@@ -2,7 +2,6 @@ package com.example.demo.errors;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -21,12 +20,7 @@ public class GlobalExceptionHandler {
     // we need some annotations to make it work
     @ExceptionHandler(EntityNotFoundException.class)  // when this exception is thrown, this method is called
     public ResponseEntity<ErrorResponse> handleNotFoundException(EntityNotFoundException ex) {
-        ErrorResponse error = new ErrorResponse(
-            "NOT_FOUND",
-            ex.getMessage(),
-            Instant.now()
-        );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return handleApiException(new ResourceNotFoundException(ex.getMessage(), ex));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,12 +33,12 @@ public class GlobalExceptionHandler {
             .orElse("Validation error");
 
         ErrorResponse error = new ErrorResponse(
-            "VALIDATION_ERROR",
+            ErrorCode.VALIDATION_ERROR,
             message,
             Instant.now()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
     @ExceptionHandler({ConstraintViolationException.class})
@@ -56,21 +50,21 @@ public class GlobalExceptionHandler {
             .orElse("Validation error");
 
         ErrorResponse error = new ErrorResponse(
-            "VALIDATION_ERROR",
+            ErrorCode.VALIDATION_ERROR,
             message,
             Instant.now()
         );
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        return ResponseEntity.badRequest().body(error);
     }
 
-    @ExceptionHandler({ResourceNotFoundException.class})
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    @ExceptionHandler(ApiException.class)
+    public ResponseEntity<ErrorResponse> handleApiException(ApiException ex) {
         ErrorResponse error = new ErrorResponse(
-            "NOT_FOUND",
+            ex.getCode(),
             ex.getMessage(),
             Instant.now()
         );
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+        return ResponseEntity.status(ex.getStatus()).body(error);
     }
 }

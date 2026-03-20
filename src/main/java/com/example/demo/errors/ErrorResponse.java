@@ -5,7 +5,7 @@ import java.time.Instant;
 
 public record ErrorResponse(
     @Schema(example = "VALIDATION_ERROR")
-    String code,
+    ErrorCode code,
     @Schema(example = "firstName must not be blank")
     String message,
     @Schema(example = "2026-03-17T12:45:00Z")

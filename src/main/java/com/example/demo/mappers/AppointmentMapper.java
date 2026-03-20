@@ -8,9 +8,9 @@ public class AppointmentMapper {
     public static AppointmentResponse appointmentToAppointmentResponse(Appointment appointment) {
         return new AppointmentResponse(
             appointment.getAppointmentId(),
-            appointment.getPatientId(),
-            appointment.getPractitionerId(),
-            appointment.getDepartmentId(),
+            appointment.getPatient().getPatientId(),
+            appointment.getPractitioner().getPractitionerId(),
+            appointment.getDepartment().getDepartmentId(),
             appointment.getStart(),
             appointment.getEnd(),
             appointment.getStatus());

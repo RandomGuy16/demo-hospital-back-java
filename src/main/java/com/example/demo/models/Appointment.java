@@ -19,16 +19,19 @@ public class Appointment {
     private UUID appointmentId;
 
     @Schema(example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @JoinColumn(name = "patient_id")
-    private UUID patientId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "patient_id", referencedColumnName = "patient_id", nullable = false)
+    private Patient patient;
 
     @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
-    @JoinColumn(name = "practitioner_id")
-    private UUID practitionerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practitioner_id", referencedColumnName = "practitioner_id", nullable = false)
+    private Practitioner practitioner;
 
     @Schema(example = "a0b1f54e-98c4-4e4d-9412-2eaf3e0c8695")
-    @JoinColumn(name = "department_id")
-    private UUID departmentId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id", referencedColumnName = "department_id", nullable = false)
+    private Department department;
 
     @Schema(example = "2026-04-10T09:00:00")
     @Column(nullable = false, name = "start_time")
@@ -44,10 +47,10 @@ public class Appointment {
 
     public Appointment() {}
 
-    public Appointment(UUID patientId, UUID practitionerId, UUID departmentId, LocalDateTime start, LocalDateTime end, String status) {
-        this.patientId = patientId;
-        this.practitionerId = practitionerId;
-        this.departmentId = departmentId;
+    public Appointment(Patient patient, Practitioner practitioner, Department department, LocalDateTime start, LocalDateTime end, String status) {
+        this.patient = patient;
+        this.practitioner = practitioner;
+        this.department = department;
         this.start = start;
         this.end = end;
         this.status = status;
@@ -57,28 +60,28 @@ public class Appointment {
         return appointmentId;
     }
 
-    public UUID getPatientId() {
-        return patientId;
+    public Patient getPatient() {
+        return patient;
     }
 
-    public void setPatientId(UUID patientId) {
-        this.patientId = patientId;
+    public void setPatient(Patient patient) {
+        this.patient = patient;
     }
 
-    public UUID getPractitionerId() {
-        return practitionerId;
+    public Practitioner getPractitioner() {
+        return practitioner;
     }
 
-    public void setPractitionerId(UUID practitionerId) {
-        this.practitionerId = practitionerId;
+    public void setPractitioner(Practitioner practitioner) {
+        this.practitioner = practitioner;
     }
 
-    public UUID getDepartmentId() {
-        return departmentId;
+    public Department getDepartment() {
+        return department;
     }
 
-    public void setDepartmentId(UUID departmentId) {
-        this.departmentId = departmentId;
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     public LocalDateTime getStart() {
