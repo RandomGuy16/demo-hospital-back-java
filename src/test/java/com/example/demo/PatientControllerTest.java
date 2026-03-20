@@ -62,14 +62,19 @@ class PatientControllerTest extends ControllerTestSupport {
 
     @Test
     void getAllPatientsReturnsPaginatedSortedContent() throws Exception {
+        cleanDatabase();
         savePatient(
             "Zoe",
             "Zulu",
             "1111111111",
             "female",
-            LocalDate.of(1990, 1, 1)
-        );
-        savePatient("Ana", "Alpha", "2222222222", "female", LocalDate.of(1991, 2, 2));
+            LocalDate.of(1990, 1, 1));
+        savePatient(
+            "Ana",
+            "Alpha",
+            "2222222222",
+            "female",
+            LocalDate.of(1991, 2, 2));
 
         mockMvc.perform(get("/api/v1/patients")
                         .param("page", "0")
@@ -125,7 +130,7 @@ class PatientControllerTest extends ControllerTestSupport {
         Patient patient = savePatient(
             "Black",
             "Widow",
-            "50112345667",
+            "5011234566",
             "female",
             LocalDate.of(1993, 2, 28)
         );
@@ -143,8 +148,8 @@ class PatientControllerTest extends ControllerTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.firstName").value("Janet"))
-                .andExpect(jsonPath("$.lastName").value("Smith"))
+                .andExpect(jsonPath("$.firstName").value("Scarlett"))
+                .andExpect(jsonPath("$.lastName").value("Johansson"))
                 .andExpect(jsonPath("$.address").value("456 Oak Ave"))
                 .andExpect(jsonPath("$.mrn").value(patient.getMrn()));
     }
@@ -156,9 +161,7 @@ class PatientControllerTest extends ControllerTestSupport {
             "Kamo",
             "666917846",
             "male",
-            LocalDate.of(1878, 11, 30)
-        );
-
+            LocalDate.of(1878, 11, 30));
         PatientPatchRequest req = new PatientPatchRequest(
             "Kenjaku",
             "---",
@@ -167,8 +170,7 @@ class PatientControllerTest extends ControllerTestSupport {
             null,
             null,
             null,
-            null
-        );
+            null);
 
         mockMvc.perform(patch("/api/v1/patients/{id}", patient.getPatientId())
                         .contentType(MediaType.APPLICATION_JSON)

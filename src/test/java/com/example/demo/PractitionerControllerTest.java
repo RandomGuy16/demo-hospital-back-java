@@ -64,6 +64,7 @@ class PractitionerControllerTest extends ControllerTestSupport {
 
     @Test
     void getAllPractitionersReturnsSortedPage() throws Exception {
+        cleanDatabase();
         savePractitioner("Meredith", "Grey", "1234567891", List.of("Surgery"));
         savePractitioner("Stephen", "Strange", "1234567892", List.of("Neurology"));
 
