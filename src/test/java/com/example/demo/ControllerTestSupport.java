@@ -69,7 +69,13 @@ abstract class ControllerTestSupport {
     }
 
     protected TestSubjects seedDefaultSubjects() {
-        Patient patient = savePatient("John", "Doe", "1234567890", "male", LocalDate.of(1995, 4, 18));
+        Patient patient = savePatient(
+            "John",
+            "Doe",
+            "1234567890",
+            "male",
+            LocalDate.of(1995, 4, 18)
+        );
         Department department = saveDepartment("Cardiology", "Handles heart care");
         Practitioner practitioner = savePractitioner(
                 "Shoko",
@@ -196,12 +202,12 @@ abstract class ControllerTestSupport {
         return departmentRepository.save(new Department(name, description));
     }
 
-    protected Appointment saveAppointment(UUID patientId, UUID practitionerId, UUID departmentId, String status) {
+    protected Appointment saveAppointment(Patient patient, Practitioner practitioner, Department department, String status) {
         LocalDateTime start = LocalDateTime.now().plusDays(5);
         Appointment appointment = new Appointment(
-                patientId,
-                practitionerId,
-                departmentId,
+                patient,
+                practitioner,
+                department,
                 start,
                 start.plusMinutes(30),
                 status

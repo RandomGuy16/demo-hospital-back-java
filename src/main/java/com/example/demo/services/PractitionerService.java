@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.PractitionerRequest;
+import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.models.Practitioner;
 import com.example.demo.repositories.PractitionerRepository;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,13 @@ public class PractitionerService {
     }
 
     public Practitioner createPractitioner(PractitionerRequest request) {
+        // check if idNumber already exists, that can't be repeated
+        // person being globally sets two different idNumber columns, which agrees to reality
+        // a doctor/practitioner when they are sick, they become patients and someone else attends them
+        if (practitionerRepository.existsByIdNumber(request.idNumber())) {
+            throw new RepeatedIdNumberError("Practitioner with idNumber " + request.idNumber() + " already exists");
+        }
+
         Practitioner practitioner = new Practitioner(
                 request.firstName(),
                 request.lastName(),

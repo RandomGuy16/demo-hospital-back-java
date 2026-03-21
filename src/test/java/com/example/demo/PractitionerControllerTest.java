@@ -23,6 +23,9 @@ class PractitionerControllerTest extends ControllerTestSupport {
 
     @Test
     void createPractitionerReturnsCreatedResponse() throws Exception {
+        cleanDatabase();
+        seedDefaultSubjects();
+        seedFunnySubjects();
         PractitionerRequest request = new PractitionerRequest(
                 "Gregory",
                 "House",
@@ -41,6 +44,30 @@ class PractitionerControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.practitionerId").isNotEmpty())
                 .andExpect(jsonPath("$.firstName").value("Gregory"))
                 .andExpect(jsonPath("$.specialties", contains("Diagnostics", "Nephrology")));
+    }
+
+    @Test
+    void createPractitionerWithExistingIdNumberReturnsConflict() throws Exception {
+        // yes I grabbed the previous test subject 'cuz I'm lazy
+        // save the practitioner
+        savePractitioner("Gregory", "House", "1234567890", List.of("Diagnostics", "Nephrology"));
+
+        // now try to create a practitioner with the same id number
+        PractitionerRequest request = new PractitionerRequest(
+            "Gregory",
+            "House",
+            "1234567890",
+            LocalDate.of(1970, 6, 11),
+            "male",
+            "+1 555 0200",
+            "house@example.com",
+            List.of("Diagnostics", "Nephrology"));
+
+        mockMvc.perform(post("/api/v1/practitioners")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test

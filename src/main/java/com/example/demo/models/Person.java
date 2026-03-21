@@ -17,7 +17,7 @@ public abstract class Person {
     private String lastName;
 
     @Schema(example = "1234567890")
-    @Column(name = "id_number", nullable = false, length = 10)
+    @Column(name = "id_number", nullable = false, length = 10, unique = true)
     private String idNumber;
 
     @Schema(example = "1995-04-18")

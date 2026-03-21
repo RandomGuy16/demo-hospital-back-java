@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
+import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.models.Patient;
 import com.example.demo.repositories.PatientRepository;
 import org.springframework.data.domain.Page;
@@ -41,6 +42,11 @@ public class PatientService {
     }
 
     public Patient createPatient(PatientRequest patient) {
+        // first validation: check unique idNumber
+        if (patientRepository.existsByIdNumber(patient.idNumber())) {
+            throw new RepeatedIdNumberError("Patient with idNumber " + patient.idNumber() + " already exists");
+        }
+
         Patient newPatient = new Patient(
                 patient.firstName(),
                 patient.lastName(),

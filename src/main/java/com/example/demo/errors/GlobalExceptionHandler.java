@@ -23,6 +23,11 @@ public class GlobalExceptionHandler {
         return handleApiException(new ResourceNotFoundException(ex.getMessage(), ex));
     }
 
+    @ExceptionHandler({RepeatedIdNumberError.class})
+    public ResponseEntity<ErrorResponse> handleRepeatedIdNumberError(RepeatedIdNumberError ex) {
+        return handleApiException(ex);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {
         String message = ex.getBindingResult()

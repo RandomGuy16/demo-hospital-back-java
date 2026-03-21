@@ -20,10 +20,11 @@ class PatientControllerTest extends ControllerTestSupport {
 
     @Test
     void createPatientReturnsCreatedResponse() throws Exception {
+        // notice that idNumber 1234567890 already exists in the database as part of the default test subjects
         PatientRequest request = new PatientRequest(
                 "Jane",
                 "Doe",
-                "1234567890",
+                "1234567891",
                 LocalDate.of(1995, 4, 18),
                 "female",
                 "+1 555 0100",
@@ -38,7 +39,7 @@ class PatientControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.patientId").isNotEmpty())
                 .andExpect(jsonPath("$.firstName").value("Jane"))
                 .andExpect(jsonPath("$.lastName").value("Doe"))
-                .andExpect(jsonPath("$.mrn").value(containsString("1234567890")));
+                .andExpect(jsonPath("$.mrn").value(containsString("1234567891")));
     }
 
     @Test
@@ -58,6 +59,26 @@ class PatientControllerTest extends ControllerTestSupport {
                         .content(json(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    void createPatientWithExistingIdNumberReturnsConflict() throws Exception {
+        // the first test already sent this to the db
+        PatientRequest request = new PatientRequest(
+            "Jane",
+            "Doe",
+            "1234567890",
+            LocalDate.of(1995, 4, 18),
+            "female",
+            "+1 555 0100",
+            "jane.doe@example.com",
+            "123 Main St");
+
+        mockMvc.perform(post("/api/v1/patients")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
 
     @Test

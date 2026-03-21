@@ -35,4 +35,6 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     List<Patient> findByLastName(@NonNull String lastName);
 
     boolean existsByMrn(@NonNull String mrn);
+
+    boolean existsByIdNumber(@NonNull String idNumber);
 }

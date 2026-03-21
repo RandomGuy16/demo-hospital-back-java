@@ -1,8 +1,12 @@
 package com.example.demo;
 
 import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.dto.PatientRequest;
 import com.example.demo.errors.ErrorCode;
 import com.example.demo.models.Appointment;
+import com.example.demo.models.Department;
+import com.example.demo.models.Patient;
+import com.example.demo.models.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
@@ -75,16 +79,41 @@ class AppointmentControllerTest extends ControllerTestSupport {
     }
 
     @Test
-    void getAllAppointmentsReturnsSortedPage() throws Exception {
-        saveAppointment(
-            defaultSubjects.patient().getPatientId(),
+    void createAppointmentWithSamePatientAndPractitionerReturnsBadRequest() throws Exception {
+        // basically you can't attend yourself test
+        // first create a patient for the practitioner
+        Patient ppatient = savePatient(
+            defaultSubjects.practitioner().getFirstName(),
+            defaultSubjects.practitioner().getLastName(),
+            defaultSubjects.practitioner().getIdNumber()
+        );
+
+        AppointmentRequest request = new AppointmentRequest(
+            ppatient.getPatientId(),
             defaultSubjects.practitioner().getPractitionerId(),
             defaultSubjects.department().getDepartmentId(),
+            LocalDateTime.now().plusDays(1),
+            LocalDateTime.now().plusDays(1).plusHours(1),
+            "SCHEDULED");
+
+        mockMvc.perform(post("/api/v1/appointments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value(ErrorCode.VALIDATION_ERROR.name()));
+    }
+
+    @Test
+    void getAllAppointmentsReturnsSortedPage() throws Exception {
+        saveAppointment(
+            defaultSubjects.patient(),
+            defaultSubjects.practitioner(),
+            defaultSubjects.department(),
             "SCHEDULED");
         saveAppointment(
-            funnySubjects.patient().getPatientId(),
-            funnySubjects.practitioner().getPractitionerId(),
-            funnySubjects.department().getDepartmentId(),
+            funnySubjects.patient(),
+            funnySubjects.practitioner(),
+            funnySubjects.department(),
             "COMPLETED"
         );
 
@@ -99,7 +128,11 @@ class AppointmentControllerTest extends ControllerTestSupport {
 
     @Test
     void getAppointmentByIdReturnsAppointment() throws Exception {
-        Appointment appointment = saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SCHEDULED");
+        Appointment appointment = saveAppointment(
+            defaultSubjects.patient(),
+            defaultSubjects.practitioner(),
+            defaultSubjects.department(),
+            "SCHEDULED");
 
         mockMvc.perform(get("/api/v1/appointments/{id}", appointment.getAppointmentId()))
                 .andExpect(status().isOk())
@@ -109,11 +142,16 @@ class AppointmentControllerTest extends ControllerTestSupport {
 
     @Test
     void updateAppointmentReturnsUpdatedAppointment() throws Exception {
-        Appointment appointment = saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SCHEDULED");
+        Appointment appointment = saveAppointment(
+            defaultSubjects.patient(),
+            defaultSubjects.practitioner(),
+            defaultSubjects.department(),
+            "SCHEDULED");
+
         AppointmentRequest request = new AppointmentRequest(
-                UUID.randomUUID(),
-                UUID.randomUUID(),
-                UUID.randomUUID(),
+                funnySubjects.patient().getPatientId(),
+                funnySubjects.practitioner().getPractitionerId(),
+                funnySubjects.department().getDepartmentId(),
                 LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(10).plusMinutes(30),
                 "COMPLETED");
@@ -128,7 +166,11 @@ class AppointmentControllerTest extends ControllerTestSupport {
 
     @Test
     void deleteAppointmentReturnsDeletedPayload() throws Exception {
-        Appointment appointment = saveAppointment(UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID(), "SCHEDULED");
+        Appointment appointment = saveAppointment(
+            funnySubjects.patient(),
+            funnySubjects.practitioner(),
+            funnySubjects.department(),
+            "SCHEDULED");
 
         mockMvc.perform(delete("/api/v1/appointments/{id}", appointment.getAppointmentId()))
                 .andExpect(status().isNoContent());

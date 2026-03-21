@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.errors.ResourceNotFoundException;
 import com.example.demo.models.Appointment;
 import com.example.demo.models.Department;
@@ -16,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -56,6 +58,10 @@ public class AppointmentService {
 
         Department department =  departmentRepository.findById(request.departmentId())
             .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
+
+        if (Objects.equals(patient.getIdNumber(), practitioner.getIdNumber())) {
+            throw new RepeatedIdNumberError("Patient and practitioner cannot be the same");
+        }
 
         return new AppointmentRefs(
             patient,
