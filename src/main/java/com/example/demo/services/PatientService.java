@@ -2,6 +2,7 @@ package com.example.demo.services;
 
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
+import com.example.demo.errors.ImmutableFieldError;
 import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.models.Patient;
 import com.example.demo.repositories.PatientRepository;
@@ -72,6 +73,9 @@ public class PatientService {
 
         return patientRepository.findById(id)
                 .map(p -> {
+                    if (!p.getIdNumber().equals(pRequest.idNumber())) {
+                        throw new ImmutableFieldError("Patient idNumber cannot be changed");
+                    }
                     p.setFirstName(pRequest.firstName());
                     p.setLastName(pRequest.lastName());
                     p.setDateOfBirth(pRequest.dateOfBirth());
@@ -86,11 +90,12 @@ public class PatientService {
     public Optional<Patient> patchPatient(UUID id, PatientPatchRequest pRequest) {
         return patientRepository.findById(id)
             .map(p -> {
+                if (pRequest.idNumber() != null && !p.getIdNumber().equals(pRequest.idNumber())) {
+                    throw new ImmutableFieldError("Patient idNumber cannot be changed");
+                }
                 if (pRequest.firstName() != null) p.setFirstName(pRequest.firstName());
 
                 if (pRequest.lastName() != null) p.setLastName(pRequest.lastName());
-
-                if (pRequest.idNumber() != null) p.setIdNumber(pRequest.idNumber());
 
                 if (pRequest.dateOfBirth() != null) p.setDateOfBirth(pRequest.dateOfBirth());
 

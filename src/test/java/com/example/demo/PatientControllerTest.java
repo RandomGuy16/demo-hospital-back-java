@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
+import com.example.demo.errors.ErrorCode;
 import com.example.demo.models.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -78,7 +79,7 @@ class PatientControllerTest extends ControllerTestSupport {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
     }
 
     @Test
@@ -158,7 +159,7 @@ class PatientControllerTest extends ControllerTestSupport {
         PatientRequest request = new PatientRequest(
                 "Scarlett",
                 "Johansson",
-                "1234567893",
+                "5011234566",
                 LocalDate.of(1984, 11, 22),
                 "female",
                 "+1 555 9999",
@@ -173,6 +174,32 @@ class PatientControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.lastName").value("Johansson"))
                 .andExpect(jsonPath("$.address").value("456 Oak Ave"))
                 .andExpect(jsonPath("$.mrn").value(patient.getMrn()));
+    }
+
+    @Test
+    void updatePatientWithChangedIdNumberReturnsConflict() throws Exception {
+        Patient patient = savePatient(
+            "Black",
+            "Widow",
+            "5011234566",
+            "female",
+            LocalDate.of(1993, 2, 28)
+        );
+        PatientRequest request = new PatientRequest(
+                "Scarlett",
+                "Johansson",
+                "1234567893",
+                LocalDate.of(1984, 11, 22),
+                "female",
+                "+1 555 9999",
+                "janet.smith@example.com",
+                "456 Oak Ave");
+
+        mockMvc.perform(put("/api/v1/patients/{id}", patient.getPatientId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("CONFLICT"));
     }
 
     @Test
@@ -200,6 +227,31 @@ class PatientControllerTest extends ControllerTestSupport {
             .andExpect(jsonPath("$.firstName").value("Kenjaku"))
             .andExpect(jsonPath("$.lastName").value("---"))
             .andExpect(jsonPath("$.mrn").value(patient.getMrn()));
+    }
+
+    @Test
+    void patchPatientWithChangedIdNumberReturnsConflict() throws Exception {
+        Patient patient = savePatient(
+            "Noritoshi",
+            "Kamo",
+            "666917846",
+            "male",
+            LocalDate.of(1878, 11, 30));
+        PatientPatchRequest req = new PatientPatchRequest(
+            null,
+            null,
+            "1234567890",
+            null,
+            null,
+            null,
+            null,
+            null);
+
+        mockMvc.perform(patch("/api/v1/patients/{id}", patient.getPatientId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(req)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value("CONFLICT"));
     }
 
     @Test

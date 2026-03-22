@@ -4,10 +4,10 @@ import org.springframework.http.HttpStatus;
 
 public class RepeatedIdNumberError extends ApiException {
     public RepeatedIdNumberError(String message) {
-        super(HttpStatus.CONFLICT, ErrorCode.VALIDATION_ERROR, message);
+            super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message);
     }
 
     public RepeatedIdNumberError(String message, Throwable cause) {
-        super(HttpStatus.CONFLICT, ErrorCode.VALIDATION_ERROR, message, cause);
+        super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message, cause);
     }
 }

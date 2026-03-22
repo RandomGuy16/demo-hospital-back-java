@@ -3,6 +3,7 @@ package com.example.demo.services;
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.errors.ResourceNotFoundException;
+import com.example.demo.errors.SelfDiagnosisConflictException;
 import com.example.demo.models.Appointment;
 import com.example.demo.models.Department;
 import com.example.demo.models.Patient;
@@ -60,7 +61,7 @@ public class AppointmentService {
             .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
         if (Objects.equals(patient.getIdNumber(), practitioner.getIdNumber())) {
-            throw new RepeatedIdNumberError("Patient and practitioner cannot be the same");
+            throw new SelfDiagnosisConflictException("Patient and practitioner cannot be the same");
         }
 
         return new AppointmentRefs(

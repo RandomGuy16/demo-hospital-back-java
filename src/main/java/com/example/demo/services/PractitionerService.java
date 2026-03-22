@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.PractitionerRequest;
+import com.example.demo.errors.ImmutableFieldError;
 import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.models.Practitioner;
 import com.example.demo.repositories.PractitionerRepository;
@@ -53,9 +54,11 @@ public class PractitionerService {
     public Optional<Practitioner> updatePractitioner(UUID id, PractitionerRequest request) {
         return practitionerRepository.findById(id)
                 .map(practitioner -> {
+                    if (!practitioner.getIdNumber().equals(request.idNumber())) {
+                        throw new ImmutableFieldError("Practitioner idNumber cannot be changed");
+                    }
                     practitioner.setFirstName(request.firstName());
                     practitioner.setLastName(request.lastName());
-                    practitioner.setIdNumber(request.idNumber());
                     practitioner.setDateOfBirth(request.dateOfBirth());
                     practitioner.setGender(request.gender());
                     practitioner.setPhoneNumber(request.phoneNumber());

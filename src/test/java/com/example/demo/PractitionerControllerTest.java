@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dto.PractitionerRequest;
+import com.example.demo.errors.ErrorCode;
 import com.example.demo.models.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -67,7 +68,7 @@ class PractitionerControllerTest extends ControllerTestSupport {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(request)))
             .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+            .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
     }
 
     @Test
@@ -134,6 +135,26 @@ class PractitionerControllerTest extends ControllerTestSupport {
                 .andExpect(jsonPath("$.firstName").value("James"))
                 .andExpect(jsonPath("$.lastName").value("Wilson"))
                 .andExpect(jsonPath("$.specialties[0]").value("Oncology"));
+    }
+
+    @Test
+    void updatePractitionerWithChangedIdNumberReturnsConflict() throws Exception {
+        Practitioner practitioner = savePractitioner("Gregory", "House", "1234567894", List.of("Diagnostics"));
+        PractitionerRequest request = new PractitionerRequest(
+                "James",
+                "Wilson",
+                "1234567890",
+                LocalDate.of(1975, 7, 1),
+                "male",
+                "+1 555 3333",
+                "wilson@example.com",
+                List.of("Oncology"));
+
+        mockMvc.perform(put("/api/v1/practitioners/{id}", practitioner.getPractitionerId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("CONFLICT"));
     }
 
     @Test
