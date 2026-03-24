@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import java.util.UUID;
 import java.time.LocalDateTime;
 
+@ValidAppointmentTime
 @Schema(name = "Appointment", description = "Appointment record")
 @Entity
 @Table(name = "appointments")

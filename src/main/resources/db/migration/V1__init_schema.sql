@@ -43,12 +43,6 @@ CREATE TABLE patients
     CONSTRAINT pk_patients PRIMARY KEY (patient_id)
 );
 
-CREATE TABLE practitioner_departments
-(
-    department_id   UUID NOT NULL,
-    practitioner_id UUID NOT NULL
-);
-
 CREATE TABLE practitioner_specialties
 (
     practitioner_id UUID NOT NULL,
@@ -91,17 +85,18 @@ ALTER TABLE appointments
 ALTER TABLE appointments
     ADD CONSTRAINT FK_APPOINTMENTS_ON_PRACTITIONER FOREIGN KEY (practitioner_id) REFERENCES practitioners (practitioner_id);
 
+ALTER TABLE appointments
+    ADD CONSTRAINT CHK_APPOINTMENTS_TIME_RANGE CHECK (start_time < end_time);
+
 ALTER TABLE department_practitioners
     ADD CONSTRAINT fk_deppra_on_department FOREIGN KEY (department_id) REFERENCES departments (department_id);
 
 ALTER TABLE department_practitioners
     ADD CONSTRAINT fk_deppra_on_practitioner FOREIGN KEY (practitioner_id) REFERENCES practitioners (practitioner_id);
 
+-- this wasn't added by intellij
+ALTER TABLE department_practitioners
+    ADD CONSTRAINT pk_department_practitioners PRIMARY KEY (department_id, practitioner_id);
+
 ALTER TABLE practitioner_specialties
     ADD CONSTRAINT fk_practitioner_specialties_on_practitioner FOREIGN KEY (practitioner_id) REFERENCES practitioners (practitioner_id);
-
-ALTER TABLE practitioner_departments
-    ADD CONSTRAINT fk_pradep_on_department FOREIGN KEY (department_id) REFERENCES departments (department_id);
-
-ALTER TABLE practitioner_departments
-    ADD CONSTRAINT fk_pradep_on_practitioner FOREIGN KEY (practitioner_id) REFERENCES practitioners (practitioner_id);

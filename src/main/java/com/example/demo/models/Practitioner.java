@@ -25,12 +25,12 @@ public class Practitioner extends Person {
     @Column(name = "specialty", length = 100)
     private List<String> specialties = new ArrayList<>();
 
-    @ManyToMany
-    @JoinTable(
+    @ManyToMany(mappedBy = "practitioners")
+    /*@JoinTable(
         name = "practitioner_departments",
         joinColumns = @JoinColumn(name = "practitioner_id"),
         inverseJoinColumns = @JoinColumn(name = "department_id")
-    )
+    )*/
     @JsonIgnore
     @Schema(hidden = true)
     private List<Department> departments = new ArrayList<>();
