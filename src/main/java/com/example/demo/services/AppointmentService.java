@@ -1,13 +1,12 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.AppointmentRequest;
-import com.example.demo.errors.RepeatedIdNumberError;
 import com.example.demo.errors.ResourceNotFoundException;
 import com.example.demo.errors.SelfDiagnosisConflictException;
-import com.example.demo.models.Appointment;
-import com.example.demo.models.Department;
-import com.example.demo.models.Patient;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.appointment.Appointment;
+import com.example.demo.models.department.Department;
+import com.example.demo.models.patient.Patient;
+import com.example.demo.models.practitioner.Practitioner;
 import com.example.demo.repositories.AppointmentRepository;
 import com.example.demo.repositories.DepartmentRepository;
 import com.example.demo.repositories.PatientRepository;

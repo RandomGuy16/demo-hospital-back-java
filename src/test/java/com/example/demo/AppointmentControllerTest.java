@@ -2,8 +2,8 @@ package com.example.demo;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.errors.ErrorCode;
-import com.example.demo.models.Appointment;
-import com.example.demo.models.Patient;
+import com.example.demo.models.appointment.Appointment;
+import com.example.demo.models.patient.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

@@ -1,5 +1,7 @@
-package com.example.demo.models;
+package com.example.demo.models.practitioner;
 
+import com.example.demo.models.department.Department;
+import com.example.demo.models.Person;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;

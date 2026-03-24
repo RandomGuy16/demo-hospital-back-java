@@ -1,9 +1,9 @@
 package com.example.demo;
 
-import com.example.demo.models.Appointment;
-import com.example.demo.models.Department;
-import com.example.demo.models.Patient;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.appointment.Appointment;
+import com.example.demo.models.department.Department;
+import com.example.demo.models.patient.Patient;
+import com.example.demo.models.practitioner.Practitioner;
 import com.example.demo.repositories.AppointmentRepository;
 import com.example.demo.repositories.DepartmentRepository;
 import com.example.demo.repositories.PatientRepository;
@@ -20,7 +20,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc

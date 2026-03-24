@@ -1,5 +1,8 @@
-package com.example.demo.models;
+package com.example.demo.models.appointment;
 
+import com.example.demo.models.department.Department;
+import com.example.demo.models.patient.Patient;
+import com.example.demo.models.practitioner.Practitioner;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 

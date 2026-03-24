@@ -1,7 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.dto.DepartmentRequest;
-import com.example.demo.models.Department;
+import com.example.demo.models.department.Department;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

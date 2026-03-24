@@ -1,7 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.DepartmentRequest;
-import com.example.demo.models.Department;
+import com.example.demo.models.department.Department;
 import com.example.demo.repositories.DepartmentRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

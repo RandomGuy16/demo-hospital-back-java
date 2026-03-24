@@ -3,7 +3,7 @@ package com.example.demo.services;
 import com.example.demo.dto.PractitionerRequest;
 import com.example.demo.errors.ImmutableFieldError;
 import com.example.demo.errors.RepeatedIdNumberError;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.practitioner.Practitioner;
 import com.example.demo.repositories.PractitionerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

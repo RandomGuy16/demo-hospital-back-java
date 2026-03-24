@@ -3,7 +3,7 @@ package com.example.demo;
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.errors.ErrorCode;
-import com.example.demo.models.Patient;
+import com.example.demo.models.patient.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

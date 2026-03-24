@@ -1,7 +1,7 @@
 package com.example.demo.mappers;
 
 import com.example.demo.dto.PatientResponse;
-import com.example.demo.models.Patient;
+import com.example.demo.models.patient.Patient;
 
 public class PatientMapper {
 

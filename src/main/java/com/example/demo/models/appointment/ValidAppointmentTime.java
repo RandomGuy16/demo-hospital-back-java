@@ -1,4 +1,4 @@
-package com.example.demo.models;
+package com.example.demo.models.appointment;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

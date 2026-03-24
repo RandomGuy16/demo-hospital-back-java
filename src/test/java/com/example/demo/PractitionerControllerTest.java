@@ -2,7 +2,7 @@ package com.example.demo;
 
 import com.example.demo.dto.PractitionerRequest;
 import com.example.demo.errors.ErrorCode;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.practitioner.Practitioner;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 

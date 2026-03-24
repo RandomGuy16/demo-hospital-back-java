@@ -1,7 +1,7 @@
 package com.example.demo.mappers;
 
 import com.example.demo.dto.AppointmentResponse;
-import com.example.demo.models.Appointment;
+import com.example.demo.models.appointment.Appointment;
 
 public class AppointmentMapper {
 

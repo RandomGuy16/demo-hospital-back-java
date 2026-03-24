@@ -4,7 +4,7 @@ import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.errors.ImmutableFieldError;
 import com.example.demo.errors.RepeatedIdNumberError;
-import com.example.demo.models.Patient;
+import com.example.demo.models.patient.Patient;
 import com.example.demo.repositories.PatientRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

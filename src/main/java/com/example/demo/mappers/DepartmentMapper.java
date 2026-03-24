@@ -1,7 +1,7 @@
 package com.example.demo.mappers;
 
 import com.example.demo.dto.DepartmentResponse;
-import com.example.demo.models.Department;
+import com.example.demo.models.department.Department;
 import com.example.demo.models.Person;
 
 public class DepartmentMapper {

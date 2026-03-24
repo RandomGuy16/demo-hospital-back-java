@@ -1,7 +1,7 @@
 package com.example.demo.mappers;
 
 import com.example.demo.dto.PractitionerResponse;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.practitioner.Practitioner;
 
 public class PractitionerMapper {
 

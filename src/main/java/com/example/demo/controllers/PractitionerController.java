@@ -2,7 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.PractitionerRequest;
 import com.example.demo.dto.PractitionerResponse;
-import com.example.demo.models.Practitioner;
+import com.example.demo.models.practitioner.Practitioner;
 import com.example.demo.paging.SortParser;
 import com.example.demo.services.PractitionerService;
 import com.example.demo.mappers.PractitionerMapper;

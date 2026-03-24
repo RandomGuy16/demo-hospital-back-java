@@ -1,6 +1,6 @@
 package com.example.demo.repositories;
 
-import com.example.demo.models.Patient;
+import com.example.demo.models.patient.Patient;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;

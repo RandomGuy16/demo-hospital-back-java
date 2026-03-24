@@ -2,7 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.DepartmentRequest;
 import com.example.demo.dto.DepartmentResponse;
-import com.example.demo.models.Department;
+import com.example.demo.models.department.Department;
 import com.example.demo.paging.SortParser;
 import com.example.demo.services.DepartmentService;
 import com.example.demo.mappers.DepartmentMapper;

@@ -2,7 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.dto.AppointmentResponse;
-import com.example.demo.models.Appointment;
+import com.example.demo.models.appointment.Appointment;
 import com.example.demo.paging.SortParser;
 import com.example.demo.services.AppointmentService;
 import com.example.demo.mappers.AppointmentMapper;

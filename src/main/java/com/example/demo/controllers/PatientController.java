@@ -3,7 +3,7 @@ package com.example.demo.controllers;
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
 import com.example.demo.dto.PatientResponse;
-import com.example.demo.models.Patient;
+import com.example.demo.models.patient.Patient;
 import com.example.demo.paging.SortParser;
 import com.example.demo.services.PatientService;
 import com.example.demo.mappers.PatientMapper;
