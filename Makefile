@@ -16,7 +16,7 @@ help:
 dev: db-up
 	$(GRADLEW) bootRun -t
 
-test:
+test: db-up
 	$(GRADLEW) test
 
 build:
