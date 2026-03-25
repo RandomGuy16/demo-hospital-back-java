@@ -33,7 +33,7 @@ public class Practitioner extends Person {
     @Schema(hidden = true)
     private List<Department> departments = new ArrayList<>();
 
-    @OneToMany(mappedBy = "practitioners")
+    @OneToMany(mappedBy = "practitioner")
     @JsonIgnore
     private List<Appointment> appointments;
 

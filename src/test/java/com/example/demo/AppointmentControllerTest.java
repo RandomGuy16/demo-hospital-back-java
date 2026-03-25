@@ -3,6 +3,7 @@ package com.example.demo;
 import com.example.demo.dto.AppointmentRequest;
 import com.example.demo.errors.ErrorCode;
 import com.example.demo.models.appointment.Appointment;
+import com.example.demo.models.appointment.AppointmentStatus;
 import com.example.demo.models.patient.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -30,7 +31,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
                 defaultSubjects.department().getDepartmentId(),
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().plusDays(2).plusMinutes(45),
-                "SCHEDULED");
+                AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -38,7 +39,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.appointmentId").isNotEmpty())
-                .andExpect(jsonPath("$.status").value("SCHEDULED"));
+                .andExpect(jsonPath("$.status").value(AppointmentStatus.SCHEDULED.name()));
     }
 
     @Test
@@ -49,7 +50,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
                 UUID.randomUUID(),
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusHours(1),
-                "SCHEDULED");
+            AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -66,7 +67,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
             UUID.randomUUID(),
             LocalDateTime.now().minusDays(1),
             LocalDateTime.now().plusDays(1),
-            "");
+            AppointmentStatus.CANCELLED);
 
         mockMvc.perform(post("/api/v1/appointments")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -91,7 +92,7 @@ class AppointmentControllerTest extends ControllerTestSupport {
             defaultSubjects.department().getDepartmentId(),
             LocalDateTime.now().plusDays(1),
             LocalDateTime.now().plusDays(1).plusHours(1),
-            "SCHEDULED");
+            AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -151,14 +152,14 @@ class AppointmentControllerTest extends ControllerTestSupport {
                 funnySubjects.department().getDepartmentId(),
                 LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(10).plusMinutes(30),
-                "COMPLETED");
+            AppointmentStatus.COMPLETED);
 
         mockMvc.perform(put("/api/v1/appointments/{id}", appointment.getAppointmentId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.appointmentId").value(appointment.getAppointmentId().toString()))
-                .andExpect(jsonPath("$.status").value("COMPLETED"));
+                .andExpect(jsonPath("$.status").value(AppointmentStatus.COMPLETED.name()));
     }
 
     @Test

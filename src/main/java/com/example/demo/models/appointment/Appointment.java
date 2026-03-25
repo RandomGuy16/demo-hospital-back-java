@@ -47,11 +47,13 @@ public class Appointment {
 
     @Schema(example = "SCHEDULED")
     @Column(nullable = false, length = 10)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private AppointmentStatus status;
 
     public Appointment() {}
 
-    public Appointment(Patient patient, Practitioner practitioner, Department department, LocalDateTime start, LocalDateTime end, String status) {
+    public Appointment(Patient patient, Practitioner practitioner, Department department, LocalDateTime start,
+                       LocalDateTime end, AppointmentStatus status) {
         this.patient = patient;
         this.practitioner = practitioner;
         this.department = department;
@@ -104,11 +106,11 @@ public class Appointment {
         this.end = end;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.demo.dto;
 
+import com.example.demo.models.appointment.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.time.LocalDateTime;
@@ -25,6 +26,6 @@ public record AppointmentResponse(
         LocalDateTime end,
 
         @Schema(example = "SCHEDULED")
-        String status
+        AppointmentStatus status
 ) {
 }

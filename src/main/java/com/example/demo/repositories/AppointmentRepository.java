@@ -29,8 +29,20 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     // methods to find appointment collisions for patients and practitioners
     Set<Appointment> findByPatient_PatientIdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
     boolean existsByPatient_PatientIdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+            UUID patientId,
+            UUID appointmentId,
+            LocalDateTime requestedEnd,
+            LocalDateTime requestedStart
+    );
 
     Set<Appointment> findByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
     boolean existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+            UUID practitionerId,
+            UUID appointmentId,
+            LocalDateTime requestedEnd,
+            LocalDateTime requestedStart
+    );
 
 }

@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import com.example.demo.models.appointment.Appointment;
+import com.example.demo.models.appointment.AppointmentStatus;
 import com.example.demo.models.department.Department;
 import com.example.demo.models.patient.Patient;
 import com.example.demo.models.practitioner.Practitioner;
@@ -202,6 +203,13 @@ abstract class ControllerTestSupport {
     }
 
     protected Appointment saveAppointment(Patient patient, Practitioner practitioner, Department department, String status) {
+        return saveAppointment(patient, practitioner, department, AppointmentStatus.valueOf(status));
+    }
+
+    protected Appointment saveAppointment(Patient patient,
+                                          Practitioner practitioner,
+                                          Department department,
+                                          AppointmentStatus status) {
         LocalDateTime start = LocalDateTime.now().plusDays(5);
         Appointment appointment = new Appointment(
                 patient,
