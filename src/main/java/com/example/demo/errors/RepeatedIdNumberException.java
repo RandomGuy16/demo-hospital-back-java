@@ -2,12 +2,12 @@ package com.example.demo.errors;
 
 import org.springframework.http.HttpStatus;
 
-public class RepeatedIdNumberError extends ApiException {
-    public RepeatedIdNumberError(String message) {
+public class RepeatedIdNumberException extends ApiException {
+    public RepeatedIdNumberException(String message) {
             super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message);
     }
 
-    public RepeatedIdNumberError(String message, Throwable cause) {
+    public RepeatedIdNumberException(String message, Throwable cause) {
         super(HttpStatus.CONFLICT, ErrorCode.CONFLICT, message, cause);
     }
 }

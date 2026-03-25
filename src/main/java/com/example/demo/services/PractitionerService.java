@@ -1,8 +1,8 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.PractitionerRequest;
-import com.example.demo.errors.ImmutableFieldError;
-import com.example.demo.errors.RepeatedIdNumberError;
+import com.example.demo.errors.ImmutableFieldException;
+import com.example.demo.errors.RepeatedIdNumberException;
 import com.example.demo.models.practitioner.Practitioner;
 import com.example.demo.repositories.PractitionerRepository;
 import org.springframework.data.domain.Page;
@@ -28,7 +28,7 @@ public class PractitionerService {
         // person being globally sets two different idNumber columns, which agrees to reality
         // a doctor/practitioner when they are sick, they become patients and someone else attends them
         if (practitionerRepository.existsByIdNumber(request.idNumber())) {
-            throw new RepeatedIdNumberError("Practitioner with idNumber " + request.idNumber() + " already exists");
+            throw new RepeatedIdNumberException("Practitioner with idNumber " + request.idNumber() + " already exists");
         }
 
         Practitioner practitioner = new Practitioner(
@@ -55,7 +55,7 @@ public class PractitionerService {
         return practitionerRepository.findById(id)
                 .map(practitioner -> {
                     if (!practitioner.getIdNumber().equals(request.idNumber())) {
-                        throw new ImmutableFieldError("Practitioner idNumber cannot be changed");
+                        throw new ImmutableFieldException("Practitioner idNumber cannot be changed");
                     }
                     practitioner.setFirstName(request.firstName());
                     practitioner.setLastName(request.lastName());

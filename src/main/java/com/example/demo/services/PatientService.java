@@ -2,8 +2,8 @@ package com.example.demo.services;
 
 import com.example.demo.dto.PatientPatchRequest;
 import com.example.demo.dto.PatientRequest;
-import com.example.demo.errors.ImmutableFieldError;
-import com.example.demo.errors.RepeatedIdNumberError;
+import com.example.demo.errors.ImmutableFieldException;
+import com.example.demo.errors.RepeatedIdNumberException;
 import com.example.demo.models.patient.Patient;
 import com.example.demo.repositories.PatientRepository;
 import org.springframework.data.domain.Page;
@@ -45,7 +45,7 @@ public class PatientService {
     public Patient createPatient(PatientRequest patient) {
         // first validation: check unique idNumber
         if (patientRepository.existsByIdNumber(patient.idNumber())) {
-            throw new RepeatedIdNumberError("Patient with idNumber " + patient.idNumber() + " already exists");
+            throw new RepeatedIdNumberException("Patient with idNumber " + patient.idNumber() + " already exists");
         }
 
         Patient newPatient = new Patient(
@@ -74,7 +74,7 @@ public class PatientService {
         return patientRepository.findById(id)
                 .map(p -> {
                     if (!p.getIdNumber().equals(pRequest.idNumber())) {
-                        throw new ImmutableFieldError("Patient idNumber cannot be changed");
+                        throw new ImmutableFieldException("Patient idNumber cannot be changed");
                     }
                     p.setFirstName(pRequest.firstName());
                     p.setLastName(pRequest.lastName());
@@ -91,7 +91,7 @@ public class PatientService {
         return patientRepository.findById(id)
             .map(p -> {
                 if (pRequest.idNumber() != null && !p.getIdNumber().equals(pRequest.idNumber())) {
-                    throw new ImmutableFieldError("Patient idNumber cannot be changed");
+                    throw new ImmutableFieldException("Patient idNumber cannot be changed");
                 }
                 if (pRequest.firstName() != null) p.setFirstName(pRequest.firstName());
 

@@ -1,5 +1,6 @@
 package com.example.demo.models.practitioner;
 
+import com.example.demo.models.appointment.Appointment;
 import com.example.demo.models.department.Department;
 import com.example.demo.models.Person;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -28,14 +29,13 @@ public class Practitioner extends Person {
     private List<String> specialties = new ArrayList<>();
 
     @ManyToMany(mappedBy = "practitioners")
-    /*@JoinTable(
-        name = "practitioner_departments",
-        joinColumns = @JoinColumn(name = "practitioner_id"),
-        inverseJoinColumns = @JoinColumn(name = "department_id")
-    )*/
     @JsonIgnore
     @Schema(hidden = true)
     private List<Department> departments = new ArrayList<>();
+
+    @OneToMany(mappedBy = "practitioners")
+    @JsonIgnore
+    private List<Appointment> appointments;
 
     // Constructors
     public Practitioner() {
@@ -50,6 +50,10 @@ public class Practitioner extends Person {
     // Getters and Setters
     public UUID getPractitionerId() {
         return practitionerId;
+    }
+
+    public void setPractitionerId(UUID practitionerId) {
+        this.practitionerId = practitionerId;
     }
 
     public List<String> getSpecialties() {
@@ -77,6 +81,21 @@ public class Practitioner extends Person {
     public void addDepartment(Department department) {
         if (!this.departments.contains(department)) {
             this.departments.add(department);
+        }
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+
+    public void addAppointment(Appointment appointment) {
+        if (!this.appointments.contains(appointment)) {
+            this.appointments.add(appointment);
+            appointment.setPractitioner(this);
         }
     }
 }

@@ -1,11 +1,14 @@
 package com.example.demo.models.patient;
 
 import com.example.demo.models.Person;
+import com.example.demo.models.appointment.Appointment;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
+import java.util.List;
 
 @Schema(name = "Patient", description = "Patient record")
 @Entity
@@ -24,6 +27,10 @@ public class Patient extends Person {
     @Schema(example = "123 Main St, Springfield")
     @Column(nullable = false, length = 200)
     private String address;
+
+    @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Appointment> appointments;
 
     // Constructors
     public Patient() {
@@ -64,5 +71,20 @@ public class Patient extends Person {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public List<Appointment> getAppointments() {
+        return appointments;
+    }
+
+    public void setAppointments(List<Appointment> appointments) {
+        this.appointments = appointments;
+    }
+
+    public void addAppointment(Appointment appointment) {
+        if (!this.appointments.contains(appointment)) {
+            this.appointments.add(appointment);
+            appointment.setPatient(this);
+        }
     }
 }

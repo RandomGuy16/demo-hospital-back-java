@@ -1,6 +1,7 @@
 package com.example.demo.services;
 
 import com.example.demo.dto.AppointmentRequest;
+import com.example.demo.errors.AppointmentCollisionException;
 import com.example.demo.errors.ResourceNotFoundException;
 import com.example.demo.errors.SelfDiagnosisConflictException;
 import com.example.demo.models.appointment.Appointment;
@@ -17,9 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @Transactional
@@ -59,10 +58,21 @@ public class AppointmentService {
         Department department =  departmentRepository.findById(request.departmentId())
             .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
+        // validate patient and practitioner ain't the same
         if (Objects.equals(patient.getIdNumber(), practitioner.getIdNumber())) {
             throw new SelfDiagnosisConflictException("Patient and practitioner cannot be the same");
         }
 
+        // validate that the time chosen is correct and there are no collisions
+        boolean doesPatientHaveCollision = appointmentRepository
+            .existsByPatient_PatientIdAndStartBeforeAndEndAfter(patient.getPatientId(), request.end(), request.start());
+
+        boolean doesPractitionerHaveCollision = appointmentRepository
+            .existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(practitioner.getPractitionerId(), request.end(), request.start());
+
+        if (doesPatientHaveCollision || doesPractitionerHaveCollision)
+            throw new AppointmentCollisionException("Appointment time collision detected");
+        
         return new AppointmentRefs(
             patient,
             practitioner,
