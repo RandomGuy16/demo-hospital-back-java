@@ -2,6 +2,11 @@
 
 GRADLEW := ./gradlew
 
+ifneq (,$(wildcard .env))
+	include .env
+	export
+endif
+
 help:
 	@printf "Available targets:\n"
 	@printf "  make dev    Start the Spring Boot dev server\n"

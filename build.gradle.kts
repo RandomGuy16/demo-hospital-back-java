@@ -44,7 +44,11 @@ dependencies {
 
     // implement flyway
     implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb:flyway-database-postgresql") // support for postgresql
+    implementation("org.flywaydb:flyway-database-postgresql") // support for
+
+    // oauth2
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
 }
 
 tasks.withType<Test> {
