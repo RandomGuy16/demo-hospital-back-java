@@ -44,11 +44,11 @@ dependencies {
 
     // implement flyway
     implementation("org.flywaydb:flyway-core")
-    implementation("org.flywaydb:flyway-database-postgresql") // support for
+    implementation("org.flywaydb:flyway-database-postgresql") // support for postgresql
 
-    // oauth2
+    // backend validates JWTs issued by the external identity provider
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
-    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    testImplementation("org.springframework.security:spring-security-test")
 }
 
 tasks.withType<Test> {

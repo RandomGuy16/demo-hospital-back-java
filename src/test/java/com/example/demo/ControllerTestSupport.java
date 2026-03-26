@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @SpringBootTest
-@AutoConfigureMockMvc
+@AutoConfigureMockMvc(addFilters = false)
 abstract class ControllerTestSupport {
 
     protected record TestSubjects(
