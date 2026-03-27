@@ -26,6 +26,14 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+    /**
+     * Configures the stateless API security chain.
+     *
+     * @param http Spring Security HTTP builder.
+     * @param jwtAuthenticationConverter converter that maps the custom roles claim into authorities.
+     * @return configured security filter chain.
+     * @throws Exception if the chain cannot be built.
+     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         http
@@ -46,16 +54,35 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Exposes the framework authentication manager used by the login endpoint.
+     *
+     * @param config Spring Security authentication configuration.
+     * @return application authentication manager.
+     * @throws Exception if the manager cannot be created.
+     */
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    /**
+     * Creates the password encoder used for local accounts.
+     *
+     * @return BCrypt password encoder.
+     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Registers DAO-based authentication against the local user-account table.
+     *
+     * @param userDetailsService loader for local user credentials.
+     * @param passwordEncoder password hash verifier.
+     * @return DAO authentication provider.
+     */
     @Bean
     DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -64,6 +91,12 @@ public class SecurityConfig {
         return provider;
     }
 
+    /**
+     * Builds the JWT decoder that validates tokens signed by {@link JwtService}.
+     *
+     * @param jwtService service exposing the shared HMAC secret.
+     * @return JWT decoder.
+     */
     @Bean
     JwtDecoder jwtDecoder(JwtService jwtService) {
         return NimbusJwtDecoder.withSecretKey(jwtService.getSecretKey())
@@ -71,6 +104,11 @@ public class SecurityConfig {
                 .build();
     }
 
+    /**
+     * Maps the custom {@code roles} JWT claim into Spring Security authorities.
+     *
+     * @return JWT authentication converter.
+     */
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -80,6 +118,7 @@ public class SecurityConfig {
                 return List.of();
             }
 
+            // Tokens store roles as a string array, so convert each entry into a GrantedAuthority.
             return roles.stream()
                     .filter(String.class::isInstance)
                     .map(String.class::cast)

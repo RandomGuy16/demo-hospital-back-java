@@ -2,7 +2,7 @@ package com.example.demo.controllers;
 
 import com.example.demo.dto.CurrentUserResponse;
 import com.example.demo.dto.UserAccountLoginRequest;
-import com.example.demo.dto.UserAccountLoginResponse;
+import com.example.demo.dto.UserAccountAuthenticationResponse;
 import com.example.demo.dto.UserAccountRegisterRequest;
 import com.example.demo.models.useraccount.UserAccount;
 import com.example.demo.services.JwtService;
@@ -32,6 +32,13 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserAccountService userAccountService;
 
+    /**
+     * Creates the authentication controller dependencies.
+     *
+     * @param authenticationManager Spring Security entry point for username/password authentication.
+     * @param jwtService service that signs and validates the API JWTs.
+     * @param userAccountService service used to load and register local user accounts.
+     */
     public AuthController(AuthenticationManager authenticationManager,
                           JwtService jwtService,
                           UserAccountService userAccountService) {
@@ -47,9 +54,17 @@ public class AuthController {
             security = @SecurityRequirement(name = "bearerAuth")
     )
     @ApiResponse(responseCode = "200", description = "Current user resolved successfully")
+    /**
+     * Builds the current-user payload directly from the authenticated JWT.
+     *
+     * @param jwt validated bearer token attached to the request.
+     * @param authentication authenticated principal plus resolved authorities.
+     * @return the normalized current-user response for frontend bootstrap.
+     */
     public ResponseEntity<CurrentUserResponse> getCurrentUser(
             @AuthenticationPrincipal Jwt jwt,
             @Schema(hidden = true) Authentication authentication) {
+        // Sort authorities to make the response deterministic for the frontend and tests.
         List<String> authorities = authentication.getAuthorities()
                 .stream()
                 .map(grantedAuthority -> grantedAuthority.getAuthority())
@@ -72,6 +87,12 @@ public class AuthController {
         return ResponseEntity.ok(response);
     }
 
+    /**
+     * Returns the first non-empty string from the provided candidates.
+     *
+     * @param values ordered candidates to inspect.
+     * @return the first non-blank value, or {@code null} if none is usable.
+     */
     private String firstNonBlank(String... values) {
         for (String value : values) {
             if (value != null && !value.isBlank()) {
@@ -87,10 +108,16 @@ public class AuthController {
         description = "Creates a local user account and returns a signed JWT"
     )
     @ApiResponse(responseCode = "201", description = "New user created successfully")
-    public ResponseEntity<UserAccountLoginResponse> register(@RequestBody @Valid UserAccountRegisterRequest request) {
+    /**
+     * Registers a new local user and immediately returns an access token.
+     *
+     * @param request user registration payload.
+     * @return signed JWT for the newly created user.
+     */
+    public ResponseEntity<UserAccountAuthenticationResponse> register(@RequestBody @Valid UserAccountRegisterRequest request) {
         UserAccount created = userAccountService.registerUserAccount(request);
         String token = jwtService.generateToken(created);
-        return ResponseEntity.status(201).body(new UserAccountLoginResponse(token));
+        return ResponseEntity.status(201).body(new UserAccountAuthenticationResponse(token));
     }
 
     @PostMapping("/login")
@@ -99,7 +126,13 @@ public class AuthController {
         description = "Authenticates a local user and returns a signed JWT"
     )
     @ApiResponse(responseCode = "200", description = "User logged in successfully")
-    public ResponseEntity<UserAccountLoginResponse> login(@RequestBody @Valid UserAccountLoginRequest request) {
+    /**
+     * Authenticates a local user and returns a signed JWT.
+     *
+     * @param request login credentials.
+     * @return signed JWT for the authenticated account.
+     */
+    public ResponseEntity<UserAccountAuthenticationResponse> login(@RequestBody @Valid UserAccountLoginRequest request) {
         // hand the email/password pair to Spring Security so the password check stays centralized.
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
@@ -108,10 +141,11 @@ public class AuthController {
             )
         );
 
+        // Reload the domain account so token claims come from our persisted user data, not the generic UserDetails.
         UserAccount user = userAccountService.getUserAccountByEmail(request.email())
                 .orElseThrow(() -> new IllegalStateException("Authenticated user account could not be loaded"));
         String token = jwtService.generateToken(user);
-        UserAccountLoginResponse response = new UserAccountLoginResponse(token);
+        UserAccountAuthenticationResponse response = new UserAccountAuthenticationResponse(token);
         return ResponseEntity.ok(response);
     }
 }

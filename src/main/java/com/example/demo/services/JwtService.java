@@ -22,6 +22,13 @@ public class JwtService {
     private final long expirationMillis;
     private final String issuer;
 
+    /**
+     * Creates the JWT service dependencies.
+     *
+     * @param secretKey base64-encoded HMAC secret used to sign and verify tokens.
+     * @param expirationMillis token lifetime in milliseconds.
+     * @param issuer issuer claim written into generated tokens.
+     */
     public JwtService(
         @Value("${security.jwt.secret}") String secretKey,
         @Value("${security.jwt.expiration-ms}") long expirationMillis,
@@ -32,7 +39,12 @@ public class JwtService {
         this.issuer = issuer;
     }
 
-    // include the basic profile claims the frontend needs after login.
+    /**
+     * Generates a signed JWT for a persisted local user account.
+     *
+     * @param userAccount authenticated local user account.
+     * @return signed compact JWT string.
+     */
     public String generateToken(UserAccount userAccount) {
         Instant now = Instant.now();
 
@@ -51,16 +63,35 @@ public class JwtService {
             .compact();
     }
 
+    /**
+     * Extracts the subject claim from a signed JWT.
+     *
+     * @param token signed JWT string.
+     * @return token subject.
+     */
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
+    /**
+     * Validates that the token belongs to the provided user and is not expired.
+     *
+     * @param token signed JWT string.
+     * @param userDetails Spring Security user details to compare against the token subject.
+     * @return {@code true} when the token is valid for that user.
+     */
     public boolean isTokenValid(String token, UserDetails userDetails) {
         String username = extractUsername(token);
         return username.equals(userDetails.getUsername())
             && extractAllClaims(token).getExpiration().after(new Date());
     }
 
+    /**
+     * Parses every claim from the signed JWT.
+     *
+     * @param token signed JWT string.
+     * @return parsed JWT claims.
+     */
     private Claims extractAllClaims(String token) {
         return Jwts.parser()
             .verifyWith(secretKey)
@@ -69,6 +100,11 @@ public class JwtService {
             .getPayload();
     }
 
+    /**
+     * Exposes the raw HMAC key so Spring Security can build the matching decoder.
+     *
+     * @return signing secret key.
+     */
     public SecretKey getSecretKey() {
         return secretKey;
     }

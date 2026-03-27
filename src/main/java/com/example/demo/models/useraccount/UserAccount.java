@@ -73,18 +73,38 @@ public class UserAccount {
     @Column(name = "password_hash", length = 1000)
     private String password;
 
+    /**
+     * Sets timestamps right before the row is inserted.
+     */
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
+    /**
+     * Refreshes the update timestamp right before the row is updated.
+     */
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
 
     public UserAccount() {}
+
+    /**
+     * Creates a fully populated user-account aggregate.
+     *
+     * @param practitioner optional practitioner link.
+     * @param patient optional patient link.
+     * @param provider external or local auth provider name.
+     * @param providerSubject stable subject within that provider.
+     * @param role application role.
+     * @param displayName user-facing display name.
+     * @param username unique application username.
+     * @param email unique login email.
+     * @param password encoded password hash.
+     */
     public UserAccount(Practitioner practitioner, Patient patient, String provider, String providerSubject,
                        Role role, String displayName, String username, String email, String password) {
         this.practitioner = practitioner;

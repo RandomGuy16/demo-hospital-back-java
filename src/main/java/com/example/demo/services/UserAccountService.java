@@ -32,6 +32,14 @@ public class UserAccountService implements UserDetailsService {
     private final PatientRepository patientRepository;
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Creates the user-account service dependencies.
+     *
+     * @param userAccountRepository repository for user-account persistence.
+     * @param practitionerRepository repository used to resolve practitioner links.
+     * @param patientRepository repository used to resolve patient links.
+     * @param passwordEncoder encoder used to hash local passwords before persistence.
+     */
     public UserAccountService(UserAccountRepository userAccountRepository,
                               PractitionerRepository practitionerRepository,
                               PatientRepository patientRepository,
@@ -47,6 +55,13 @@ public class UserAccountService implements UserDetailsService {
         Practitioner practitioner
     ) {};
 
+    /**
+     * Resolves the optional patient and practitioner links for a user-account request.
+     *
+     * @param request incoming user-account payload.
+     * @return resolved patient/practitioner references.
+     * @throws UnclearUserRoleException if a referenced entity does not exist or the role/link pair is invalid.
+     */
     private UserAccountRefs resolveUserAccountRefs(UserAccountRequest request) {
         Patient patient = request.patientId() == null
                 ? null
@@ -63,6 +78,14 @@ public class UserAccountService implements UserDetailsService {
         return new UserAccountRefs(patient, practitioner);
     }
 
+    /**
+     * Validates that the selected role matches the attached domain links.
+     *
+     * @param role requested application role.
+     * @param patient optional patient link.
+     * @param practitioner optional practitioner link.
+     * @throws UnclearUserRoleException if the role and links describe an invalid combination.
+     */
     private void validateRoleLink(Role role, Patient patient, Practitioner practitioner) {
         boolean hasPatient = patient != null;
         boolean hasPractitioner = practitioner != null;
@@ -78,19 +101,41 @@ public class UserAccountService implements UserDetailsService {
         }
     }
 
+    /**
+     * Lists every stored user account.
+     *
+     * @return all persisted user accounts.
+     */
     public List<UserAccount> getAllUserAccounts() {
         return userAccountRepository.findAll();
     }
 
+    /**
+     * Fetches a user account by its identifier.
+     *
+     * @param id user-account identifier.
+     * @return optional user account.
+     */
     public Optional<UserAccount> getUserAccountById(UUID id) {
         return userAccountRepository.findById(id);
     }
 
+    /**
+     * Fetches a user account by email.
+     *
+     * @param email unique login email.
+     * @return optional user account.
+     */
     public Optional<UserAccount> getUserAccountByEmail(String email) {
         return userAccountRepository.findByEmail(email);
     }
 
-    // local registration defaults to the internal provider and uses email as the stable subject.
+    /**
+     * Registers a local user account and defaults provider metadata for password-based login.
+     *
+     * @param request registration payload.
+     * @return newly created user account.
+     */
     public UserAccount registerUserAccount(UserAccountRegisterRequest request) {
         return createUserAccount(new UserAccountRequest(
                 request.displayName(),
@@ -105,6 +150,14 @@ public class UserAccountService implements UserDetailsService {
         ));
     }
 
+    /**
+     * Creates a user account after enforcing uniqueness and role-link constraints.
+     *
+     * @param request user-account payload.
+     * @return persisted user account with encoded password.
+     * @throws RepeatedUsernameException if username, email, or provider subject is already taken.
+     * @throws UnclearUserRoleException if the role and linked entities are inconsistent.
+     */
     public UserAccount createUserAccount(UserAccountRequest request) {
         if (userAccountRepository.existsByUsername(request.username())) {
             throw new RepeatedUsernameException("User with username " + request.username() + " already exists");
@@ -118,6 +171,7 @@ public class UserAccountService implements UserDetailsService {
             throw new RepeatedUsernameException("User for provider subject already exists");
         }
 
+        // Resolve and validate the optional patient/practitioner ownership before writing anything.
         UserAccountRefs refs = resolveUserAccountRefs(request);
 
         UserAccount newUser = new UserAccount(
@@ -135,6 +189,13 @@ public class UserAccountService implements UserDetailsService {
     }
 
     @Override
+    /**
+     * Loads Spring Security credentials for local email/password authentication.
+     *
+     * @param email email used as the username during login.
+     * @return Spring Security user details with the stored password hash and role.
+     * @throws UsernameNotFoundException if the email is not registered.
+     */
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         UserAccount userAccount = userAccountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found"));

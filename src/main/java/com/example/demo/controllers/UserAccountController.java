@@ -27,6 +27,11 @@ import static com.example.demo.mappers.UserAccountMapper.userAccountToUserAccoun
 public class UserAccountController {
     private final UserAccountService userAccountService;
 
+    /**
+     * Creates the user-account controller dependencies.
+     *
+     * @param userAccountService service handling user-account persistence and validation.
+     */
     public UserAccountController(UserAccountService userAccountService) {
         this.userAccountService = userAccountService;
     }
@@ -37,6 +42,13 @@ public class UserAccountController {
         @ApiResponse(responseCode = "201", description = "User account created successfully"),
         @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
+    /**
+     * Creates a user account record from an explicit administrative request.
+     *
+     * @param request user-account payload.
+     * @param uriBuilder helper used to build the resource location header.
+     * @return created user-account response plus location header.
+     */
     public ResponseEntity<UserAccountResponse> createUserAccount(@RequestBody @Valid UserAccountRequest request,
                                                                   UriComponentsBuilder uriBuilder) {
         UserAccount created = userAccountService.createUserAccount(request);
@@ -50,6 +62,11 @@ public class UserAccountController {
     @GetMapping
     @Operation(summary = "List user accounts", description = "Returns all user accounts")
     @ApiResponse(responseCode = "200", description = "User accounts retrieved successfully")
+    /**
+     * Lists all user accounts.
+     *
+     * @return all persisted user accounts mapped to API responses.
+     */
     public ResponseEntity<List<UserAccountResponse>> getAllUserAccounts() {
         List<UserAccountResponse> response = userAccountService.getAllUserAccounts()
                 .stream()
@@ -64,6 +81,12 @@ public class UserAccountController {
         @ApiResponse(responseCode = "200", description = "User account retrieved successfully"),
         @ApiResponse(responseCode = "404", description = "User account not found")
     })
+    /**
+     * Fetches a single user account by id.
+     *
+     * @param id user-account identifier.
+     * @return the mapped response when found, otherwise 404.
+     */
     public ResponseEntity<UserAccountResponse> getUserAccountById(@PathVariable UUID id) {
         return userAccountService.getUserAccountById(id)
                 .map(UserAccountController::mapToResponse)
@@ -71,6 +94,12 @@ public class UserAccountController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    /**
+     * Maps the domain entity to its outward-facing DTO.
+     *
+     * @param userAccount persisted user account.
+     * @return API response DTO.
+     */
     private static UserAccountResponse mapToResponse(UserAccount userAccount) {
         return userAccountToUserAccountResponse(userAccount);
     }
