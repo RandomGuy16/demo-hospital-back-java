@@ -35,6 +35,8 @@ public record UserAccountRequest(
 
     @Schema(example = "bat.man@example.com")
     @Email
-    @NotBlank String email
+    @NotBlank String email,
 
+    @Schema(example = "alskdjhf029hcoij3n43jiwhfds")
+    @NotBlank String password
 ) {}

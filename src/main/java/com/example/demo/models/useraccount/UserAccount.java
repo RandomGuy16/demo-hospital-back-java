@@ -4,7 +4,6 @@ import com.example.demo.models.patient.Patient;
 import com.example.demo.models.practitioner.Practitioner;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -70,6 +69,10 @@ public class UserAccount {
     @Column(name = "updated_at", nullable = false, updatable = true)
     private LocalDateTime updatedAt;
 
+    @Schema(example = "a;sjghlioauheofjiahlkj")
+    @Column(name = "password_hash", length = 1000)
+    private String password;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -82,8 +85,8 @@ public class UserAccount {
     }
 
     public UserAccount() {}
-    public UserAccount(Practitioner practitioner, Patient patient, String provider,
-                       String providerSubject, Role role, String displayName, String username, String email) {
+    public UserAccount(Practitioner practitioner, Patient patient, String provider, String providerSubject,
+                       Role role, String displayName, String username, String email, String password) {
         this.practitioner = practitioner;
         this.patient = patient;
         this.provider = provider;
@@ -92,6 +95,7 @@ public class UserAccount {
         this.displayName = displayName;
         this.username = username;
         this.email = email;
+        this.password = password;
     }
 
     public UUID getId() {
@@ -176,5 +180,13 @@ public class UserAccount {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

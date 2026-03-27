@@ -19,7 +19,7 @@ help:
 	@printf "  make db-prune   Stop PostgreSQL and remove its Docker volume\n"
 	@printf "  make docker-dev Start the API and PostgreSQL with Docker Compose\n"
 
-dev:
+dev: db-up
 	JWT_SECRET=$(JWT_SECRET) $(GRADLEW) bootRun -t
 
 test: db-up

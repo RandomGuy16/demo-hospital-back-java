@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -41,6 +42,9 @@ class UserAccountServiceTest {
 
     @Mock
     private PatientRepository patientRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserAccountService userAccountService;
@@ -84,13 +88,15 @@ class UserAccountServiceTest {
                 "keycloak",
                 "subject-1",
                 Role.ROLE_PATIENT,
-                "john.doe@example.com"
+                "john.doe@example.com",
+                "strong-password"
         );
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
         when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
         when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
+        when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UserAccount created = userAccountService.createUserAccount(request);
@@ -110,12 +116,14 @@ class UserAccountServiceTest {
                 "keycloak",
                 "subject-2",
                 Role.ROLE_ADMIN,
-                "frontdesk.admin@example.com"
+                "frontdesk.admin@example.com",
+                "strong-password"
         );
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
         when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
+        when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         UserAccount created = userAccountService.createUserAccount(request);
@@ -135,7 +143,8 @@ class UserAccountServiceTest {
                 "keycloak",
                 "subject-3",
                 Role.ROLE_PRACTITIONER,
-                "shoko.ieiri@example.com"
+                "shoko.ieiri@example.com",
+                "strong-password"
         );
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
@@ -160,7 +169,8 @@ class UserAccountServiceTest {
                 "keycloak",
                 "subject-4",
                 Role.ROLE_PATIENT,
-                "john.doe@example.com"
+                "john.doe@example.com",
+                "strong-password"
         );
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
@@ -183,7 +193,8 @@ class UserAccountServiceTest {
                 "keycloak",
                 "subject-5",
                 Role.ROLE_ADMIN,
-                "john.doe@example.com"
+                "john.doe@example.com",
+                "strong-password"
         );
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(true);

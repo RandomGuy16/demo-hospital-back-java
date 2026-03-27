@@ -1,5 +1,7 @@
 package com.example.demo.services;
 
+import com.example.demo.models.useraccount.UserAccount;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -7,47 +9,42 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.crypto.SecretKey;
-
+import java.util.List;
 
 @Service
 public class JwtService {
 
     private final SecretKey secretKey;
     private final long expirationMillis;
+    private final String issuer;
 
     public JwtService(
-        // secretKey is a base64 encoded string
-        // pick its value from application.properties
         @Value("${security.jwt.secret}") String secretKey,
-        @Value("${security.jwt.expiration-ms}") long expirationMillis) {
+        @Value("${security.jwt.expiration-ms}") long expirationMillis,
+        @Value("${security.jwt.issuer}") String issuer) {
 
         this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secretKey));
         this.expirationMillis = expirationMillis;
+        this.issuer = issuer;
     }
 
-    public String generateToken(UserDetails userDetails) {
+    // include the basic profile claims the frontend needs after login.
+    public String generateToken(UserAccount userAccount) {
         Instant now = Instant.now();
 
-        String roles = userDetails.getAuthorities()
-            .stream()
-            .map(GrantedAuthority::getAuthority)
-            .collect(Collectors.joining(","));
+        List<String> roles = List.of(userAccount.getRole().name());
 
         return Jwts.builder()
-            .subject(userDetails.getUsername()) // normalmente email o username
-            .claims(Map.of("roles", roles))
+            .subject(userAccount.getEmail())
+            .issuer(issuer)
+            .claim("roles", roles)
+            .claim("email", userAccount.getEmail())
+            .claim("name", userAccount.getDisplayName())
+            .claim("preferred_username", userAccount.getUsername())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plusMillis(expirationMillis)))
             .signWith(secretKey)
@@ -75,5 +72,4 @@ public class JwtService {
     public SecretKey getSecretKey() {
         return secretKey;
     }
-
 }

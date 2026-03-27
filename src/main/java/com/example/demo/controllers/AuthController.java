@@ -4,7 +4,9 @@ import com.example.demo.dto.CurrentUserResponse;
 import com.example.demo.dto.UserAccountLoginRequest;
 import com.example.demo.dto.UserAccountLoginResponse;
 import com.example.demo.dto.UserAccountRegisterRequest;
+import com.example.demo.models.useraccount.UserAccount;
 import com.example.demo.services.JwtService;
+import com.example.demo.services.UserAccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +30,14 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
+    private final UserAccountService userAccountService;
 
-    public AuthController(AuthenticationManager authenticationManager, JwtService jwtService) {
+    public AuthController(AuthenticationManager authenticationManager,
+                          JwtService jwtService,
+                          UserAccountService userAccountService) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
+        this.userAccountService = userAccountService;
     }
 
     @GetMapping("/me")
@@ -79,30 +84,32 @@ public class AuthController {
     @PostMapping("/register")
     @Operation(
         summary = "Creates new user",
-        description = "Creates new entity in the app for the credentials and return a jwt token",
-        security = @SecurityRequirement(name = "bearerAuth")
+        description = "Creates a local user account and returns a signed JWT"
     )
     @ApiResponse(responseCode = "201", description = "New user created successfully")
-    public ResponseEntity<String> register(@RequestBody @Valid UserAccountRegisterRequest request) {
-        return ResponseEntity.ok("Register successful");
+    public ResponseEntity<UserAccountLoginResponse> register(@RequestBody @Valid UserAccountRegisterRequest request) {
+        UserAccount created = userAccountService.registerUserAccount(request);
+        String token = jwtService.generateToken(created);
+        return ResponseEntity.status(201).body(new UserAccountLoginResponse(token));
     }
 
     @PostMapping("/login")
     @Operation(
         summary = "Login user",
-        description = "Authenticates user for the credentials sent and return a jwt token",
-        security = @SecurityRequirement(name = "bearerAuth")
+        description = "Authenticates a local user and returns a signed JWT"
     )
-    @ApiResponse(responseCode = "201", description = "User logged in successfully")
+    @ApiResponse(responseCode = "200", description = "User logged in successfully")
     public ResponseEntity<UserAccountLoginResponse> login(@RequestBody @Valid UserAccountLoginRequest request) {
-        var authentication = authenticationManager.authenticate(
+        // hand the email/password pair to Spring Security so the password check stays centralized.
+        authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.email(),
                 request.password()
             )
         );
 
-        UserDetails user = (UserDetails) authentication.getPrincipal();
+        UserAccount user = userAccountService.getUserAccountByEmail(request.email())
+                .orElseThrow(() -> new IllegalStateException("Authenticated user account could not be loaded"));
         String token = jwtService.generateToken(user);
         UserAccountLoginResponse response = new UserAccountLoginResponse(token);
         return ResponseEntity.ok(response);
