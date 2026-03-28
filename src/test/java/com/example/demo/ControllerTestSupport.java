@@ -5,22 +5,23 @@ import com.example.demo.models.appointment.AppointmentStatus;
 import com.example.demo.models.department.Department;
 import com.example.demo.models.patient.Patient;
 import com.example.demo.models.practitioner.Practitioner;
-import com.example.demo.repositories.AppointmentRepository;
-import com.example.demo.repositories.DepartmentRepository;
-import com.example.demo.repositories.PatientRepository;
-import com.example.demo.repositories.PractitionerRepository;
+import com.example.demo.models.useraccount.Role;
+import com.example.demo.models.useraccount.UserAccount;
+import com.example.demo.repositories.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -32,6 +33,11 @@ abstract class ControllerTestSupport {
             Department department
     ) {
     }
+    
+    protected record TestUserSubjects(
+        UserAccount admin,
+        UserAccount receptionist
+    ) {}
 
     @Autowired
     protected MockMvc mockMvc;
@@ -51,6 +57,12 @@ abstract class ControllerTestSupport {
     @Autowired
     protected AppointmentRepository appointmentRepository;
     
+    @Autowired
+    protected UserAccountRepository userAccountRepository;
+
+    @Autowired
+    protected PasswordEncoder passwordEncoder;
+    
     protected TestSubjects defaultSubjects;
     protected TestSubjects funnySubjects;
 
@@ -63,6 +75,7 @@ abstract class ControllerTestSupport {
 
     protected void cleanDatabase() {
         appointmentRepository.deleteAll();
+        userAccountRepository.deleteAll();
         practitionerRepository.deleteAll();
         departmentRepository.deleteAll();
         patientRepository.deleteAll();
@@ -111,6 +124,32 @@ abstract class ControllerTestSupport {
                 new ArrayList<>(List.of("Chaos Management", "Duck Whispering"))
         );
         return new TestSubjects(patient, practitioner, department);
+    }
+    
+    protected TestUserSubjects seedUserSubjects() {
+        UserAccount admin = saveUserAccount(
+                "Admin User",
+                "admin",
+                null,
+                null,
+            "admin-subject",
+                Role.ROLE_ADMIN,
+                "admin@example.com",
+                "admin-password"
+        );
+
+        UserAccount receptionist = saveUserAccount(
+                "Receptionist User",
+                "receptionist",
+                null,
+                null,
+            "receptionist-subject",
+                Role.ROLE_RECEPTIONIST,
+                "receptionist@example.com",
+                "receptionist-password"
+        );
+
+        return new TestUserSubjects(admin, receptionist);
     }
 
     protected String json(Object value) throws JsonProcessingException {
@@ -220,5 +259,40 @@ abstract class ControllerTestSupport {
                 status
         );
         return appointmentRepository.save(appointment);
+    }
+    
+    protected UserAccount saveUserAccount() {
+        return saveUserAccount(
+                "John Doe",
+                "john.doe",
+                null,
+                null,
+            "subject-" + System.nanoTime(),
+                Role.ROLE_ADMIN,
+                "john.doe@example.com",
+                "strong-password"
+        );
+    }
+
+    protected UserAccount saveUserAccount(String displayName,
+                                          String username,
+                                          UUID practitionerId,
+                                          UUID patientId,
+                                          String providerSubject,
+                                          Role role,
+                                          String email,
+                                          String password) {
+
+        return userAccountRepository.save(new UserAccount(
+                practitionerId == null ? null : practitionerRepository.findById(practitionerId).orElse(null),
+                patientId == null ? null : patientRepository.findById(patientId).orElse(null),
+                "local",
+                providerSubject,
+                role,
+                displayName,
+                username,
+                email,
+                passwordEncoder.encode(password)
+        ));
     }
 }
