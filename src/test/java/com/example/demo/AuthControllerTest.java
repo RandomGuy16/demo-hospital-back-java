@@ -3,23 +3,27 @@ package com.example.demo;
 import com.example.demo.dto.UserAccountLoginRequest;
 import com.example.demo.dto.UserAccountRegisterRequest;
 import com.example.demo.models.useraccount.Role;
-import com.example.demo.services.JwtService;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-public class AuthControllerTest extends ControllerTestSupport{
+@SpringBootTest(properties = {
+    "security.jwt.secret=${JWT_SECRET}",
+    "security.jwt.expiration-ms=86400000",
+    "security.jwt.issuer=${JWT_ISSUER:demo-api}"
+})
+public class AuthControllerTest extends AuthControllerTestSupport {
 
-    @InjectMocks
-    private JwtService jwtService;
-    
     @Test
     public void testRegisterReturnsCreated() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
@@ -76,7 +80,8 @@ public class AuthControllerTest extends ControllerTestSupport{
             .andExpect(status().isBadRequest());
     }
 
-    @Test void testLoginReturnsOk() throws Exception {
+    @Test
+    void testLoginReturnsOk() throws Exception {
         cleanDatabase();
         seedUserSubjects();
 
@@ -92,7 +97,8 @@ public class AuthControllerTest extends ControllerTestSupport{
             .andExpect(jsonPath("$.token").isNotEmpty());
     }
 
-    @Test void testLoginWithInvalidCredentialsReturnsUnauthorized() throws Exception {
+    @Test
+    void testLoginWithInvalidCredentialsReturnsUnauthorized() throws Exception {
         cleanDatabase();
         seedUserSubjects();
         UserAccountLoginRequest request = new UserAccountLoginRequest(
@@ -107,7 +113,8 @@ public class AuthControllerTest extends ControllerTestSupport{
             .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
-    @Test void testLoginWithNonExistingUserReturnsUnauthorized() throws Exception {
+    @Test
+    void testLoginWithNonExistingUserReturnsUnauthorized() throws Exception {
         UserAccountLoginRequest request = new UserAccountLoginRequest(
             "idk@idk.com",
             "invalid"
@@ -120,29 +127,30 @@ public class AuthControllerTest extends ControllerTestSupport{
             .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
     }
 
-    @Test void testMeReturnsOk() throws Exception {
+    @Test
+    void testMeReturnsOk() throws Exception {
         cleanDatabase();
         TestUserSubjects guineaPigs = seedUserSubjects();
 
-        String token = jwtService.generateToken(guineaPigs.admin());
-
         mockMvc.perform(get("/api/v1/me")
-                .header("Authorization", "Bearer " + token))
+                .with(jwt().jwt(jwt -> jwt
+                        .subject(guineaPigs.admin().getEmail())
+                        .claim("email", guineaPigs.admin().getEmail())
+                        .claim("name", guineaPigs.admin().getDisplayName())
+                        .claim("preferred_username", guineaPigs.admin().getUsername())
+                        .claim("roles", List.of(guineaPigs.admin().getRole().name()))
+                ).authorities(new SimpleGrantedAuthority(guineaPigs.admin().getRole().name()))))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.username").value(guineaPigs.admin().getUsername()))
-            .andExpect(jsonPath("$.displayName").value(guineaPigs.admin().getDisplayName()))
+            .andExpect(jsonPath("$.subject").value(guineaPigs.admin().getEmail()))
             .andExpect(jsonPath("$.email").value(guineaPigs.admin().getEmail()))
-            .andExpect(jsonPath("$.role").value(guineaPigs.admin().getRole().name()));
-        /*
-        @Schema(example = "00u123example") String subject,
-        @Schema(example = "https://accounts.google.com") String issuer,
-        @Schema(example = "jane.doe@example.com") String email,
-        @Schema(example = "Jane Doe") String name,
-        @Schema(example = "jane.doe") String preferredUsername,
-        @Schema(example = "[\"SCOPE_openid\", \"ROLE_ADMIN\"]") List<String> authorities
-         */
+            .andExpect(jsonPath("$.name").value(guineaPigs.admin().getDisplayName()))
+            .andExpect(jsonPath("$.preferredUsername").value(guineaPigs.admin().getUsername()))
+            .andExpect(jsonPath("$.authorities[0]").value(guineaPigs.admin().getRole().name()));
     }
 
-    @Test void testMeWithoutJwtReturnsUnauthorized() throws Exception {}
-
+    @Test
+    void testMeWithoutJwtReturnsUnauthorized() throws Exception {
+        mockMvc.perform(get("/api/v1/me"))
+            .andExpect(status().isUnauthorized());
+    }
 }

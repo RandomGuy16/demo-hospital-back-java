@@ -3,6 +3,7 @@ package com.example.demo.errors;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -66,5 +67,15 @@ public class GlobalExceptionHandler {
             Instant.now()
         );
         return ResponseEntity.status(ex.getStatus()).body(error);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthenticationException(AuthenticationException ex) {
+        ErrorResponse error = new ErrorResponse(
+            ErrorCode.UNAUTHORIZED,
+            ex.getMessage(),
+            Instant.now()
+        );
+        return ResponseEntity.status(401).body(error);
     }
 }

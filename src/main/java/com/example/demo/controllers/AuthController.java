@@ -15,7 +15,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -64,6 +66,10 @@ public class AuthController {
     public ResponseEntity<CurrentUserResponse> getCurrentUser(
             @AuthenticationPrincipal Jwt jwt,
             @Schema(hidden = true) Authentication authentication) {
+        if (jwt == null || authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
+        }
+
         // Sort authorities to make the response deterministic for the frontend and tests.
         List<String> authorities = authentication.getAuthorities()
                 .stream()

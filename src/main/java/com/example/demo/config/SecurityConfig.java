@@ -48,9 +48,9 @@ public class SecurityConfig {
                     "/api/v1/register"
                 ).permitAll()
                 .anyRequest().authenticated()
-            )
-            // the api is stateless, so every protected request must carry a bearer token.
-            .oauth2ResourceServer((oauth2) -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+            ) // the api is stateless, so every protected request must carry a bearer token.
+            .oauth2ResourceServer((oauth2) -> oauth2
+                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return http.build();
     }
 

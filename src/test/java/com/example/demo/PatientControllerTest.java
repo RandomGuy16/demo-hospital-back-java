@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-class PatientControllerTest extends ControllerTestSupport {
+class PatientControllerTest extends CrudControllerTestSupport {
 
     @Test
     void createPatientReturnsCreatedResponse() throws Exception {
