@@ -22,7 +22,6 @@ public class DatabaseCleanup {
     @Autowired
     protected UserAccountRepository userAccountRepository;
 
-
     /**
      * Deletes test data in dependency order so foreign keys do not block cleanup.
      */

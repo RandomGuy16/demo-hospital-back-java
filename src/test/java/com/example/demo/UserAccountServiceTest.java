@@ -26,7 +26,6 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -53,7 +52,8 @@ class UserAccountServiceTest {
     private Practitioner practitioner;
 
     /**
-     * Builds the shared patient and practitioner fixtures used by service-level auth tests.
+     * Builds the shared patient and practitioner fixtures used by service-level
+     * auth tests.
      */
     @BeforeEach
     void setUp() {
@@ -66,8 +66,7 @@ class UserAccountServiceTest {
                 "+1 555 0100",
                 "john@example.com",
                 "MRN-1234567890",
-                "123 Main St"
-        );
+                "123 Main St");
 
         practitioner = new Practitioner(
                 "Shoko",
@@ -76,13 +75,13 @@ class UserAccountServiceTest {
                 LocalDate.of(1992, 6, 12),
                 "female",
                 "+1 555 0200",
-                "shoko@example.com"
-        );
+                "shoko@example.com");
     }
 
     @Test
     /**
-     * Verifies that a patient-linked account is created when role and patient reference are consistent.
+     * Verifies that a patient-linked account is created when role and patient
+     * reference are consistent.
      */
     void createUserAccountCreatesPatientAccountWhenRoleMatchesPatientLink() {
         UUID patientId = UUID.randomUUID();
@@ -95,12 +94,12 @@ class UserAccountServiceTest {
                 "subject-1",
                 Role.ROLE_PATIENT,
                 "john.doe@example.com",
-                "strong-password"
-        );
+                "strong-password");
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
-        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
+        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject()))
+                .thenReturn(false);
         when(patientRepository.findById(patientId)).thenReturn(Optional.of(patient));
         when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
@@ -126,12 +125,12 @@ class UserAccountServiceTest {
                 "subject-2",
                 Role.ROLE_ADMIN,
                 "frontdesk.admin@example.com",
-                "strong-password"
-        );
+                "strong-password");
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
-        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
+        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject()))
+                .thenReturn(false);
         when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -144,7 +143,8 @@ class UserAccountServiceTest {
 
     @Test
     /**
-     * Verifies that practitioner accounts are rejected when no practitioner link is provided.
+     * Verifies that practitioner accounts are rejected when no practitioner link is
+     * provided.
      */
     void createUserAccountRejectsPractitionerRoleWithoutPractitionerLink() {
         UserAccountRequest request = new UserAccountRequest(
@@ -156,12 +156,12 @@ class UserAccountServiceTest {
                 "subject-3",
                 Role.ROLE_PRACTITIONER,
                 "shoko.ieiri@example.com",
-                "strong-password"
-        );
+                "strong-password");
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
-        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
+        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject()))
+                .thenReturn(false);
 
         assertThatThrownBy(() -> userAccountService.createUserAccount(request))
                 .isInstanceOf(UnclearUserRoleException.class)
@@ -185,12 +185,12 @@ class UserAccountServiceTest {
                 "subject-4",
                 Role.ROLE_PATIENT,
                 "john.doe@example.com",
-                "strong-password"
-        );
+                "strong-password");
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(false);
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
-        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject())).thenReturn(false);
+        when(userAccountRepository.existsByProviderAndProviderSubject(request.provider(), request.providerSubject()))
+                .thenReturn(false);
         when(patientRepository.findById(patientId)).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> userAccountService.createUserAccount(request))
@@ -200,7 +200,8 @@ class UserAccountServiceTest {
 
     @Test
     /**
-     * Verifies that username uniqueness is enforced before any domain lookups occur.
+     * Verifies that username uniqueness is enforced before any domain lookups
+     * occur.
      */
     void createUserAccountRejectsDuplicateUsername() {
         UserAccountRequest request = new UserAccountRequest(
@@ -212,8 +213,7 @@ class UserAccountServiceTest {
                 "subject-5",
                 Role.ROLE_ADMIN,
                 "john.doe@example.com",
-                "strong-password"
-        );
+                "strong-password");
 
         when(userAccountRepository.existsByUsername(request.username())).thenReturn(true);
 

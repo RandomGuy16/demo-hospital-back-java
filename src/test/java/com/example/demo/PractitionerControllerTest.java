@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -26,8 +25,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
     @Test
     void createPractitionerReturnsCreatedResponse() throws Exception {
         cleanDatabase();
-        seedDefaultSubjects();
-        seedFunnySubjects();
+        domainFixtures.seedDefaultSubjects();
+        domainFixtures.seedFunnySubjects();
         PractitionerRequest request = new PractitionerRequest(
                 "Gregory",
                 "House",
