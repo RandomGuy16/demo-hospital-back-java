@@ -52,6 +52,9 @@ class UserAccountServiceTest {
     private Patient patient;
     private Practitioner practitioner;
 
+    /**
+     * Builds the shared patient and practitioner fixtures used by service-level auth tests.
+     */
     @BeforeEach
     void setUp() {
         patient = new Patient(
@@ -78,6 +81,9 @@ class UserAccountServiceTest {
     }
 
     @Test
+    /**
+     * Verifies that a patient-linked account is created when role and patient reference are consistent.
+     */
     void createUserAccountCreatesPatientAccountWhenRoleMatchesPatientLink() {
         UUID patientId = UUID.randomUUID();
         UserAccountRequest request = new UserAccountRequest(
@@ -107,6 +113,9 @@ class UserAccountServiceTest {
     }
 
     @Test
+    /**
+     * Verifies that administrative accounts can be created without domain links.
+     */
     void createUserAccountCreatesAdminAccountWithoutDomainLink() {
         UserAccountRequest request = new UserAccountRequest(
                 "Front Desk Admin",
@@ -134,6 +143,9 @@ class UserAccountServiceTest {
     }
 
     @Test
+    /**
+     * Verifies that practitioner accounts are rejected when no practitioner link is provided.
+     */
     void createUserAccountRejectsPractitionerRoleWithoutPractitionerLink() {
         UserAccountRequest request = new UserAccountRequest(
                 "Shoko Ieiri",
@@ -159,6 +171,9 @@ class UserAccountServiceTest {
     }
 
     @Test
+    /**
+     * Verifies that creation fails when the referenced patient id does not exist.
+     */
     void createUserAccountRejectsMissingPatientReference() {
         UUID patientId = UUID.randomUUID();
         UserAccountRequest request = new UserAccountRequest(
@@ -184,6 +199,9 @@ class UserAccountServiceTest {
     }
 
     @Test
+    /**
+     * Verifies that username uniqueness is enforced before any domain lookups occur.
+     */
     void createUserAccountRejectsDuplicateUsername() {
         UserAccountRequest request = new UserAccountRequest(
                 "John Doe",

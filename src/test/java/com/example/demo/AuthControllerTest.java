@@ -3,6 +3,7 @@ package com.example.demo;
 import com.example.demo.dto.UserAccountLoginRequest;
 import com.example.demo.dto.UserAccountRegisterRequest;
 import com.example.demo.models.useraccount.Role;
+import com.example.demo.testsupport.base.AuthControllerTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -25,6 +26,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthControllerTest extends AuthControllerTestSupport {
 
     @Test
+    /**
+     * Verifies that local registration returns a signed JWT for an admin-style account.
+     */
     public void testRegisterReturnsCreated() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
             "Gregory House",
@@ -44,6 +48,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that registration succeeds when a patient-linked account points at an existing patient.
+     */
     public void testRegisterWithExistingPatient() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
             "John Doe",
@@ -63,6 +70,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that registration fails when the requested practitioner link does not exist.
+     */
     public void testRegisterWithNonExistingPractitionerReturnsBadRequest() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
             "Shoko Ieiri",
@@ -81,6 +91,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that a seeded local user can exchange valid credentials for a JWT.
+     */
     void testLoginReturnsOk() throws Exception {
         cleanDatabase();
         seedUserSubjects();
@@ -98,6 +111,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that bad credentials are translated into a 401 API error response.
+     */
     void testLoginWithInvalidCredentialsReturnsUnauthorized() throws Exception {
         cleanDatabase();
         seedUserSubjects();
@@ -114,6 +130,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that login fails with 401 when no local account exists for the email.
+     */
     void testLoginWithNonExistingUserReturnsUnauthorized() throws Exception {
         UserAccountLoginRequest request = new UserAccountLoginRequest(
             "idk@idk.com",
@@ -128,10 +147,14 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that `/api/v1/me` reads identity and authorities from the authenticated JWT.
+     */
     void testMeReturnsOk() throws Exception {
         cleanDatabase();
         TestUserSubjects guineaPigs = seedUserSubjects();
 
+        // Use spring-security-test to inject a JWT-backed Authentication into the secured MockMvc request.
         mockMvc.perform(get("/api/v1/me")
                 .with(jwt().jwt(jwt -> jwt
                         .subject(guineaPigs.admin().getEmail())
@@ -149,6 +172,9 @@ public class AuthControllerTest extends AuthControllerTestSupport {
     }
 
     @Test
+    /**
+     * Verifies that `/api/v1/me` rejects anonymous requests.
+     */
     void testMeWithoutJwtReturnsUnauthorized() throws Exception {
         mockMvc.perform(get("/api/v1/me"))
             .andExpect(status().isUnauthorized());

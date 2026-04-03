@@ -2,6 +2,7 @@ package com.example.demo;
 
 import com.example.demo.dto.DepartmentRequest;
 import com.example.demo.models.department.Department;
+import com.example.demo.testsupport.base.CrudControllerTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 
