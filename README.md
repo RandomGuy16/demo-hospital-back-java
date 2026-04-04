@@ -1,6 +1,6 @@
-# Hospital Organization API (Spring Boot)
+# Evergreen General Hospital API (Spring Boot)
 
-A starter Spring Boot project for a hospital/health organization API. This repository begins with a minimal endpoint and provides a roadmap, guidelines, and an OpenAPI blueprint to evolve into a robust REST API covering core healthcare domains (patients, practitioners, appointments, departments, and medical records).
+Spring Boot API for Evergreen General Hospital. The repository includes the core hospital domains, project guidelines, and an OpenAPI blueprint for the platform.
 
 ## Quick Start
 
@@ -46,7 +46,7 @@ Health check/demo endpoint:
 
 ## Project Structure
 
-- `src/main/java/com/example/demo` — Spring Boot app and controllers
+- `src/main/java/com/evergreen/generalhospital` — Spring Boot application code
 - `src/main/resources` — configuration
 - `src/test/java` — tests
 - `docs/openapi.yaml` — Initial OpenAPI 3.1 specification and blueprint
@@ -59,7 +59,7 @@ Health check/demo endpoint:
 
 ## API Blueprint (OpenAPI)
 
-You can explore the initial specification at `docs/openapi.yaml`. It includes core resources (Patients, Practitioners, Appointments, Departments, MedicalRecords) with example requests/responses and standard conventions (versioning, pagination, error model).
+You can explore the initial specification at `docs/openapi.yaml`. It includes core resources such as Patients, Practitioners, Appointments, Departments, and User Accounts, with example requests/responses and standard conventions.
 
 You can render the spec with a local container of Swagger UI:
 

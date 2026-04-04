@@ -1,0 +1,117 @@
+package com.evergreen.generalhospital.controllers;
+
+import com.evergreen.generalhospital.dto.AppointmentRequest;
+import com.evergreen.generalhospital.dto.AppointmentResponse;
+import com.evergreen.generalhospital.models.appointment.Appointment;
+import com.evergreen.generalhospital.paging.SortParser;
+import com.evergreen.generalhospital.services.AppointmentService;
+import com.evergreen.generalhospital.mappers.AppointmentMapper;
+import static com.evergreen.generalhospital.mappers.AppointmentMapper.appointmentToAppointmentResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+@RestController
+@RequestMapping("/api/v1/appointments")
+@Tag(name = "Appointments", description = "Endpoints for managing appointments")
+@Validated
+public class AppointmentController {
+    private final AppointmentService appointmentService;
+
+    public AppointmentController(AppointmentService appointmentService) {
+        this.appointmentService = appointmentService;
+    }
+
+
+    @PostMapping
+    @Operation(summary = "Create an appointment", description = "Creates an appointment record")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Appointment created successfully"),
+            @ApiResponse(responseCode = "404", description = "Patient, practitioner or department not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    public ResponseEntity<AppointmentResponse> createAppointment(@RequestBody @Valid AppointmentRequest request,
+            UriComponentsBuilder uriBuilder) {
+        Appointment created = appointmentService.createAppointment(request);
+        URI location = uriBuilder.path("/api/v1/appointments/{id}")
+            .buildAndExpand(created.getAppointmentId())
+            .toUri();
+        return ResponseEntity.created(location).body(appointmentToAppointmentResponse(created));
+
+    }
+
+    @GetMapping
+    @Operation(summary = "List appointments", description = "Returns paginated appointments")
+    @ApiResponse(responseCode = "200", description = "Appointments retrieved successfully")
+    public ResponseEntity<Page<AppointmentResponse>> getAllAppointments(
+            @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
+            @RequestParam(defaultValue = "0")
+            @Min(0) int page,
+            @Parameter(description = "Number of records per page", schema = @Schema(defaultValue = "20", minimum = "1", maximum = "100"))
+            @RequestParam(defaultValue = "20")
+            @Min(1) @Max(100) int size,
+            @Parameter(description = "Sorting criteria in the format field,direction", example = "start,asc")
+            @RequestParam(required = false) List<String> sort) {
+
+        Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
+        return ResponseEntity.ok(
+            appointmentService
+                .getAllAppointments(pageable)
+                .map(AppointmentMapper::appointmentToAppointmentResponse));
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get appointment by ID", description = "Returns a single appointment by its identifier")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Appointment retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Appointment not found")
+    })
+    public ResponseEntity<AppointmentResponse> getAppointmentById(@PathVariable UUID id) {
+        return appointmentService.getAppointmentById(id)
+                .map(appointment -> ResponseEntity.ok(appointmentToAppointmentResponse(appointment)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update appointment", description = "Updates an existing appointment")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Appointment updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
+            @ApiResponse(responseCode = "404", description = "Appointment not found")
+    })
+    public ResponseEntity<AppointmentResponse> updateAppointment(@PathVariable UUID id,
+            @RequestBody @Valid AppointmentRequest request) {
+        return appointmentService.updateAppointment(id, request)
+                .map(appointment -> ResponseEntity.ok(appointmentToAppointmentResponse(appointment)))
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Delete appointment", description = "Deletes an appointment by ID")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204", description = "Appointment deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Appointment not found")
+    })
+    public ResponseEntity<Void> deleteAppointment(@PathVariable UUID id) {
+        return appointmentService.deleteAppointment(id)
+                .map(appointment -> ResponseEntity.noContent().<Void>build())
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+}

@@ -1,6 +1,6 @@
 # Roadmap
 
-A phased plan to evolve this repository into a robust Hospital Organization API.
+A phased plan to evolve this repository into the Evergreen General Hospital API.
 
 ## Phase 0 — Foundations (now)
 - Minimal Spring Boot app running locally ✓

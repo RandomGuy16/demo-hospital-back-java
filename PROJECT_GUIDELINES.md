@@ -1,6 +1,6 @@
 # Project Guidelines
 
-These guidelines describe how to build a robust, maintainable Spring Boot API for a hospital/health organization.
+These guidelines describe how to build a robust, maintainable Spring Boot API for Evergreen General Hospital.
 
 ## Coding Standards
 
@@ -11,7 +11,7 @@ These guidelines describe how to build a robust, maintainable Spring Boot API fo
 
 ## Packages
 
-- `com.example.hospital` (later) with subpackages by feature: `patients`, `practitioners`, `appointments`, `departments`, `records`, `common`.
+- `com.evergreen.generalhospital` with subpackages by feature: `patients`, `practitioners`, `appointments`, `departments`, `records`, `common`.
 - Within a feature, use vertical slices: `api` (controllers), `application` (services/use-cases), `domain` (entities/aggregates), `infrastructure` (persistence, integrations).
 
 ## API Design

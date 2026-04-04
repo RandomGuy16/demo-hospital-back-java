@@ -1,7 +1,7 @@
 # Repository Guidelines
 
 ## Project Structure & Module Organization
-- `src/main/java/com/example/demo` contains the Spring Boot application code. Subpackages are organized by role: `controllers`, `services`, `repositories`, `models`, and `dto`.
+- `src/main/java/com/evergreen/generalhospital` contains the Spring Boot application code. Subpackages are organized by role: `controllers`, `services`, `repositories`, `models`, and `dto`.
 - `src/main/resources` holds configuration such as `application.properties`.
 - `src/test/java` contains JUnit 5 tests (currently a MockMvc-based API test).
 - `docs/` contains the OpenAPI spec (`docs/openapi.yaml`) and architecture notes.
@@ -16,7 +16,7 @@
 - Java toolchain is set to 21 in `build.gradle.kts`; Gradle can auto-resolve the required JDK.
 - Follow standard Java conventions and keep controllers thin (Controller → Service → Repository).
 - Prefer DTOs for API boundaries; avoid exposing entities directly.
-- Package naming follows `com.example.demo.<role>`.
+- Package naming follows `com.evergreen.generalhospital.<role>`.
 - Indentation: 4 spaces; use standard Java formatting. No formatting tool is configured yet.
 
 ## Testing Guidelines

@@ -1,6 +1,6 @@
 # Architecture Overview
 
-This document outlines a pragmatic architecture for the Hospital Organization API.
+This document outlines a pragmatic architecture for the Evergreen General Hospital API.
 
 ## Goals
 - Keep services simple and maintainable

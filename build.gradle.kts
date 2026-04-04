@@ -6,9 +6,9 @@ plugins {
     id("io.spring.dependency-management") version "1.1.7"
 }
 
-group = "org.example"
+group = "com.evergreen.generalhospital"
 version = "0.0.1-SNAPSHOT"
-description = "demo"
+description = "Evergreen General Hospital API"
 
 java {
     toolchain {

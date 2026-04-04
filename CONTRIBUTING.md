@@ -1,6 +1,6 @@
 # Contributing Guide
 
-Thank you for your interest in improving the Hospital Organization API!
+Thank you for your interest in improving the Evergreen General Hospital API!
 
 ## Development Workflow
 

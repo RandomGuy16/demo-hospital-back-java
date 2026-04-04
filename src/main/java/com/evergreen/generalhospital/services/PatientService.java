@@ -1,0 +1,134 @@
+package com.evergreen.generalhospital.services;
+
+import com.evergreen.generalhospital.dto.PatientPatchRequest;
+import com.evergreen.generalhospital.dto.PatientRequest;
+import com.evergreen.generalhospital.errors.ImmutableFieldException;
+import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
+import com.evergreen.generalhospital.models.patient.Patient;
+import com.evergreen.generalhospital.repositories.PatientRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Service
+@Transactional
+public class PatientService {
+    private final PatientRepository patientRepository;
+
+    // once I had a problem because LSP didn't find the "bean" of PatientRepository,
+    // it meant that spring didnt recognize it, that's why we use decorators
+    /*
+     * @Component - Generic bean
+     * 
+     * @Service - Business logic layer (like your services)
+     * 
+     * @Repository - Data access layer (your repositories)
+     * 
+     * @Controller / @RestController - Web layer (your API controllers)
+     * 
+     * @Configuration - Configuration classes
+     */
+
+    public PatientService(PatientRepository patientRepository) {
+        this.patientRepository = patientRepository;
+    }
+
+    private String generateMrn(String idNumber) {
+        String random = UUID.randomUUID().toString().replace(" ", "").substring(0, 8).toUpperCase();
+        return "ShokoIeiri-" + idNumber + random;
+    }
+
+    public Patient createPatient(PatientRequest patient) {
+        // first validation: check unique idNumber
+        if (patientRepository.existsByIdNumber(patient.idNumber())) {
+            throw new RepeatedIdNumberException("Patient with idNumber " + patient.idNumber() + " already exists");
+        }
+
+        Patient newPatient = new Patient(
+                patient.firstName(),
+                patient.lastName(),
+                patient.idNumber(),
+                patient.dateOfBirth(),
+                patient.gender(),
+                patient.phoneNumber(),
+                patient.contacts(),
+                generateMrn(patient.idNumber()),
+                patient.address());
+        return patientRepository.save(newPatient);
+    }
+
+    public Optional<Patient> getPatientById(UUID id) {
+        return patientRepository.findById(id);
+    }
+
+    public Optional<Patient> getPatientByMRN(String mrn) {
+        return patientRepository.findByMrn(mrn);
+    }
+
+    public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {
+
+        return patientRepository.findById(id)
+                .map(p -> {
+                    if (!p.getIdNumber().equals(pRequest.idNumber())) {
+                        throw new ImmutableFieldException("Patient idNumber cannot be changed");
+                    }
+                    p.setFirstName(pRequest.firstName());
+                    p.setLastName(pRequest.lastName());
+                    p.setDateOfBirth(pRequest.dateOfBirth());
+                    p.setGender(pRequest.gender());
+                    p.setPhoneNumber(pRequest.phoneNumber());
+                    p.setContacts(pRequest.contacts());
+                    p.setAddress(pRequest.address());
+                    return patientRepository.save(p);
+                });
+    }
+
+    public Optional<Patient> patchPatient(UUID id, PatientPatchRequest pRequest) {
+        return patientRepository.findById(id)
+            .map(p -> {
+                if (pRequest.idNumber() != null && !p.getIdNumber().equals(pRequest.idNumber())) {
+                    throw new ImmutableFieldException("Patient idNumber cannot be changed");
+                }
+                if (pRequest.firstName() != null) p.setFirstName(pRequest.firstName());
+
+                if (pRequest.lastName() != null) p.setLastName(pRequest.lastName());
+
+                if (pRequest.dateOfBirth() != null) p.setDateOfBirth(pRequest.dateOfBirth());
+
+                if (pRequest.gender() != null) p.setGender(pRequest.gender());
+
+                if (pRequest.phoneNumber() != null) p.setPhoneNumber(pRequest.phoneNumber());
+
+                if (pRequest.contacts() != null) p.setContacts(pRequest.contacts());
+
+                if (pRequest.address() != null) p.setAddress(pRequest.address());
+
+                return patientRepository.save(p);
+            });
+    }
+
+    // In order to implement pagination, at least at a basic level
+    // we need to use the Pageable interface from springboot
+    // we return a Page<Patient> instead of a List<Patient>
+    // this is because the pageable interface returns a page of objects
+    // and we pass a Pageable object to the repository method
+    // to get the page of objects
+    // theres no need to add something to the repository, since it inherits from
+    // JpaRepository
+
+    public Page<Patient> getAllPatients(Pageable pageable) {
+        return patientRepository.findAll(pageable);
+    }
+
+    public Optional<Patient> deletePatientById(UUID id) {
+        return patientRepository.findById(id)
+                .map(patient -> {
+                    patientRepository.delete(patient);
+                    return patient;
+                });
+    }
+}
