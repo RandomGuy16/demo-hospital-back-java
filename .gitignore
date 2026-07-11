@@ -64,3 +64,6 @@ replay_pid*
 
 # .env file, I need it :p
 *.env
+
+# the secret
+client_secret.json

@@ -107,6 +107,7 @@ public class AuthController {
         return null;
     }
 
+
     @PostMapping("/register")
     @Operation(
         summary = "Creates new user",
@@ -119,11 +120,14 @@ public class AuthController {
      * @param request user registration payload.
      * @return signed JWT for the newly created user.
      */
-    public ResponseEntity<UserAccountAuthenticationResponse> register(@RequestBody @Valid UserAccountRegisterRequest request) {
+    public ResponseEntity<UserAccountAuthenticationResponse> register(
+        @RequestBody @Valid UserAccountRegisterRequest request) {
+
         UserAccount created = userAccountService.registerUserAccount(request);
         String token = jwtService.generateToken(created);
         return ResponseEntity.status(201).body(new UserAccountAuthenticationResponse(token));
     }
+
 
     @PostMapping("/login")
     @Operation(
