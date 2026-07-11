@@ -1,8 +1,8 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.PatientPatchRequest;
-import com.evergreen.generalhospital.dto.PatientRequest;
-import com.evergreen.generalhospital.dto.PatientResponse;
+import com.evergreen.generalhospital.dto.patient.PatientPatchRequest;
+import com.evergreen.generalhospital.dto.patient.PatientRequest;
+import com.evergreen.generalhospital.dto.patient.PatientResponse;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.PatientService;

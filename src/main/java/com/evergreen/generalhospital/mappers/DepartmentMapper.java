@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.mappers;
 
-import com.evergreen.generalhospital.dto.DepartmentResponse;
+import com.evergreen.generalhospital.dto.department.DepartmentResponse;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.models.Person;
 

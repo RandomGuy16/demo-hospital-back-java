@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.UserAccountLoginRequest;
-import com.evergreen.generalhospital.dto.UserAccountRegisterRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.models.useraccount.Role;
 import com.evergreen.generalhospital.testsupport.base.AuthControllerTestSupport;
 import org.junit.jupiter.api.Test;

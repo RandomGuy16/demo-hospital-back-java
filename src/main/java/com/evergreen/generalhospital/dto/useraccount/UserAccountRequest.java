@@ -1,12 +1,16 @@
-package com.evergreen.generalhospital.dto;
+package com.evergreen.generalhospital.dto.useraccount;
 
 import com.evergreen.generalhospital.models.useraccount.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record UserAccountRegisterRequest(
+import java.util.UUID;
+
+public record UserAccountRequest(
     @Schema(example = "Gregory House")
     @NotBlank String displayName,
 
@@ -14,19 +18,25 @@ public record UserAccountRegisterRequest(
     @NotBlank String username,
 
     @Schema(example = "alkjadshf-1234-5kjhl134-sf13f42df")
-    java.util.UUID practitionerId,
+    UUID practitionerId,
 
     @Schema(example = "alkjadshf-1234-5kjhl134-sf13f42df")
-    java.util.UUID patientId,
+    UUID patientId,
+
+    @Schema(example = "keycloak")
+    @NotBlank String provider,
+
+    @Schema(example = "1234567890")
+    @NotBlank String providerSubject,
 
     @Schema(example = "ROLE_ADMIN")
+    @Enumerated(EnumType.STRING)
     @NotNull Role role,
 
     @Schema(example = "bat.man@example.com")
     @Email
     @NotBlank String email,
 
-    @Schema(example = "strong-password")
+    @Schema(example = "alskdjhf029hcoij3n43jiwhfds")
     @NotBlank String password
-) {
-}
+) {}

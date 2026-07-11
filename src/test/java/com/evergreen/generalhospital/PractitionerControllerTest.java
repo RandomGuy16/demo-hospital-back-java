@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.PractitionerRequest;
+import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ErrorCode;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
 import com.evergreen.generalhospital.testsupport.base.CrudControllerTestSupport;

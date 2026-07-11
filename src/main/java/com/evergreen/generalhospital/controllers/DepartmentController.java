@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.DepartmentRequest;
-import com.evergreen.generalhospital.dto.DepartmentResponse;
+import com.evergreen.generalhospital.dto.department.DepartmentRequest;
+import com.evergreen.generalhospital.dto.department.DepartmentResponse;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.DepartmentService;

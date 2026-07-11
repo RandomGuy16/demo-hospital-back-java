@@ -1,4 +1,4 @@
-package com.evergreen.generalhospital.dto;
+package com.evergreen.generalhospital.dto.appointment;
 
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;

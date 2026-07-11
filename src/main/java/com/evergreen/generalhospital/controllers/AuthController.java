@@ -1,9 +1,9 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.CurrentUserResponse;
-import com.evergreen.generalhospital.dto.UserAccountLoginRequest;
-import com.evergreen.generalhospital.dto.UserAccountAuthenticationResponse;
-import com.evergreen.generalhospital.dto.UserAccountRegisterRequest;
+import com.evergreen.generalhospital.dto.useraccount.CurrentUserResponse;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountAuthenticationResponse;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.models.useraccount.UserAccount;
 import com.evergreen.generalhospital.services.JwtService;
 import com.evergreen.generalhospital.services.UserAccountService;

@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.PatientPatchRequest;
-import com.evergreen.generalhospital.dto.PatientRequest;
+import com.evergreen.generalhospital.dto.patient.PatientPatchRequest;
+import com.evergreen.generalhospital.dto.patient.PatientRequest;
 import com.evergreen.generalhospital.errors.ErrorCode;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.testsupport.base.CrudControllerTestSupport;

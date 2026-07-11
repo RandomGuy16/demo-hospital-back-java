@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.services;
 
-import com.evergreen.generalhospital.dto.UserAccountRequest;
-import com.evergreen.generalhospital.dto.UserAccountRegisterRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
 import com.evergreen.generalhospital.errors.UnclearUserRoleException;
 import com.evergreen.generalhospital.models.patient.Patient;

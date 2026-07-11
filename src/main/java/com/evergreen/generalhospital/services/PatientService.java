@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.services;
 
-import com.evergreen.generalhospital.dto.PatientPatchRequest;
-import com.evergreen.generalhospital.dto.PatientRequest;
+import com.evergreen.generalhospital.dto.patient.PatientPatchRequest;
+import com.evergreen.generalhospital.dto.patient.PatientRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.models.patient.Patient;

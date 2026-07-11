@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.UserAccountRequest;
-import com.evergreen.generalhospital.dto.UserAccountResponse;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountResponse;
 import com.evergreen.generalhospital.models.useraccount.UserAccount;
 import com.evergreen.generalhospital.services.UserAccountService;
 import io.swagger.v3.oas.annotations.Operation;

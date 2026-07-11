@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
 import com.evergreen.generalhospital.errors.AppointmentCollisionException;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.errors.SelfDiagnosisConflictException;

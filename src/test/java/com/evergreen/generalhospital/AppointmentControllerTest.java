@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
 import com.evergreen.generalhospital.errors.ErrorCode;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;

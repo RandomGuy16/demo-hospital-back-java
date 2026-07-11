@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.PractitionerRequest;
-import com.evergreen.generalhospital.dto.PractitionerResponse;
+import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
+import com.evergreen.generalhospital.dto.practitioner.PractitionerResponse;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.PractitionerService;

@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.controllers;
 
-import com.evergreen.generalhospital.dto.AppointmentRequest;
-import com.evergreen.generalhospital.dto.AppointmentResponse;
+import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.AppointmentResponse;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.AppointmentService;
@@ -56,6 +56,7 @@ public class AppointmentController {
         return ResponseEntity.created(location).body(appointmentToAppointmentResponse(created));
 
     }
+
 
     @GetMapping
     @Operation(summary = "List appointments", description = "Returns paginated appointments")

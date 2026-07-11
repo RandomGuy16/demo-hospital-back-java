@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.services;
 
-import com.evergreen.generalhospital.dto.PractitionerRequest;
+import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;

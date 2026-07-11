@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital;
 
-import com.evergreen.generalhospital.dto.DepartmentRequest;
+import com.evergreen.generalhospital.dto.department.DepartmentRequest;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.testsupport.base.CrudControllerTestSupport;
 import org.junit.jupiter.api.Test;

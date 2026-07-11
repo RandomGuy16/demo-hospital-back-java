@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.mappers;
 
-import com.evergreen.generalhospital.dto.AppointmentResponse;
+import com.evergreen.generalhospital.dto.appointment.AppointmentResponse;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 
 public class AppointmentMapper {

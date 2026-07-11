@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.mappers;
 
-import com.evergreen.generalhospital.dto.PatientResponse;
+import com.evergreen.generalhospital.dto.patient.PatientResponse;
 import com.evergreen.generalhospital.models.patient.Patient;
 
 public class PatientMapper {

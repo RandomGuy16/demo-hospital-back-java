@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.mappers;
 
-import com.evergreen.generalhospital.dto.UserAccountResponse;
+import com.evergreen.generalhospital.dto.useraccount.UserAccountResponse;
 import com.evergreen.generalhospital.models.useraccount.UserAccount;
 
 public class UserAccountMapper {

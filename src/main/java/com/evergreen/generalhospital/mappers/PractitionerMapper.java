@@ -1,6 +1,6 @@
 package com.evergreen.generalhospital.mappers;
 
-import com.evergreen.generalhospital.dto.PractitionerResponse;
+import com.evergreen.generalhospital.dto.practitioner.PractitionerResponse;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
 
 public class PractitionerMapper {
