@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.config;
 
 import com.evergreen.generalhospital.services.JwtService;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,12 +30,20 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@ConfigurationProperties(prefix = "cors")
 public class SecurityConfig {
     /**
-     * Comma-separated list of origins allowed to call the API (e.g. the frontend).
+     * Origins allowed to call the API (e.g. the frontend). Comma-separated.
      */
-    @Value("${cors.allowed-origins:http://localhost:5173}")
-    private String[] allowedOrigins;
+    private List<String> allowedOrigins = List.of("http://localhost:5173", "http://localhost:3000");
+
+    public List<String> getAllowedOrigins() {
+        return allowedOrigins;
+    }
+
+    public void setAllowedOrigins(List<String> allowedOrigins) {
+        this.allowedOrigins = allowedOrigins;
+    }
 
     /**
      * Configures the stateless API security chain.
@@ -75,7 +83,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(allowedOrigins));
+        config.setAllowedOrigins(allowedOrigins);
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
