@@ -67,3 +67,7 @@ replay_pid*
 
 # the secret
 client_secret.json
+
+# idk
+*.log
+graphify-out/cache

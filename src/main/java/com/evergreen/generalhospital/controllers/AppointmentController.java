@@ -2,6 +2,7 @@ package com.evergreen.generalhospital.controllers;
 
 import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
 import com.evergreen.generalhospital.dto.appointment.AppointmentResponse;
+import com.evergreen.generalhospital.dto.appointment.GuestAppointmentRequest;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.AppointmentService;
@@ -57,6 +58,22 @@ public class AppointmentController {
 
     }
 
+    @PostMapping("/guest")
+    @Operation(summary = "Create a guest appointment",
+            description = "Books an appointment for an unregistered person identified by national idNumber")
+    @ApiResponses({
+            @ApiResponse(responseCode = "201", description = "Appointment created successfully"),
+            @ApiResponse(responseCode = "404", description = "Practitioner or department not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data")
+    })
+    public ResponseEntity<AppointmentResponse> createGuestAppointment(@RequestBody @Valid GuestAppointmentRequest request,
+            UriComponentsBuilder uriBuilder) {
+        Appointment created = appointmentService.createGuestAppointment(request);
+        URI location = uriBuilder.path("/api/v1/appointments/{id}")
+            .buildAndExpand(created.getAppointmentId())
+            .toUri();
+        return ResponseEntity.created(location).body(appointmentToAppointmentResponse(created));
+    }
 
     @GetMapping
     @Operation(summary = "List appointments", description = "Returns paginated appointments")

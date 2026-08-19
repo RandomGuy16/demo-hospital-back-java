@@ -13,6 +13,9 @@ import java.util.List;
 @Schema(name = "Patient", description = "Patient record")
 @Entity
 @Table(name = "patients")
+@AttributeOverride(name = "firstName", column = @Column(name = "first_name", nullable = true))
+@AttributeOverride(name = "lastName", column = @Column(name = "last_name", nullable = true))
+@AttributeOverride(name = "dateOfBirth", column = @Column(name = "date_of_birth", nullable = true))
 public class Patient extends Person {
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
     @Id

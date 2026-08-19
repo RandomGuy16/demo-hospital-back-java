@@ -45,7 +45,8 @@ public class SecurityConfig {
                     "/swagger-ui.html",
                     "/api-docs/**",
                     "/api/v1/login",
-                    "/api/v1/register"
+                    "/api/v1/register",
+                    "/api/v1/appointments/guest"
                 ).permitAll()
                 .anyRequest().authenticated()
             ) // the api is stateless, so every protected request must carry a bearer token.

@@ -3,6 +3,7 @@ package com.evergreen.generalhospital.services;
 import com.evergreen.generalhospital.dto.patient.PatientPatchRequest;
 import com.evergreen.generalhospital.dto.patient.PatientRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
+import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.repositories.PatientRepository;
@@ -11,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -59,6 +61,98 @@ public class PatientService {
                 generateMrn(patient.idNumber()),
                 patient.address());
         return patientRepository.save(newPatient);
+    }
+
+    /**
+     * Resolves the patient shell created by a guest booking, creating one when no
+     * patient exists for the national idNumber yet.
+     *
+     * <p>Guest patients only carry identity and contact details; full demographics
+     * are filled in later when the person registers.</p>
+     *
+     * @param idNumber   national idNumber identifying the guest.
+     * @param phoneNumber guest contact phone number.
+     * @param contacts    guest contact reference (email).
+     * @param address     booking location, used as the patient address.
+     * @return the existing or newly created guest patient.
+     */
+    public Patient findOrCreateGuestPatient(String idNumber, String phoneNumber, String contacts, String address) {
+        return patientRepository.findByIdNumber(idNumber)
+                .orElseGet(() -> patientRepository.save(new Patient(
+                        null,
+                        null,
+                        idNumber,
+                        null,
+                        null,
+                        phoneNumber,
+                        contacts,
+                        generateMrn(idNumber),
+                        address)));
+    }
+
+    /**
+     * Finds a patient by national idNumber and fills in the demographics provided
+     * during self-service registration, creating the patient when none exists.
+     *
+     * <p>When a patient already exists under the idNumber, the provided name and
+     * date of birth are verified against the stored values (anti-hijacking): a
+     * mismatch is rejected so nobody can claim a stranger's identity. A shell
+     * patient created by a guest booking has no demographics yet, so it is simply
+     * completed.</p>
+     *
+     * @param idNumber    national idNumber being registered.
+     * @param firstName   registered first name.
+     * @param lastName    registered last name.
+     * @param dateOfBirth registered date of birth.
+     * @param gender      registered gender.
+     * @param phoneNumber registered phone number.
+     * @param contacts    registered contact reference (emergency contact).
+     * @param address     registered address.
+     * @return the existing or newly created patient.
+     * @throws PatientIdentityMismatchException when an existing patient under the
+     *                                          idNumber has different demographics.
+     */
+    public Patient resolveOrCreateByIdNumber(String idNumber,
+                                             String firstName,
+                                             String lastName,
+                                             LocalDate dateOfBirth,
+                                             String gender,
+                                             String phoneNumber,
+                                             String contacts,
+                                             String address) {
+        return patientRepository.findByIdNumber(idNumber)
+                .map(existing -> {
+                    boolean identityPresent = existing.getFirstName() != null
+                            && existing.getLastName() != null
+                            && existing.getDateOfBirth() != null;
+
+                    if (identityPresent
+                            && (!existing.getFirstName().equalsIgnoreCase(firstName)
+                                || !existing.getLastName().equalsIgnoreCase(lastName)
+                                || !existing.getDateOfBirth().equals(dateOfBirth))) {
+                        throw new PatientIdentityMismatchException(
+                                "Patient identity for idNumber " + idNumber + " does not match the provided information");
+                    }
+
+                    if (existing.getFirstName() == null) existing.setFirstName(firstName);
+                    if (existing.getLastName() == null) existing.setLastName(lastName);
+                    if (existing.getDateOfBirth() == null) existing.setDateOfBirth(dateOfBirth);
+                    existing.setGender(gender);
+                    existing.setPhoneNumber(phoneNumber);
+                    existing.setContacts(contacts);
+                    existing.setAddress(address);
+                    return patientRepository.save(existing);
+                })
+                .orElseGet(() -> patientRepository.save(new Patient(
+                        firstName,
+                        lastName,
+                        idNumber,
+                        dateOfBirth,
+                        gender,
+                        phoneNumber,
+                        contacts,
+                        generateMrn(idNumber),
+                        address)));
     }
 
     public Optional<Patient> getPatientById(UUID id) {

@@ -1,6 +1,7 @@
 package com.evergreen.generalhospital.services;
 
 import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.GuestAppointmentRequest;
 import com.evergreen.generalhospital.errors.AppointmentCollisionException;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.errors.SelfDiagnosisConflictException;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -28,6 +30,7 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final PractitionerRepository practitionerRepository;
     private final DepartmentRepository departmentRepository;
+    private final PatientService patientService;
 
     // simple record to temporarily store the input after validating
     private record AppointmentRefs (
@@ -40,41 +43,45 @@ public class AppointmentService {
     public AppointmentService(AppointmentRepository appointmentRepository,
                               PatientRepository patientRepository,
                               PractitionerRepository practitionerRepository,
-                              DepartmentRepository departmentRepository) {
+                              DepartmentRepository departmentRepository,
+                              PatientService patientService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.practitionerRepository = practitionerRepository;
         this.departmentRepository = departmentRepository;
+        this.patientService = patientService;
     }
 
     // method for validating the no collision of an appointment
-    private void validateAppointmentNoCollision(AppointmentRequest request) throws AppointmentCollisionException {
+    private void validateAppointmentNoCollision(UUID patientId, UUID practitionerId,
+                                                LocalDateTime start, LocalDateTime end) throws AppointmentCollisionException {
         boolean doesPatientHaveCollision = appointmentRepository
-            .existsByPatient_PatientIdAndStartBeforeAndEndAfter(request.patientId(), request.end(), request.start());
+            .existsByPatient_PatientIdAndStartBeforeAndEndAfter(patientId, end, start);
 
         boolean doesPractitionerHaveCollision = appointmentRepository
-            .existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(request.practitionerId(), request.end(), request.start());
+            .existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(practitionerId, end, start);
 
         if (doesPatientHaveCollision || doesPractitionerHaveCollision)
             throw new AppointmentCollisionException("Appointment time collision detected");
     }
 
     // same as before but for update requests
-    private void validateAppointmentNoCollision(UUID appointmentId, AppointmentRequest request) throws AppointmentCollisionException {
+    private void validateAppointmentNoCollision(UUID appointmentId, UUID patientId, UUID practitionerId,
+                                                LocalDateTime start, LocalDateTime end) throws AppointmentCollisionException {
         boolean doesPatientHaveCollision = appointmentRepository
             .existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
-                request.patientId(),
+                patientId,
                 appointmentId,
-                request.end(),
-                request.start()
+                end,
+                start
             );
 
         boolean doesPractitionerHaveCollision = appointmentRepository
             .existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
-                request.practitionerId(),
+                practitionerId,
                 appointmentId,
-                request.end(),
-                request.start()
+                end,
+                start
             );
 
         if (doesPatientHaveCollision || doesPractitionerHaveCollision) {
@@ -82,17 +89,17 @@ public class AppointmentService {
         }
     }
 
-    private AppointmentRefs validateAppointmentParticipantsExistence(AppointmentRequest request) throws ResourceNotFoundException {
+    private AppointmentRefs validateAppointmentParticipantsExistence(UUID patientId, UUID practitionerId, UUID departmentId) throws ResourceNotFoundException {
         // findById().orElseThrow() is one query but loads the whole model
         // existsById() and getReferenceById() is lightweight but 2 roundtrips to database
 
-        Patient patient = patientRepository.findById(request.patientId())
+        Patient patient = patientRepository.findById(patientId)
             .orElseThrow(() -> new ResourceNotFoundException("Patient not found"));
 
-        Practitioner practitioner = practitionerRepository.findById(request.practitionerId())
+        Practitioner practitioner = practitionerRepository.findById(practitionerId)
             .orElseThrow(() -> new ResourceNotFoundException("Practitioner not found"));
 
-        Department department =  departmentRepository.findById(request.departmentId())
+        Department department =  departmentRepository.findById(departmentId)
             .orElseThrow(() -> new ResourceNotFoundException("Department not found"));
 
         // validate patient and practitioner ain't the same
@@ -109,11 +116,44 @@ public class AppointmentService {
 
     public Appointment createAppointment(AppointmentRequest request) {
         // validate that all the participants in the appointment exist
-        AppointmentRefs payload = validateAppointmentParticipantsExistence(request);
-        validateAppointmentNoCollision(request);
+        AppointmentRefs payload = validateAppointmentParticipantsExistence(request.patientId(), request.practitionerId(), request.departmentId());
+        validateAppointmentNoCollision(request.patientId(), request.practitionerId(), request.start(), request.end());
 
         Appointment appointment = new Appointment(
                 payload.patient,
+                payload.practitioner,
+                payload.department,
+                request.start(),
+                request.end(),
+                request.status());
+        return appointmentRepository.save(appointment);
+    }
+
+    /**
+     * Books an appointment for an unregistered person identified by national idNumber.
+     *
+     * <p>The patient shell is resolved or created from the guest's idNumber and
+     * contact details, then the same existence, collision, and self-diagnosis
+     * validations as a normal booking are applied.</p>
+     *
+     * @param request guest booking payload.
+     * @return the booked appointment.
+     */
+    public Appointment createGuestAppointment(GuestAppointmentRequest request) {
+        Patient patient = patientService.findOrCreateGuestPatient(
+                request.idNumber(),
+                request.phoneNumber(),
+                request.email(),
+                request.location());
+
+        AppointmentRefs payload = validateAppointmentParticipantsExistence(
+                patient.getPatientId(),
+                request.practitionerId(),
+                request.departmentId());
+        validateAppointmentNoCollision(patient.getPatientId(), request.practitionerId(), request.start(), request.end());
+
+        Appointment appointment = new Appointment(
+                patient,
                 payload.practitioner,
                 payload.department,
                 request.start(),
@@ -133,8 +173,8 @@ public class AppointmentService {
     public Optional<Appointment> updateAppointment(UUID id, AppointmentRequest request) {
         return appointmentRepository.findById(id)
                 .map(appointment -> {
-                    AppointmentRefs payload = validateAppointmentParticipantsExistence(request);
-                    validateAppointmentNoCollision(id, request);
+                    AppointmentRefs payload = validateAppointmentParticipantsExistence(request.patientId(), request.practitionerId(), request.departmentId());
+                    validateAppointmentNoCollision(id, request.patientId(), request.practitionerId(), request.start(), request.end());
 
                     appointment.setPatient(payload.patient);
                     appointment.setPractitioner(payload.practitioner);

@@ -26,6 +26,8 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
 
     Optional<Patient> findById(UUID id);
 
+    Optional<Patient> findByIdNumber(String idNumber);
+
     Optional<Patient> findByMrn(String mrn);
 
     List<Patient> findAll();

@@ -2,15 +2,14 @@ package com.evergreen.generalhospital;
 
 import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
-import com.evergreen.generalhospital.models.useraccount.Role;
 import com.evergreen.generalhospital.testsupport.base.AuthControllerTestSupport;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
+import java.time.LocalDate;
 import java.util.List;
-import java.util.UUID;
 
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -19,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(properties = {
-    "security.jwt.secret=${JWT_SECRET}",
+    "security.jwt.secret=${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5}",
     "security.jwt.expiration-ms=86400000",
     "security.jwt.issuer=${JWT_ISSUER:evergreen-general-hospital-api}"
 })
@@ -27,16 +26,20 @@ public class AuthControllerTest extends AuthControllerTestSupport {
 
     @Test
     /**
-     * Verifies that local registration returns a signed JWT for an admin-style account.
+     * Verifies that local registration with demographics returns a signed JWT
+     * for a new patient account.
      */
     public void testRegisterReturnsCreated() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
-            "Gregory House",
-            "g.house",
-            null,
-            null,
-            Role.ROLE_ADMIN,
-            "example@gmail.com",
+            "Gregory",
+            "House",
+            "5550000001",
+            LocalDate.of(1995, 4, 18),
+            "male",
+            "+1 555 0199",
+            "greg.house@example.com",
+            "123 Main St",
+            "gregory.house@example.com",
             "123456"
         );
 
@@ -49,15 +52,19 @@ public class AuthControllerTest extends AuthControllerTestSupport {
 
     @Test
     /**
-     * Verifies that registration succeeds when a patient-linked account points at an existing patient.
+     * Verifies that registration links the new account to an existing patient
+     * when the demographics and idNumber match a previously booked guest.
      */
-    public void testRegisterWithExistingPatient() throws Exception {
+    public void testRegisterLinksExistingPatient() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
-            "John Doe",
-            "j.doe",
-            null,
-            defaultSubjects.patient().getPatientId(),
-            Role.ROLE_PATIENT,
+            defaultSubjects.patient().getFirstName(),
+            defaultSubjects.patient().getLastName(),
+            defaultSubjects.patient().getIdNumber(),
+            defaultSubjects.patient().getDateOfBirth(),
+            defaultSubjects.patient().getGender(),
+            "+1 555 0100",
+            "john.doe@example.com",
+            "123 Main St",
             "jdoe@gmail.com",
             "123456"
         );
@@ -71,23 +78,56 @@ public class AuthControllerTest extends AuthControllerTestSupport {
 
     @Test
     /**
-     * Verifies that registration fails when the requested practitioner link does not exist.
+     * Verifies that registration rejects an idNumber whose stored demographics
+     * do not match the payload (anti-hijacking).
      */
-    public void testRegisterWithNonExistingPractitionerReturnsBadRequest() throws Exception {
+    public void testRegisterWithMismatchedIdentityReturnsConflict() throws Exception {
         UserAccountRegisterRequest request = new UserAccountRegisterRequest(
-            "Shoko Ieiri",
-            "shk.iei",
-            UUID.randomUUID(),
-            null,
-            Role.ROLE_PRACTITIONER,
-            "anotherexample@gmail.com",
-            "123456789"
+            "Jane",
+            "Roe",
+            defaultSubjects.patient().getIdNumber(),
+            LocalDate.of(2000, 1, 1),
+            "female",
+            "+1 555 0100",
+            "jane.roe@example.com",
+            "123 Main St",
+            "jane.roe@gmail.com",
+            "123456"
         );
 
         mockMvc.perform(post("/api/v1/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(request)))
-            .andExpect(status().isBadRequest());
+            .andExpect(status().isConflict());
+    }
+
+    @Test
+    /**
+     * Verifies that an idNumber can only own a single account.
+     */
+    public void testRegisterWithIdNumberAlreadyRegisteredReturnsConflict() throws Exception {
+        UserAccountRegisterRequest request = new UserAccountRegisterRequest(
+            "Gregory",
+            "House",
+            "5550000002",
+            LocalDate.of(1995, 4, 18),
+            "male",
+            "+1 555 0199",
+            "greg.house@example.com",
+            "123 Main St",
+            "greg.house@gmail.com",
+            "123456"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+            .andExpect(status().isCreated());
+
+        mockMvc.perform(post("/api/v1/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(request)))
+            .andExpect(status().isConflict());
     }
 
     @Test

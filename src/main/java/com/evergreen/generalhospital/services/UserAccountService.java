@@ -30,6 +30,7 @@ public class UserAccountService implements UserDetailsService {
     private final UserAccountRepository userAccountRepository;
     private final PractitionerRepository practitionerRepository;
     private final PatientRepository patientRepository;
+    private final PatientService patientService;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -38,15 +39,18 @@ public class UserAccountService implements UserDetailsService {
      * @param userAccountRepository repository for user-account persistence.
      * @param practitionerRepository repository used to resolve practitioner links.
      * @param patientRepository repository used to resolve patient links.
+     * @param patientService service used to resolve or create patients during registration.
      * @param passwordEncoder encoder used to hash local passwords before persistence.
      */
     public UserAccountService(UserAccountRepository userAccountRepository,
                               PractitionerRepository practitionerRepository,
                               PatientRepository patientRepository,
+                              PatientService patientService,
                               PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;
         this.practitionerRepository = practitionerRepository;
         this.patientRepository = patientRepository;
+        this.patientService = patientService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -131,23 +135,58 @@ public class UserAccountService implements UserDetailsService {
     }
 
     /**
-     * Registers a local user account and defaults provider metadata for password-based login.
+     * Registers a local patient account from demographics and credentials.
+     *
+     * <p>Self-service registration is patient-only: the payload carries the
+     * person's demographics, the patient is resolved or created by national
+     * idNumber, and the account is linked to it with the {@code ROLE_PATIENT}
+     * role. The account username mirrors the email so login stays
+     * email-based.</p>
      *
      * @param request registration payload.
      * @return newly created user account.
+     * @throws RepeatedUsernameException if the email is already taken or the
+     *                                   idNumber already owns an account.
+     * @throws com.evergreen.generalhospital.errors.PatientIdentityMismatchException
+     *                                   if the demographics do not match an
+     *                                   existing patient under that idNumber.
      */
     public UserAccount registerUserAccount(UserAccountRegisterRequest request) {
-        return createUserAccount(new UserAccountRequest(
-                request.displayName(),
-                request.username(),
-                request.practitionerId(),
-                request.patientId(),
+        String username = request.email();
+
+        if (userAccountRepository.existsByEmail(request.email())) {
+            throw new RepeatedUsernameException("User with email " + request.email() + " already exists");
+        }
+        if (userAccountRepository.existsByUsername(username)) {
+            throw new RepeatedUsernameException("User with username " + username + " already exists");
+        }
+
+        Patient patient = patientService.resolveOrCreateByIdNumber(
+                request.idNumber(),
+                request.firstName(),
+                request.lastName(),
+                request.dateOfBirth(),
+                request.gender(),
+                request.phoneNumber(),
+                request.emergencyContact(),
+                request.address());
+
+        if (userAccountRepository.existsByPatient(patient)) {
+            throw new RepeatedUsernameException("A user account already exists for idNumber " + request.idNumber());
+        }
+
+        UserAccount newUser = new UserAccount(
+                null,
+                patient,
                 "local",
                 request.email(),
-                request.role(),
+                Role.ROLE_PATIENT,
+                request.firstName() + " " + request.lastName(),
+                username,
                 request.email(),
-                request.password()
-        ));
+                passwordEncoder.encode(request.password())
+        );
+        return userAccountRepository.save(newUser);
     }
 
     /**

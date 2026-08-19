@@ -1,6 +1,8 @@
 package com.evergreen.generalhospital;
 
+import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
+import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
 import com.evergreen.generalhospital.errors.UnclearUserRoleException;
 import com.evergreen.generalhospital.models.patient.Patient;
@@ -10,6 +12,7 @@ import com.evergreen.generalhospital.models.useraccount.UserAccount;
 import com.evergreen.generalhospital.repositories.PatientRepository;
 import com.evergreen.generalhospital.repositories.PractitionerRepository;
 import com.evergreen.generalhospital.repositories.UserAccountRepository;
+import com.evergreen.generalhospital.services.PatientService;
 import com.evergreen.generalhospital.services.UserAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,8 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -41,6 +46,9 @@ class UserAccountServiceTest {
 
     @Mock
     private PatientRepository patientRepository;
+
+    @Mock
+    private PatientService patientService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -224,5 +232,101 @@ class UserAccountServiceTest {
         verify(userAccountRepository, never()).save(any());
         verify(patientRepository, never()).findById(any());
         verify(practitionerRepository, never()).findById(any());
+    }
+
+    private UserAccountRegisterRequest registrationRequest() {
+        return new UserAccountRegisterRequest(
+                "John",
+                "Doe",
+                "1234567890",
+                LocalDate.of(1995, 4, 18),
+                "male",
+                "+1 555 0100",
+                "john@example.com",
+                "123 Main St",
+                "john.doe@example.com",
+                "strong-password");
+    }
+
+    @Test
+    /**
+     * Verifies that self-service registration creates a patient account linked to
+     * the resolved patient with the patient role and email-based username.
+     */
+    void registerUserAccountCreatesPatientAccountLinkedToResolvedPatient() {
+        UserAccountRegisterRequest request = registrationRequest();
+
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername(request.email())).thenReturn(false);
+        when(patientService.resolveOrCreateByIdNumber(
+                eq(request.idNumber()), anyString(), anyString(), eq(request.dateOfBirth()),
+                anyString(), anyString(), anyString(), anyString())).thenReturn(patient);
+        when(userAccountRepository.existsByPatient(patient)).thenReturn(false);
+        when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
+        when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserAccount created = userAccountService.registerUserAccount(request);
+
+        assertThat(created.getRole()).isEqualTo(Role.ROLE_PATIENT);
+        assertThat(created.getPatient()).isSameAs(patient);
+        assertThat(created.getPractitioner()).isNull();
+        assertThat(created.getUsername()).isEqualTo(request.email());
+        assertThat(created.getDisplayName()).isEqualTo("John Doe");
+        assertThat(created.getProvider()).isEqualTo("local");
+    }
+
+    @Test
+    /**
+     * Verifies that registration rejects a duplicate email before touching the patient.
+     */
+    void registerUserAccountRejectsDuplicateEmail() {
+        UserAccountRegisterRequest request = registrationRequest();
+
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(true);
+
+        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+                .isInstanceOf(RepeatedUsernameException.class)
+                .hasMessage("User with email john.doe@example.com already exists");
+
+        verify(userAccountRepository, never()).save(any());
+        verify(patientService, never()).resolveOrCreateByIdNumber(any(), any(), any(), any(), any(), any(), any(), any());
+    }
+
+    @Test
+    /**
+     * Verifies that an idNumber that already owns an account cannot be registered again.
+     */
+    void registerUserAccountRejectsIdNumberAlreadyLinkedToAccount() {
+        UserAccountRegisterRequest request = registrationRequest();
+
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername(request.email())).thenReturn(false);
+        when(patientService.resolveOrCreateByIdNumber(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(patient);
+        when(userAccountRepository.existsByPatient(patient)).thenReturn(true);
+
+        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+                .isInstanceOf(RepeatedUsernameException.class)
+                .hasMessage("A user account already exists for idNumber 1234567890");
+
+        verify(userAccountRepository, never()).save(any());
+    }
+
+    @Test
+    /**
+     * Verifies that an identity mismatch is propagated and no account is created.
+     */
+    void registerUserAccountRejectsIdentityMismatch() {
+        UserAccountRegisterRequest request = registrationRequest();
+
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername(request.email())).thenReturn(false);
+        when(patientService.resolveOrCreateByIdNumber(any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenThrow(new PatientIdentityMismatchException("Patient identity for idNumber 1234567890 does not match the provided information"));
+
+        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+                .isInstanceOf(PatientIdentityMismatchException.class);
+
+        verify(userAccountRepository, never()).save(any());
     }
 }

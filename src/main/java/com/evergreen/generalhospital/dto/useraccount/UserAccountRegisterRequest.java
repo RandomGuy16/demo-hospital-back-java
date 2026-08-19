@@ -1,32 +1,44 @@
 package com.evergreen.generalhospital.dto.useraccount;
 
-import com.evergreen.generalhospital.models.useraccount.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+
+import java.time.LocalDate;
 
 public record UserAccountRegisterRequest(
-    @Schema(example = "Gregory House")
-    @NotBlank String displayName,
+    @Schema(example = "Jane")
+    @NotBlank @Size(max = 50) String firstName,
 
-    @Schema(example = "g.house")
-    @NotBlank String username,
+    @Schema(example = "Doe")
+    @NotBlank @Size(max = 50) String lastName,
 
-    @Schema(example = "alkjadshf-1234-5kjhl134-sf13f42df")
-    java.util.UUID practitionerId,
+    @Schema(example = "1234567890")
+    @NotBlank @Pattern(regexp = "\\d{10}", message = "idNumber must be exactly 10 digits") String idNumber,
 
-    @Schema(example = "alkjadshf-1234-5kjhl134-sf13f42df")
-    java.util.UUID patientId,
+    @Schema(example = "1995-04-18")
+    @NotNull @Past(message = "dateOfBirth must be in the past") LocalDate dateOfBirth,
 
-    @Schema(example = "ROLE_ADMIN")
-    @NotNull Role role,
+    @Schema(example = "female")
+    @NotBlank @Size(max = 20) String gender,
 
-    @Schema(example = "bat.man@example.com")
-    @Email
-    @NotBlank String email,
+    @Schema(example = "+1 555 0100")
+    @NotBlank @Size(min = 6, max = 20) String phoneNumber,
+
+    @Schema(example = "jane.doe@example.com")
+    @Size(max = 200) String emergencyContact,
+
+    @Schema(example = "123 Main St, Springfield")
+    @NotBlank @Size(max = 200) String address,
+
+    @Schema(example = "jane.doe@example.com")
+    @Email @NotBlank String email,
 
     @Schema(example = "strong-password")
-    @NotBlank String password
+    @NotBlank @Size(min = 6, max = 100) String password
 ) {
 }

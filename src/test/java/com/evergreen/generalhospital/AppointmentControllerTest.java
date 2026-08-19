@@ -1,6 +1,7 @@
 package com.evergreen.generalhospital;
 
 import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.GuestAppointmentRequest;
 import com.evergreen.generalhospital.errors.ErrorCode;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
@@ -35,8 +36,8 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
                 AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
                 .andExpect(jsonPath("$.appointmentId").isNotEmpty())
@@ -51,11 +52,11 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
                 UUID.randomUUID(),
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusHours(1),
-            AppointmentStatus.SCHEDULED);
+                AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
     }
@@ -63,18 +64,18 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
     @Test
     void createAppointmentWithInvalidPayloadReturnsBadRequest() throws Exception {
         AppointmentRequest request = new AppointmentRequest(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            LocalDateTime.now().minusDays(1),
-            LocalDateTime.now().plusDays(1),
-            AppointmentStatus.CANCELLED);
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                LocalDateTime.now().minusDays(1),
+                LocalDateTime.now().plusDays(1),
+                AppointmentStatus.CANCELLED);
 
         mockMvc.perform(post("/api/v1/appointments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(request)))
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.code").value(ErrorCode.VALIDATION_ERROR.name()));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(ErrorCode.VALIDATION_ERROR.name()));
     }
 
     @Test
@@ -82,43 +83,153 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
         // basically you can't attend yourself test
         // first create a patient for the practitioner
         Patient ppatient = savePatient(
-            defaultSubjects.practitioner().getFirstName(),
-            defaultSubjects.practitioner().getLastName(),
-            defaultSubjects.practitioner().getIdNumber()
-        );
+                defaultSubjects.practitioner().getFirstName(),
+                defaultSubjects.practitioner().getLastName(),
+                defaultSubjects.practitioner().getIdNumber());
 
         AppointmentRequest request = new AppointmentRequest(
-            ppatient.getPatientId(),
-            defaultSubjects.practitioner().getPractitionerId(),
-            defaultSubjects.department().getDepartmentId(),
-            LocalDateTime.now().plusDays(1),
-            LocalDateTime.now().plusDays(1).plusHours(1),
-            AppointmentStatus.SCHEDULED);
+                ppatient.getPatientId(),
+                defaultSubjects.practitioner().getPractitionerId(),
+                defaultSubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(1).plusHours(1),
+                AppointmentStatus.SCHEDULED);
 
         mockMvc.perform(post("/api/v1/appointments")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(request)))
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
+    }
+
+    @Test
+    void createGuestAppointmentReturnsCreatedResponse() throws Exception {
+        GuestAppointmentRequest request = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                defaultSubjects.practitioner().getPractitionerId(),
+                defaultSubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(2).plusMinutes(45),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+                .andExpect(status().isCreated())
+                .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.appointmentId").isNotEmpty())
+                .andExpect(jsonPath("$.status").value(AppointmentStatus.SCHEDULED.name()));
+    }
+
+    @Test
+    void createGuestAppointmentWithNonExistingPractitionerReturnsNotFound() throws Exception {
+        GuestAppointmentRequest request = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                UUID.randomUUID(),
+                defaultSubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(1),
+                LocalDateTime.now().plusDays(1).plusHours(1),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
+    }
+
+    @Test
+    void createGuestAppointmentReusesPatientForSameIdNumber() throws Exception {
+        GuestAppointmentRequest request = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                defaultSubjects.practitioner().getPractitionerId(),
+                defaultSubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(2).plusMinutes(45),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+                .andExpect(status().isCreated());
+
+        GuestAppointmentRequest secondRequest = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                funnySubjects.practitioner().getPractitionerId(),
+                funnySubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(3),
+                LocalDateTime.now().plusDays(3).plusMinutes(45),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(secondRequest)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    void createGuestAppointmentsInSameScheduleReturnConflict() throws Exception {
+        GuestAppointmentRequest request = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                defaultSubjects.practitioner().getPractitionerId(),
+                defaultSubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(4),
+                LocalDateTime.now().plusDays(4).plusMinutes(45),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+                .andExpect(status().isCreated());
+
+        GuestAppointmentRequest secondRequest = new GuestAppointmentRequest(
+                "5550000001",
+                "+100 123455",
+                "guest@example.com",
+                "fake street",
+                funnySubjects.practitioner().getPractitionerId(),
+                funnySubjects.department().getDepartmentId(),
+                LocalDateTime.now().plusDays(4),
+                LocalDateTime.now().plusDays(4).plusMinutes(30),
+                AppointmentStatus.SCHEDULED);
+
+        mockMvc.perform(post("/api/v1/appointments/guest")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(secondRequest)))
+                .andExpect(status().isConflict());
     }
 
     @Test
     void getAllAppointmentsReturnsSortedPage() throws Exception {
         saveAppointment(
-            defaultSubjects.patient(),
-            defaultSubjects.practitioner(),
-            defaultSubjects.department(),
-            "SCHEDULED");
+                defaultSubjects.patient(),
+                defaultSubjects.practitioner(),
+                defaultSubjects.department(),
+                "SCHEDULED");
         saveAppointment(
-            funnySubjects.patient(),
-            funnySubjects.practitioner(),
-            funnySubjects.department(),
-            "COMPLETED"
-        );
+                funnySubjects.patient(),
+                funnySubjects.practitioner(),
+                funnySubjects.department(),
+                "COMPLETED");
 
         mockMvc.perform(get("/api/v1/appointments")
-                        .param("sort", "status,asc")
-                        .param("size", "10"))
+                .param("sort", "status,asc")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].status").value("COMPLETED"))
@@ -128,10 +239,10 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
     @Test
     void getAppointmentByIdReturnsAppointment() throws Exception {
         Appointment appointment = saveAppointment(
-            defaultSubjects.patient(),
-            defaultSubjects.practitioner(),
-            defaultSubjects.department(),
-            "SCHEDULED");
+                defaultSubjects.patient(),
+                defaultSubjects.practitioner(),
+                defaultSubjects.department(),
+                "SCHEDULED");
 
         mockMvc.perform(get("/api/v1/appointments/{id}", appointment.getAppointmentId()))
                 .andExpect(status().isOk())
@@ -142,10 +253,10 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
     @Test
     void updateAppointmentReturnsUpdatedAppointment() throws Exception {
         Appointment appointment = saveAppointment(
-            defaultSubjects.patient(),
-            defaultSubjects.practitioner(),
-            defaultSubjects.department(),
-            "SCHEDULED");
+                defaultSubjects.patient(),
+                defaultSubjects.practitioner(),
+                defaultSubjects.department(),
+                "SCHEDULED");
 
         AppointmentRequest request = new AppointmentRequest(
                 funnySubjects.patient().getPatientId(),
@@ -153,11 +264,11 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
                 funnySubjects.department().getDepartmentId(),
                 LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(10).plusMinutes(30),
-            AppointmentStatus.COMPLETED);
+                AppointmentStatus.COMPLETED);
 
         mockMvc.perform(put("/api/v1/appointments/{id}", appointment.getAppointmentId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.appointmentId").value(appointment.getAppointmentId().toString()))
                 .andExpect(jsonPath("$.status").value(AppointmentStatus.COMPLETED.name()));
@@ -166,10 +277,10 @@ class AppointmentControllerTest extends CrudControllerTestSupport {
     @Test
     void deleteAppointmentReturnsDeletedPayload() throws Exception {
         Appointment appointment = saveAppointment(
-            funnySubjects.patient(),
-            funnySubjects.practitioner(),
-            funnySubjects.department(),
-            "SCHEDULED");
+                funnySubjects.patient(),
+                funnySubjects.practitioner(),
+                funnySubjects.department(),
+                "SCHEDULED");
 
         mockMvc.perform(delete("/api/v1/appointments/{id}", appointment.getAppointmentId()))
                 .andExpect(status().isNoContent());

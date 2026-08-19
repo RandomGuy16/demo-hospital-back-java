@@ -1,6 +1,7 @@
 package com.evergreen.generalhospital;
 
 import com.evergreen.generalhospital.dto.appointment.AppointmentRequest;
+import com.evergreen.generalhospital.dto.appointment.GuestAppointmentRequest;
 import com.evergreen.generalhospital.errors.AppointmentCollisionException;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.errors.SelfDiagnosisConflictException;
@@ -14,6 +15,7 @@ import com.evergreen.generalhospital.repositories.DepartmentRepository;
 import com.evergreen.generalhospital.repositories.PatientRepository;
 import com.evergreen.generalhospital.repositories.PractitionerRepository;
 import com.evergreen.generalhospital.services.AppointmentService;
+import com.evergreen.generalhospital.services.PatientService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,6 +56,9 @@ class AppointmentServiceTest {
 
     @Mock
     private DepartmentRepository departmentRepository;
+
+    @Mock
+    private PatientService patientService;
 
     @InjectMocks
     private AppointmentService appointmentService;
@@ -164,6 +169,68 @@ class AppointmentServiceTest {
         assertThatThrownBy(() -> appointmentService.createAppointment(request))
                 .isInstanceOf(AppointmentCollisionException.class)
                 .hasMessage("Appointment time collision detected");
+
+        verify(appointmentRepository, never()).save(any());
+    }
+
+    @Test
+    void createGuestAppointmentSavesWhenPatientIsResolved() {
+        UUID practitionerId = UUID.randomUUID();
+        UUID departmentId = UUID.randomUUID();
+        GuestAppointmentRequest guestRequest = new GuestAppointmentRequest(
+                "1234567890",
+                "+1 555 0100",
+                "guest@example.com",
+                "fake street",
+                practitionerId,
+                departmentId,
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(2).plusMinutes(45),
+                AppointmentStatus.SCHEDULED
+        );
+
+        when(patientService.findOrCreateGuestPatient("1234567890", "+1 555 0100", "guest@example.com", "fake street"))
+                .thenReturn(patient);
+        when(patientRepository.findById(patient.getPatientId())).thenReturn(Optional.of(patient));
+        when(practitionerRepository.findById(practitionerId)).thenReturn(Optional.of(practitioner));
+        when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
+        when(appointmentRepository.existsByPatient_PatientIdAndStartBeforeAndEndAfter(
+                eq(patient.getPatientId()), eq(guestRequest.end()), eq(guestRequest.start()))).thenReturn(false);
+        when(appointmentRepository.existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(
+                eq(practitionerId), eq(guestRequest.end()), eq(guestRequest.start()))).thenReturn(false);
+        when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Appointment created = appointmentService.createGuestAppointment(guestRequest);
+
+        assertThat(created.getPatient()).isSameAs(patient);
+        assertThat(created.getPractitioner()).isSameAs(practitioner);
+        assertThat(created.getDepartment()).isSameAs(department);
+        assertThat(created.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
+    }
+
+    @Test
+    void createGuestAppointmentThrowsWhenPractitionerDoesNotExist() {
+        UUID practitionerId = UUID.randomUUID();
+        GuestAppointmentRequest guestRequest = new GuestAppointmentRequest(
+                "1234567890",
+                "+1 555 0100",
+                "guest@example.com",
+                "fake street",
+                practitionerId,
+                UUID.randomUUID(),
+                LocalDateTime.now().plusDays(2),
+                LocalDateTime.now().plusDays(2).plusMinutes(45),
+                AppointmentStatus.SCHEDULED
+        );
+
+        when(patientService.findOrCreateGuestPatient("1234567890", "+1 555 0100", "guest@example.com", "fake street"))
+                .thenReturn(patient);
+        when(patientRepository.findById(patient.getPatientId())).thenReturn(Optional.of(patient));
+        when(practitionerRepository.findById(practitionerId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> appointmentService.createGuestAppointment(guestRequest))
+                .isInstanceOf(ResourceNotFoundException.class)
+                .hasMessage("Practitioner not found");
 
         verify(appointmentRepository, never()).save(any());
     }
