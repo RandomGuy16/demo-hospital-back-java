@@ -4,6 +4,7 @@ import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
 import com.evergreen.generalhospital.errors.UnclearUserRoleException;
+import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
 import com.evergreen.generalhospital.models.useraccount.Role;
@@ -36,17 +37,19 @@ public class UserAccountService implements UserDetailsService {
     /**
      * Creates the user-account service dependencies.
      *
-     * @param userAccountRepository repository for user-account persistence.
+     * @param userAccountRepository  repository for user-account persistence.
      * @param practitionerRepository repository used to resolve practitioner links.
-     * @param patientRepository repository used to resolve patient links.
-     * @param patientService service used to resolve or create patients during registration.
-     * @param passwordEncoder encoder used to hash local passwords before persistence.
+     * @param patientRepository      repository used to resolve patient links.
+     * @param patientService         service used to resolve or create patients
+     *                               during registration.
+     * @param passwordEncoder        encoder used to hash local passwords before
+     *                               persistence.
      */
     public UserAccountService(UserAccountRepository userAccountRepository,
-                              PractitionerRepository practitionerRepository,
-                              PatientRepository patientRepository,
-                              PatientService patientService,
-                              PasswordEncoder passwordEncoder) {
+            PractitionerRepository practitionerRepository,
+            PatientRepository patientRepository,
+            PatientService patientService,
+            PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;
         this.practitionerRepository = practitionerRepository;
         this.patientRepository = patientRepository;
@@ -54,28 +57,30 @@ public class UserAccountService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    private record UserAccountRefs (
-        Patient patient,
-        Practitioner practitioner
-    ) {};
+    private record UserAccountRefs(
+            Patient patient,
+            Practitioner practitioner) {
+    };
 
     /**
-     * Resolves the optional patient and practitioner links for a user-account request.
+     * Resolves the optional patient and practitioner links for a user-account
+     * request.
      *
      * @param request incoming user-account payload.
      * @return resolved patient/practitioner references.
-     * @throws UnclearUserRoleException if a referenced entity does not exist or the role/link pair is invalid.
+     * @throws UnclearUserRoleException if a referenced entity does not exist or the
+     *                                  role/link pair is invalid.
      */
     private UserAccountRefs resolveUserAccountRefs(UserAccountRequest request) {
         Patient patient = request.patientId() == null
                 ? null
                 : patientRepository.findById(request.patientId())
-                    .orElseThrow(() -> new UnclearUserRoleException("Patient link does not exist"));
+                        .orElseThrow(() -> new UnclearUserRoleException("Patient link does not exist"));
 
         Practitioner practitioner = request.practitionerId() == null
                 ? null
                 : practitionerRepository.findById(request.practitionerId())
-                    .orElseThrow(() -> new UnclearUserRoleException("Practitioner link does not exist"));
+                        .orElseThrow(() -> new UnclearUserRoleException("Practitioner link does not exist"));
 
         validateRoleLink(request.role(), patient, practitioner);
 
@@ -85,10 +90,11 @@ public class UserAccountService implements UserDetailsService {
     /**
      * Validates that the selected role matches the attached domain links.
      *
-     * @param role requested application role.
-     * @param patient optional patient link.
+     * @param role         requested application role.
+     * @param patient      optional patient link.
      * @param practitioner optional practitioner link.
-     * @throws UnclearUserRoleException if the role and links describe an invalid combination.
+     * @throws UnclearUserRoleException if the role and links describe an invalid
+     *                                  combination.
      */
     private void validateRoleLink(Role role, Patient patient, Practitioner practitioner) {
         boolean hasPatient = patient != null;
@@ -137,21 +143,24 @@ public class UserAccountService implements UserDetailsService {
     /**
      * Registers a local patient account from demographics and credentials.
      *
-     * <p>Self-service registration is patient-only: the payload carries the
+     * <p>
+     * Self-service registration is patient-only: the payload carries the
      * person's demographics, the patient is resolved or created by national
      * idNumber, and the account is linked to it with the {@code ROLE_PATIENT}
      * role. The account username mirrors the email so login stays
-     * email-based.</p>
+     * email-based.
+     * </p>
      *
      * @param request registration payload.
      * @return newly created user account.
-     * @throws RepeatedUsernameException if the email is already taken or the
-     *                                   idNumber already owns an account.
-     * @throws com.evergreen.generalhospital.errors.PatientIdentityMismatchException
-     *                                   if the demographics do not match an
-     *                                   existing patient under that idNumber.
+     * @throws RepeatedUsernameException        if the email is already taken or
+     *                                          the idNumber already owns an account.
+     * @throws PatientIdentityMismatchException if the demographics do not match
+     *                                          an existing patient under that
+     *                                          idNumber
      */
     public UserAccount registerUserAccount(UserAccountRegisterRequest request) {
+        // username is the same as email, to avoid complications
         String username = request.email();
 
         if (userAccountRepository.existsByEmail(request.email())) {
@@ -171,10 +180,12 @@ public class UserAccountService implements UserDetailsService {
                 request.emergencyContact(),
                 request.address());
 
+        // checks if the patient already has a user PRIOR to adding the new user
         if (userAccountRepository.existsByPatient(patient)) {
             throw new RepeatedUsernameException("A user account already exists for idNumber " + request.idNumber());
         }
 
+        // add the user
         UserAccount newUser = new UserAccount(
                 null,
                 patient,
@@ -184,8 +195,7 @@ public class UserAccountService implements UserDetailsService {
                 request.firstName() + " " + request.lastName(),
                 username,
                 request.email(),
-                passwordEncoder.encode(request.password())
-        );
+                passwordEncoder.encode(request.password()));  // use BCrypt to encode the password
         return userAccountRepository.save(newUser);
     }
 
@@ -194,8 +204,10 @@ public class UserAccountService implements UserDetailsService {
      *
      * @param request user-account payload.
      * @return persisted user account with encoded password.
-     * @throws RepeatedUsernameException if username, email, or provider subject is already taken.
-     * @throws UnclearUserRoleException if the role and linked entities are inconsistent.
+     * @throws RepeatedUsernameException if username, email, or provider subject is
+     *                                   already taken.
+     * @throws UnclearUserRoleException  if the role and linked entities are
+     *                                   inconsistent.
      */
     public UserAccount createUserAccount(UserAccountRequest request) {
         if (userAccountRepository.existsByUsername(request.username())) {
@@ -210,20 +222,20 @@ public class UserAccountService implements UserDetailsService {
             throw new RepeatedUsernameException("User for provider subject already exists");
         }
 
-        // Resolve and validate the optional patient/practitioner ownership before writing anything.
+        // Resolve and validate the optional patient/practitioner ownership before
+        // writing anything.
         UserAccountRefs refs = resolveUserAccountRefs(request);
 
         UserAccount newUser = new UserAccount(
-            refs.practitioner,
-            refs.patient,
-            request.provider(),
-            request.providerSubject(),
-            request.role(),
-            request.displayName(),
-            request.username(),
-            request.email(),
-            request.password() == null ? null : passwordEncoder.encode(request.password())
-        );
+                refs.practitioner,
+                refs.patient,
+                request.provider(),
+                request.providerSubject(),
+                request.role(),
+                request.displayName(),
+                request.username(),
+                request.email(),
+                request.password() == null ? null : passwordEncoder.encode(request.password()));
         return userAccountRepository.save(newUser);
     }
 

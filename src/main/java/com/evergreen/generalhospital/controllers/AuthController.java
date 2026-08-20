@@ -78,7 +78,7 @@ public class AuthController {
 
         CurrentUserResponse response = new CurrentUserResponse(
                 jwt.getSubject(),
-                jwt.getIssuer() != null ? jwt.getIssuer().toString() : null,
+                jwt.getClaimAsString("iss"),
                 jwt.getClaimAsString("email"),
                 jwt.getClaimAsString("name"),
                 firstNonBlank(
@@ -124,7 +124,7 @@ public class AuthController {
         @RequestBody @Valid UserAccountRegisterRequest request) {
 
         UserAccount created = userAccountService.registerUserAccount(request);
-        String token = jwtService.generateToken(created);
+        String token = jwtService.generateToken(created);  // generate token
         return ResponseEntity.status(201).body(new UserAccountAuthenticationResponse(token));
     }
 

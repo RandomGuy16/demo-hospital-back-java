@@ -59,7 +59,7 @@ public class JwtService {
             .claim("preferred_username", userAccount.getUsername())
             .issuedAt(Date.from(now))
             .expiration(Date.from(now.plusMillis(expirationMillis)))
-            .signWith(secretKey)
+            .signWith(secretKey, Jwts.SIG.HS256)
             .compact();
     }
 

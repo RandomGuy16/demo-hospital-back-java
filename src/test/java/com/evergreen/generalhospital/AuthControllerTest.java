@@ -3,10 +3,14 @@ package com.evergreen.generalhospital;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.testsupport.base.AuthControllerTestSupport;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +27,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "security.jwt.issuer=${JWT_ISSUER:evergreen-general-hospital-api}"
 })
 public class AuthControllerTest extends AuthControllerTestSupport {
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     /**
@@ -132,6 +139,125 @@ public class AuthControllerTest extends AuthControllerTestSupport {
 
     @Test
     /**
+     * Verifies that the same idNumber cannot be claimed by a second user, even
+     * when the email and password differ (one idNumber owns exactly one account).
+     */
+    public void testRegisterSameIdNumberWithDifferentEmailReturnsConflict() throws Exception {
+        UserAccountRegisterRequest first = new UserAccountRegisterRequest(
+            "Alan",
+            "Turing",
+            "5550000003",
+            LocalDate.of(1912, 6, 23),
+            "male",
+            "+1 555 0200",
+            "alan.turing@example.com",
+            "123 Main St",
+            "alan@example.com",
+            "123456"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(first)))
+            .andExpect(status().isCreated());
+
+        UserAccountRegisterRequest second = new UserAccountRegisterRequest(
+            "Alan",
+            "Turing",
+            "5550000003",
+            LocalDate.of(1912, 6, 23),
+            "male",
+            "+1 555 0200",
+            "alan.turing@example.com",
+            "123 Main St",
+            "alan.other@example.com",
+            "654321"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json(second)))
+            .andExpect(status().isConflict())
+            .andExpect(jsonPath("$.code").value("CONFLICT"));
+    }
+
+    @Test
+    /**
+     * Verifies that registration rejects a payload whose idNumber is not 10 digits.
+     */
+    public void testRegisterWithMalformedIdNumberReturnsBadRequest() throws Exception {
+        UserAccountRegisterRequest request = new UserAccountRegisterRequest(
+            "Gregory",
+            "House",
+            "12345",
+            LocalDate.of(1995, 4, 18),
+            "male",
+            "+1 555 0199",
+            "greg.house@example.com",
+            "123 Main St",
+            "greg.house@example.com",
+            "123456"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    /**
+     * Verifies that registration rejects a malformed email address.
+     */
+    public void testRegisterWithInvalidEmailReturnsBadRequest() throws Exception {
+        UserAccountRegisterRequest request = new UserAccountRegisterRequest(
+            "Gregory",
+            "House",
+            "5550000004",
+            LocalDate.of(1995, 4, 18),
+            "male",
+            "+1 555 0199",
+            "greg.house@example.com",
+            "123 Main St",
+            "not-an-email",
+            "123456"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    /**
+     * Verifies that registration rejects a password shorter than the minimum length.
+     */
+    public void testRegisterWithShortPasswordReturnsBadRequest() throws Exception {
+        UserAccountRegisterRequest request = new UserAccountRegisterRequest(
+            "Gregory",
+            "House",
+            "5550000005",
+            LocalDate.of(1995, 4, 18),
+            "male",
+            "+1 555 0199",
+            "greg.house@example.com",
+            "123 Main St",
+            "greg.house@example.com",
+            "123"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    /**
      * Verifies that a seeded local user can exchange valid credentials for a JWT.
      */
     void testLoginReturnsOk() throws Exception {
@@ -184,6 +310,98 @@ public class AuthControllerTest extends AuthControllerTestSupport {
                 .content(json(request)))
             .andExpect(status().isUnauthorized())
             .andExpect(jsonPath("$.code").value("UNAUTHORIZED"));
+    }
+
+    @Test
+    /**
+     * Verifies that login rejects a malformed email address before any lookup.
+     */
+    void testLoginWithInvalidEmailFormatReturnsBadRequest() throws Exception {
+        UserAccountLoginRequest request = new UserAccountLoginRequest(
+            "not-an-email",
+            "whatever"
+        );
+
+        mockMvc.perform(post("/api/v1/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
+    }
+
+    @Test
+    /**
+     * Verifies that a freshly registered user can immediately log in.
+     */
+    void testRegisteredUserCanLogin() throws Exception {
+        cleanDatabase();
+        UserAccountRegisterRequest register = new UserAccountRegisterRequest(
+            "Grace",
+            "Hopper",
+            "5550000006",
+            LocalDate.of(1906, 12, 9),
+            "female",
+            "+1 555 0300",
+            "grace.hopper@example.com",
+            "123 Main St",
+            "grace@example.com",
+            "compiler1"
+        );
+
+        mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(register)))
+            .andExpect(status().isCreated());
+
+        UserAccountLoginRequest login = new UserAccountLoginRequest(
+            "grace@example.com",
+            "compiler1"
+        );
+
+        mockMvc.perform(post("/api/v1/login")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(login)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    /**
+     * Verifies that the token issued by registration authenticates a real request
+     * against the protected `/me` endpoint (end-to-end JWT round trip).
+     */
+    void testRegisterTokenAuthenticatesOnMeEndpoint() throws Exception {
+        cleanDatabase();
+        UserAccountRegisterRequest register = new UserAccountRegisterRequest(
+            "Katherine",
+            "Johnson",
+            "5550000007",
+            LocalDate.of(1918, 8, 26),
+            "female",
+            "+1 555 0400",
+            "katherine.johnson@example.com",
+            "123 Main St",
+            "katherine@example.com",
+            "nasa1961"
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(register)))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        String token = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("token").asText();
+
+        mockMvc.perform(get("/api/v1/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.subject").value("katherine@example.com"))
+            .andExpect(jsonPath("$.email").value("katherine@example.com"))
+            .andExpect(jsonPath("$.name").value("Katherine Johnson"))
+            .andExpect(jsonPath("$.preferredUsername").value("katherine@example.com"))
+            .andExpect(jsonPath("$.authorities[0]").value("ROLE_PATIENT"));
     }
 
     @Test
