@@ -143,6 +143,7 @@ public class AuthController {
      */
     public ResponseEntity<UserAccountAuthenticationResponse> login(@RequestBody @Valid UserAccountLoginRequest request) {
         // hand the email/password pair to Spring Security so the password check stays centralized.
+        // this is defined in SecurityConfig
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(
                 request.email(),

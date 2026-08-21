@@ -196,6 +196,7 @@ public class UserAccountService implements UserDetailsService {
                 username,
                 request.email(),
                 passwordEncoder.encode(request.password()));  // use BCrypt to encode the password
+                                                              // this is defined in SecurityConfig
         return userAccountRepository.save(newUser);
     }
 
