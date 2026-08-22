@@ -26,6 +26,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import java.util.List;
 
 @Configuration
@@ -35,7 +37,7 @@ public class SecurityConfig {
     /**
      * Origins allowed to call the API (e.g. the frontend). Comma-separated.
      */
-    private List<String> allowedOrigins = List.of("http://localhost:5173", "http://localhost:3000");
+    private List<String> allowedOrigins = List.of();
 
     public List<String> getAllowedOrigins() {
         return allowedOrigins;
@@ -48,30 +50,32 @@ public class SecurityConfig {
     /**
      * Configures the stateless API security chain.
      *
-     * @param http Spring Security HTTP builder.
-     * @param jwtAuthenticationConverter converter that maps the custom roles claim into authorities.
+     * @param http                       Spring Security HTTP builder.
+     * @param jwtAuthenticationConverter converter that maps the custom roles claim
+     *                                   into authorities.
      * @return configured security filter chain.
      * @throws Exception if the chain cannot be built.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
         http
-            .cors(Customizer.withDefaults())
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/swagger-ui/**",
-                    "/swagger-ui.html",
-                    "/api-docs/**",
-                    "/api/v1/login",
-                    "/api/v1/register",
-                    "/api/v1/appointments/guest"
-                ).permitAll()
-                .anyRequest().authenticated()
-            ) // the api is stateless, so every protected request must carry a bearer token.
-            .oauth2ResourceServer((oauth2) -> oauth2
-                .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
+                .cors(Customizer.withDefaults())
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/api-docs/**",
+                                "/api/v1/login",
+                                "/api/v1/register",
+                                "/api/v1/appointments/guest")
+                        .permitAll()
+                        .anyRequest().authenticated()) // the api is stateless, so every protected request must carry a
+                                                       // bearer token.
+                .oauth2ResourceServer((oauth2) -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return http.build();
     }
 
@@ -81,9 +85,10 @@ public class SecurityConfig {
      * @return CORS configuration source backing the {@code cors()} filter.
      */
     @Bean
-    CorsConfigurationSource corsConfigurationSource() {
+    CorsConfigurationSource corsConfigurationSource(@Value("${cors.allowed-origins}") String corsOrigins) {
+        // @Value("${cors.allowed-origins}") String corsOrigins
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(allowedOrigins);
+        config.setAllowedOrigins(List.of(corsOrigins.split(",")));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -119,11 +124,12 @@ public class SecurityConfig {
      * Registers DAO-based authentication against the local user-account table.
      *
      * @param userDetailsService loader for local user credentials.
-     * @param passwordEncoder password hash verifier.
+     * @param passwordEncoder    password hash verifier.
      * @return DAO authentication provider.
      */
     @Bean
-    DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+    DaoAuthenticationProvider daoAuthenticationProvider(UserDetailsService userDetailsService,
+            PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setUserDetailsService(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder);
@@ -157,7 +163,8 @@ public class SecurityConfig {
                 return List.of();
             }
 
-            // Tokens store roles as a string array, so convert each entry into a GrantedAuthority.
+            // Tokens store roles as a string array, so convert each entry into a
+            // GrantedAuthority.
             return roles.stream()
                     .filter(String.class::isInstance)
                     .map(String.class::cast)
