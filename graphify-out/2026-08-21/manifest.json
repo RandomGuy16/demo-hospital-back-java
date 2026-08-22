@@ -1,11 +1,11 @@
 {
   "build.gradle.kts": {
-    "mtime": 1787359771.2404804,
+    "mtime": 1775319130.5980277,
     "ast_hash": "934aa6a6a41d51287018d93a70d8fbf6",
     "semantic_hash": "934aa6a6a41d51287018d93a70d8fbf6"
   },
   "docker/postgres/init/01-create-test-db.sql": {
-    "mtime": 1787359771.2422135,
+    "mtime": 1774395580.1525724,
     "ast_hash": "031f357b90df9b4ebeae76475c2f10e7",
     "semantic_hash": "031f357b90df9b4ebeae76475c2f10e7"
   },
@@ -15,507 +15,507 @@
     "semantic_hash": "794669d78aef1dd5c7d889ef618b311a"
   },
   "settings.gradle.kts": {
-    "mtime": 1787359771.2474804,
+    "mtime": 1775319130.5990279,
     "ast_hash": "faf50320afb3550fc3f9a6d23de8ff04",
     "semantic_hash": "faf50320afb3550fc3f9a6d23de8ff04"
   },
   "src/main/java/com/evergreen/generalhospital/DemoApplication.java": {
-    "mtime": 1787359771.2492967,
+    "mtime": 1775319130.5998077,
     "ast_hash": "ae5b14921bccb00fb348f3a66eba666c",
     "semantic_hash": "ae5b14921bccb00fb348f3a66eba666c"
   },
   "src/main/java/com/evergreen/generalhospital/DemoController.java": {
-    "mtime": 1787359771.2494023,
+    "mtime": 1775319130.5999177,
     "ast_hash": "16f98ce0f51ee1c68a5b3060d8399f8c",
     "semantic_hash": "16f98ce0f51ee1c68a5b3060d8399f8c"
   },
   "src/main/java/com/evergreen/generalhospital/config/SecurityConfig.java": {
-    "mtime": 1787359771.2494023,
-    "ast_hash": "3890fc637e72682ff941af5f45915a13",
-    "semantic_hash": ""
+    "mtime": 1775319130.5999177,
+    "ast_hash": "84dc49463dd5ad322526a6f2335d4ced",
+    "semantic_hash": "84dc49463dd5ad322526a6f2335d4ced"
   },
   "src/main/java/com/evergreen/generalhospital/config/SwaggerConfig.java": {
-    "mtime": 1787359771.249558,
+    "mtime": 1775319130.6000972,
     "ast_hash": "ee61f039a60aecc12161fe54b34d2779",
     "semantic_hash": "ee61f039a60aecc12161fe54b34d2779"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/AppointmentController.java": {
-    "mtime": 1787359771.249558,
-    "ast_hash": "16d25fcaebf9a653b72da3185f276e8e",
-    "semantic_hash": ""
+    "mtime": 1783788778.468289,
+    "ast_hash": "6f43be6b8c88197f8772d7fa72f031c8",
+    "semantic_hash": "6f43be6b8c88197f8772d7fa72f031c8"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/AuthController.java": {
-    "mtime": 1787359771.2496974,
-    "ast_hash": "3cf272796b5d0e1872d920e6ffbde5e5",
-    "semantic_hash": ""
+    "mtime": 1783747730.6343014,
+    "ast_hash": "2f2e2ee1fdef88866e4bd2840f89d229",
+    "semantic_hash": "2f2e2ee1fdef88866e4bd2840f89d229"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/DepartmentController.java": {
-    "mtime": 1787359771.2496974,
+    "mtime": 1783747730.6358335,
     "ast_hash": "a9777f924906a2494a9749eed50d0083",
     "semantic_hash": "a9777f924906a2494a9749eed50d0083"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/PatientController.java": {
-    "mtime": 1787362283.9870048,
-    "ast_hash": "e5585079d31176559fa9f747228f1492",
-    "semantic_hash": ""
+    "mtime": 1783747730.6352406,
+    "ast_hash": "4f6083bc8ec430f3304cb9f0fc5b2d01",
+    "semantic_hash": "4f6083bc8ec430f3304cb9f0fc5b2d01"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/PractitionerController.java": {
-    "mtime": 1787359771.2496974,
+    "mtime": 1783747730.634523,
     "ast_hash": "b51fe269fcc610948ab4c0e0a7d0bdae",
     "semantic_hash": "b51fe269fcc610948ab4c0e0a7d0bdae"
   },
   "src/main/java/com/evergreen/generalhospital/controllers/UserAccountController.java": {
-    "mtime": 1787359771.2496974,
+    "mtime": 1783747730.6340785,
     "ast_hash": "8c9ad6299741bcda1e3dc3993c2ca5a3",
     "semantic_hash": "8c9ad6299741bcda1e3dc3993c2ca5a3"
   },
   "src/main/java/com/evergreen/generalhospital/dto/DemoResponseBody.java": {
-    "mtime": 1787359771.2496974,
+    "mtime": 1775319130.6010385,
     "ast_hash": "a977d1a6a30788ac9119d359a5658749",
     "semantic_hash": "a977d1a6a30788ac9119d359a5658749"
   },
   "src/main/java/com/evergreen/generalhospital/dto/appointment/AppointmentRequest.java": {
-    "mtime": 1787359771.2500808,
+    "mtime": 1787170577.4736857,
     "ast_hash": "ada1573cde8f318ef01bb24e798bfed5",
     "semantic_hash": "ada1573cde8f318ef01bb24e798bfed5"
   },
   "src/main/java/com/evergreen/generalhospital/dto/appointment/AppointmentResponse.java": {
-    "mtime": 1787359771.2501354,
+    "mtime": 1783747730.557527,
     "ast_hash": "0afb0f410ef54b3af849dbdb19b2e91e",
     "semantic_hash": "0afb0f410ef54b3af849dbdb19b2e91e"
   },
   "src/main/java/com/evergreen/generalhospital/dto/appointment/GuestAppointmentRequest.java": {
-    "mtime": 1787359771.2501354,
+    "mtime": 1783789334.2308521,
     "ast_hash": "f7c4f26a1dedfb8aa46c630de69a9aae",
     "semantic_hash": "f7c4f26a1dedfb8aa46c630de69a9aae"
   },
   "src/main/java/com/evergreen/generalhospital/dto/department/DepartmentRequest.java": {
-    "mtime": 1787359771.2501354,
+    "mtime": 1783747730.5621672,
     "ast_hash": "89b09af8c8a0a9134ce443bd073949e4",
     "semantic_hash": "89b09af8c8a0a9134ce443bd073949e4"
   },
   "src/main/java/com/evergreen/generalhospital/dto/department/DepartmentResponse.java": {
-    "mtime": 1787359771.250276,
+    "mtime": 1783747730.5668974,
     "ast_hash": "2577cd1da9e466203c01e2fd60005477",
     "semantic_hash": "2577cd1da9e466203c01e2fd60005477"
   },
   "src/main/java/com/evergreen/generalhospital/dto/patient/DeletePatientRequest.java": {
-    "mtime": 1787359771.250276,
+    "mtime": 1783747730.5838912,
     "ast_hash": "391b4673ce7a218222ffac7ef71d035e",
     "semantic_hash": "391b4673ce7a218222ffac7ef71d035e"
   },
   "src/main/java/com/evergreen/generalhospital/dto/patient/PatientPatchRequest.java": {
-    "mtime": 1787359771.2504218,
+    "mtime": 1783747730.5795777,
     "ast_hash": "f1eaf0c1372a2e55529afaa3536dad8a",
     "semantic_hash": "f1eaf0c1372a2e55529afaa3536dad8a"
   },
   "src/main/java/com/evergreen/generalhospital/dto/patient/PatientRequest.java": {
-    "mtime": 1787359771.2504218,
+    "mtime": 1783747730.571344,
     "ast_hash": "96a6a9a58dab528576f0c8b3b3ebdfb8",
     "semantic_hash": "96a6a9a58dab528576f0c8b3b3ebdfb8"
   },
   "src/main/java/com/evergreen/generalhospital/dto/patient/PatientResponse.java": {
-    "mtime": 1787359771.2504218,
+    "mtime": 1783747730.5755675,
     "ast_hash": "b58e99f773805ac80a0c4dea0f22e4fb",
     "semantic_hash": "b58e99f773805ac80a0c4dea0f22e4fb"
   },
   "src/main/java/com/evergreen/generalhospital/dto/practitioner/PractitionerRequest.java": {
-    "mtime": 1787359771.2504804,
+    "mtime": 1783747730.5890212,
     "ast_hash": "b15a9ef5a7b5e2afffeb44e2a7c3bb9a",
     "semantic_hash": "b15a9ef5a7b5e2afffeb44e2a7c3bb9a"
   },
   "src/main/java/com/evergreen/generalhospital/dto/practitioner/PractitionerResponse.java": {
-    "mtime": 1787359771.251387,
+    "mtime": 1783747730.5966895,
     "ast_hash": "36b763d87fdde3226857570f59ae6ae2",
     "semantic_hash": "36b763d87fdde3226857570f59ae6ae2"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/CurrentUserResponse.java": {
-    "mtime": 1787359771.251387,
+    "mtime": 1783747730.6264603,
     "ast_hash": "1197742ba1c22a2baadf3226dffa1d08",
     "semantic_hash": "1197742ba1c22a2baadf3226dffa1d08"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/UserAccountAuthenticationResponse.java": {
-    "mtime": 1787359771.2514877,
+    "mtime": 1783747730.6222026,
     "ast_hash": "014d96ec2144ad10f7a8abe65652d43b",
     "semantic_hash": "014d96ec2144ad10f7a8abe65652d43b"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/UserAccountLoginRequest.java": {
-    "mtime": 1787359771.2514877,
+    "mtime": 1783747730.6134026,
     "ast_hash": "3adce76bd8eda99cb0867ab828d8c1c7",
     "semantic_hash": "3adce76bd8eda99cb0867ab828d8c1c7"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/UserAccountRegisterRequest.java": {
-    "mtime": 1787359771.2514877,
-    "ast_hash": "cbe8a5402998f19df225bdd1e4296597",
-    "semantic_hash": ""
+    "mtime": 1783747730.6180122,
+    "ast_hash": "43bd164b1a713d3dc64caa28c630f350",
+    "semantic_hash": "43bd164b1a713d3dc64caa28c630f350"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/UserAccountRequest.java": {
-    "mtime": 1787359771.2514877,
+    "mtime": 1783747730.6033688,
     "ast_hash": "6b1b32f62129ee2c928ffd47dd74bc9b",
     "semantic_hash": "6b1b32f62129ee2c928ffd47dd74bc9b"
   },
   "src/main/java/com/evergreen/generalhospital/dto/useraccount/UserAccountResponse.java": {
-    "mtime": 1787359771.2514877,
+    "mtime": 1783747730.6089778,
     "ast_hash": "8fc9be4ad90445cd67a56e6a9e8d06a7",
     "semantic_hash": "8fc9be4ad90445cd67a56e6a9e8d06a7"
   },
   "src/main/java/com/evergreen/generalhospital/errors/ApiException.java": {
-    "mtime": 1787359771.2514877,
+    "mtime": 1775319130.602028,
     "ast_hash": "e4bf2485bea35812fbd99eb950fb4b2b",
     "semantic_hash": "e4bf2485bea35812fbd99eb950fb4b2b"
   },
   "src/main/java/com/evergreen/generalhospital/errors/AppointmentCollisionException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "b44e2b00b8cebc523a3363db283b184d",
     "semantic_hash": "b44e2b00b8cebc523a3363db283b184d"
   },
   "src/main/java/com/evergreen/generalhospital/errors/ErrorCode.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "23c3a15e21269d28995bd9b0953c1a0a",
     "semantic_hash": "23c3a15e21269d28995bd9b0953c1a0a"
   },
   "src/main/java/com/evergreen/generalhospital/errors/ErrorResponse.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "f377d4b42eb751593fb558e2719890cb",
     "semantic_hash": "f377d4b42eb751593fb558e2719890cb"
   },
   "src/main/java/com/evergreen/generalhospital/errors/GlobalExceptionHandler.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "de6277d2359b05ebc5b22cace34a7511",
     "semantic_hash": "de6277d2359b05ebc5b22cace34a7511"
   },
   "src/main/java/com/evergreen/generalhospital/errors/ImmutableFieldException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "a6c4be68b5954917e1db2feaf6d8d2c1",
     "semantic_hash": "a6c4be68b5954917e1db2feaf6d8d2c1"
   },
   "src/main/java/com/evergreen/generalhospital/errors/RepeatedIdNumberException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "3a45e0af0d9353b01d44343bbf3648e3",
     "semantic_hash": "3a45e0af0d9353b01d44343bbf3648e3"
   },
   "src/main/java/com/evergreen/generalhospital/errors/RepeatedUsernameException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "22378daff40f55b5716bc619bf602e3f",
     "semantic_hash": "22378daff40f55b5716bc619bf602e3f"
   },
   "src/main/java/com/evergreen/generalhospital/errors/ResourceNotFoundException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "718fe1c7ec92bd4142c411b33dec11c2",
     "semantic_hash": "718fe1c7ec92bd4142c411b33dec11c2"
   },
   "src/main/java/com/evergreen/generalhospital/errors/SelfDiagnosisConflictException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "f355348b09a28fdaf5cd305d1fc75e0a",
     "semantic_hash": "f355348b09a28fdaf5cd305d1fc75e0a"
   },
   "src/main/java/com/evergreen/generalhospital/errors/UnclearUserRoleException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "9f4b2f9414080368297e6b1a224a4142",
     "semantic_hash": "9f4b2f9414080368297e6b1a224a4142"
   },
   "src/main/java/com/evergreen/generalhospital/errors/UserCredentialsNotMatchedException.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1775319130.6031682,
     "ast_hash": "2bfa50dc3326950e06e4782c09572521",
     "semantic_hash": "2bfa50dc3326950e06e4782c09572521"
   },
   "src/main/java/com/evergreen/generalhospital/mappers/AppointmentMapper.java": {
-    "mtime": 1787359771.2518268,
+    "mtime": 1783747730.6298783,
     "ast_hash": "abb6d1bfb3ddbb08187861510bdd36af",
     "semantic_hash": "abb6d1bfb3ddbb08187861510bdd36af"
   },
   "src/main/java/com/evergreen/generalhospital/mappers/DepartmentMapper.java": {
-    "mtime": 1787359771.2522905,
+    "mtime": 1783747730.6297371,
     "ast_hash": "404e6b16e0af9695eb59c1a10872e519",
     "semantic_hash": "404e6b16e0af9695eb59c1a10872e519"
   },
   "src/main/java/com/evergreen/generalhospital/mappers/PatientMapper.java": {
-    "mtime": 1787359771.2522905,
+    "mtime": 1783747730.6295264,
     "ast_hash": "210f2d8c9bd9c98ca943699d30e4d19b",
     "semantic_hash": "210f2d8c9bd9c98ca943699d30e4d19b"
   },
   "src/main/java/com/evergreen/generalhospital/mappers/PractitionerMapper.java": {
-    "mtime": 1787359771.2522905,
+    "mtime": 1783747730.630122,
     "ast_hash": "fb33b332d8d6c106f283043c28a1cd1f",
     "semantic_hash": "fb33b332d8d6c106f283043c28a1cd1f"
   },
   "src/main/java/com/evergreen/generalhospital/mappers/UserAccountMapper.java": {
-    "mtime": 1787359771.2522905,
+    "mtime": 1783747730.629999,
     "ast_hash": "f7ea441fbf9cfac40191237a5485dacb",
     "semantic_hash": "f7ea441fbf9cfac40191237a5485dacb"
   },
   "src/main/java/com/evergreen/generalhospital/models/Person.java": {
-    "mtime": 1787367187.7968926,
-    "ast_hash": "62d338d10f2a69a4101dffa2e43d1ae3",
-    "semantic_hash": ""
+    "mtime": 1775319130.6043808,
+    "ast_hash": "7f1d5f9cd9bc739896e0e3176a8d1f0d",
+    "semantic_hash": "7f1d5f9cd9bc739896e0e3176a8d1f0d"
   },
   "src/main/java/com/evergreen/generalhospital/models/appointment/Appointment.java": {
-    "mtime": 1787359771.2525501,
+    "mtime": 1775319130.6049411,
     "ast_hash": "0ab589fd222ca47c3ebe60cecf8c6d15",
     "semantic_hash": "0ab589fd222ca47c3ebe60cecf8c6d15"
   },
   "src/main/java/com/evergreen/generalhospital/models/appointment/AppointmentStatus.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "080c3af96a1dcf4e9d9df948dee41d41",
     "semantic_hash": "080c3af96a1dcf4e9d9df948dee41d41"
   },
   "src/main/java/com/evergreen/generalhospital/models/appointment/ValidAppointmentTime.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "a8f0a54383624a4e4f220a19c3a2f9ff",
     "semantic_hash": "a8f0a54383624a4e4f220a19c3a2f9ff"
   },
   "src/main/java/com/evergreen/generalhospital/models/appointment/ValidAppointmentTimeValidator.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "e05bf0ccd1baa2d4b00ca5da63757083",
     "semantic_hash": "e05bf0ccd1baa2d4b00ca5da63757083"
   },
   "src/main/java/com/evergreen/generalhospital/models/department/Department.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "511581882302c371df7ccc23043fec58",
     "semantic_hash": "511581882302c371df7ccc23043fec58"
   },
   "src/main/java/com/evergreen/generalhospital/models/medicalrecord/MedicalRecord.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "6125f97c58130a6302808c3df831bee4",
     "semantic_hash": "6125f97c58130a6302808c3df831bee4"
   },
   "src/main/java/com/evergreen/generalhospital/models/patient/Patient.java": {
-    "mtime": 1787367226.2943795,
-    "ast_hash": "473874172648e8db1bafd0143ee32708",
-    "semantic_hash": ""
+    "mtime": 1775319130.6050816,
+    "ast_hash": "799acd00563f5e078d1c1527b3a5faf9",
+    "semantic_hash": "799acd00563f5e078d1c1527b3a5faf9"
   },
   "src/main/java/com/evergreen/generalhospital/models/practitioner/Practitioner.java": {
-    "mtime": 1787359771.2526186,
-    "ast_hash": "665ebd1c37b51c0a58403b72cc62698f",
-    "semantic_hash": ""
+    "mtime": 1775319130.6050816,
+    "ast_hash": "fdaac0621046acb3f6d1d05b1de7d1c3",
+    "semantic_hash": "fdaac0621046acb3f6d1d05b1de7d1c3"
   },
   "src/main/java/com/evergreen/generalhospital/models/useraccount/Role.java": {
-    "mtime": 1787359771.2526186,
+    "mtime": 1775319130.6050816,
     "ast_hash": "fc8b2a6d9e340636468d5f5201cf6327",
     "semantic_hash": "fc8b2a6d9e340636468d5f5201cf6327"
   },
   "src/main/java/com/evergreen/generalhospital/models/useraccount/UserAccount.java": {
-    "mtime": 1787359771.2530613,
+    "mtime": 1775319130.6062493,
     "ast_hash": "9fd10d8b690538895e6c7898b6e2c990",
     "semantic_hash": "9fd10d8b690538895e6c7898b6e2c990"
   },
   "src/main/java/com/evergreen/generalhospital/models/useraccount/ValidUserAccountRoleLink.java": {
-    "mtime": 1787359771.2530613,
+    "mtime": 1775319130.6062493,
     "ast_hash": "4dd44c4bc83668b82b9e3f521babea0b",
     "semantic_hash": "4dd44c4bc83668b82b9e3f521babea0b"
   },
   "src/main/java/com/evergreen/generalhospital/models/useraccount/ValidUserAccountRoleLinkValidator.java": {
-    "mtime": 1787359771.2530613,
+    "mtime": 1775319130.6062493,
     "ast_hash": "af52bae661883adb0010ebba0f827426",
     "semantic_hash": "af52bae661883adb0010ebba0f827426"
   },
   "src/main/java/com/evergreen/generalhospital/paging/SortParser.java": {
-    "mtime": 1787359771.2530613,
+    "mtime": 1775319130.6062493,
     "ast_hash": "34ab5c434199360a32ab6bc61da93f68",
     "semantic_hash": "34ab5c434199360a32ab6bc61da93f68"
   },
   "src/main/java/com/evergreen/generalhospital/repositories/AppointmentRepository.java": {
-    "mtime": 1787359771.2530613,
-    "ast_hash": "e12aa2e060c720571bbf8169f4bb2618",
-    "semantic_hash": ""
+    "mtime": 1775319130.6062493,
+    "ast_hash": "54c8a01503db557a20a100d7f39e5a3a",
+    "semantic_hash": "54c8a01503db557a20a100d7f39e5a3a"
   },
   "src/main/java/com/evergreen/generalhospital/repositories/DepartmentRepository.java": {
-    "mtime": 1787359771.2533164,
+    "mtime": 1775319130.6068685,
     "ast_hash": "3f837d5f3030409dade24859bf3bfe5f",
     "semantic_hash": "3f837d5f3030409dade24859bf3bfe5f"
   },
   "src/main/java/com/evergreen/generalhospital/repositories/PatientRepository.java": {
-    "mtime": 1787367292.0869997,
+    "mtime": 1787171572.5192673,
     "ast_hash": "167161134d52c04fe9f1c57970cd8173",
     "semantic_hash": "167161134d52c04fe9f1c57970cd8173"
   },
   "src/main/java/com/evergreen/generalhospital/repositories/PractitionerRepository.java": {
-    "mtime": 1787359771.2533164,
+    "mtime": 1775319130.6068685,
     "ast_hash": "352331f31527eaae925aa67a28863a1f",
     "semantic_hash": "352331f31527eaae925aa67a28863a1f"
   },
   "src/main/java/com/evergreen/generalhospital/repositories/UserAccountRepository.java": {
-    "mtime": 1787359771.2533164,
-    "ast_hash": "f4526b3b6b830af5fe4aeabf7e0bc788",
-    "semantic_hash": ""
+    "mtime": 1775319130.6068685,
+    "ast_hash": "7951147e8a764a0d1d21e865ee28b134",
+    "semantic_hash": "7951147e8a764a0d1d21e865ee28b134"
   },
   "src/main/java/com/evergreen/generalhospital/services/AppointmentService.java": {
-    "mtime": 1787359771.2533164,
-    "ast_hash": "2de8f3dcee2d53f77c6c76903b5e794e",
-    "semantic_hash": ""
+    "mtime": 1783747730.633283,
+    "ast_hash": "a0786d6e50ebb91168101260c11554c9",
+    "semantic_hash": "a0786d6e50ebb91168101260c11554c9"
   },
   "src/main/java/com/evergreen/generalhospital/services/DepartmentService.java": {
-    "mtime": 1787359771.2535906,
+    "mtime": 1783747730.6336417,
     "ast_hash": "d7f21d109c8216c17d5889c55aba3d57",
     "semantic_hash": "d7f21d109c8216c17d5889c55aba3d57"
   },
   "src/main/java/com/evergreen/generalhospital/services/JwtService.java": {
-    "mtime": 1787359771.2535906,
-    "ast_hash": "2de3fbe11803c54c9445ec200434adb5",
-    "semantic_hash": ""
+    "mtime": 1775319130.607345,
+    "ast_hash": "177b75ff1c0c892eb15bafe4e39c9f79",
+    "semantic_hash": "177b75ff1c0c892eb15bafe4e39c9f79"
   },
   "src/main/java/com/evergreen/generalhospital/services/PatientService.java": {
-    "mtime": 1787367306.3831382,
-    "ast_hash": "7e8895c9a24df8a57124e4b61a8cfdb8",
-    "semantic_hash": ""
+    "mtime": 1783747730.633837,
+    "ast_hash": "8e0175b7b039f68de33d13d2008fc0b6",
+    "semantic_hash": "8e0175b7b039f68de33d13d2008fc0b6"
   },
   "src/main/java/com/evergreen/generalhospital/services/PractitionerService.java": {
-    "mtime": 1787359771.2535906,
+    "mtime": 1783747730.633469,
     "ast_hash": "8ac34a4a89ed227ed913dd9e79d28bba",
     "semantic_hash": "8ac34a4a89ed227ed913dd9e79d28bba"
   },
   "src/main/java/com/evergreen/generalhospital/services/UserAccountService.java": {
-    "mtime": 1787359771.2535906,
-    "ast_hash": "e5c5f3af15db6b45ca3496ae19a51def",
-    "semantic_hash": ""
+    "mtime": 1783747730.632936,
+    "ast_hash": "3596f3b2ba5406d8585df40059286390",
+    "semantic_hash": "3596f3b2ba5406d8585df40059286390"
   },
   "src/main/resources/db/migration/V1__init_schema.sql": {
-    "mtime": 1787359771.2539983,
+    "mtime": 1774395580.154915,
     "ast_hash": "2975650f8340ede49cb5c4c2820a8ec1",
     "semantic_hash": "2975650f8340ede49cb5c4c2820a8ec1"
   },
   "src/main/resources/db/migration/V2__appointment_indexes_and_constraints.sql": {
-    "mtime": 1787359771.2540653,
+    "mtime": 1774474112.6118016,
     "ast_hash": "31a93d01c6912f377fc334c6e1ecf0c4",
     "semantic_hash": "31a93d01c6912f377fc334c6e1ecf0c4"
   },
   "src/main/resources/db/migration/V3__create_user_accounts.sql": {
-    "mtime": 1787359771.2540653,
+    "mtime": 1775173384.7120438,
     "ast_hash": "2004d20afd1a0582a6598e66d4fa8e9a",
     "semantic_hash": "2004d20afd1a0582a6598e66d4fa8e9a"
   },
   "src/main/resources/db/migration/V4__add_user_account_password_hash.sql": {
-    "mtime": 1787359771.2540653,
+    "mtime": 1775173384.7120438,
     "ast_hash": "4f7db18f926575c4bb9c1134fa122dd1",
     "semantic_hash": "4f7db18f926575c4bb9c1134fa122dd1"
   },
   "src/main/resources/db/migration/V5__enforce_user_account_one_to_one_links.sql": {
-    "mtime": 1787359771.2540653,
+    "mtime": 1775319130.607345,
     "ast_hash": "7fd7caea0d8e6dac83a1f7b09355671b",
     "semantic_hash": "7fd7caea0d8e6dac83a1f7b09355671b"
   },
   "src/test/java/com/evergreen/generalhospital/AppointmentControllerTest.java": {
-    "mtime": 1787359771.2543547,
-    "ast_hash": "5d9295b76e25ecbf25143fe9b4ac1aee",
-    "semantic_hash": ""
+    "mtime": 1783747730.6382232,
+    "ast_hash": "47139f39d72378584a4376ade891a7bd",
+    "semantic_hash": "47139f39d72378584a4376ade891a7bd"
   },
   "src/test/java/com/evergreen/generalhospital/AppointmentServiceTest.java": {
-    "mtime": 1787359771.2544532,
-    "ast_hash": "c19d51110c525e5e1f4abffbf9d7ba05",
-    "semantic_hash": ""
+    "mtime": 1783747730.6373425,
+    "ast_hash": "a330df0fee4926c15508fe951367e932",
+    "semantic_hash": "a330df0fee4926c15508fe951367e932"
   },
   "src/test/java/com/evergreen/generalhospital/AuthControllerTest.java": {
-    "mtime": 1787364094.4547317,
-    "ast_hash": "8a49be7ab8a47a8fbc0a7f8e3a6c3e49",
-    "semantic_hash": ""
+    "mtime": 1783747730.6389825,
+    "ast_hash": "5dce1e65034c558363737222fdcb3f42",
+    "semantic_hash": "5dce1e65034c558363737222fdcb3f42"
   },
   "src/test/java/com/evergreen/generalhospital/DemoApplicationTests.java": {
-    "mtime": 1787359771.2544532,
+    "mtime": 1775319130.6084378,
     "ast_hash": "9aea88b71902d13a994110194efcd6de",
     "semantic_hash": "9aea88b71902d13a994110194efcd6de"
   },
   "src/test/java/com/evergreen/generalhospital/DepartmentControllerTest.java": {
-    "mtime": 1787359771.2544532,
+    "mtime": 1783747730.640889,
     "ast_hash": "02cab8cdff0018dc565a82a11798d3c7",
     "semantic_hash": "02cab8cdff0018dc565a82a11798d3c7"
   },
   "src/test/java/com/evergreen/generalhospital/PatientControllerTest.java": {
-    "mtime": 1787364057.149295,
+    "mtime": 1783747730.6413968,
     "ast_hash": "8e90bcef7167ab2ec296628a3f6ca994",
     "semantic_hash": "8e90bcef7167ab2ec296628a3f6ca994"
   },
   "src/test/java/com/evergreen/generalhospital/PractitionerControllerTest.java": {
-    "mtime": 1787359771.2544532,
+    "mtime": 1783747730.6393971,
     "ast_hash": "1dd17edeb0e62a6dfd341dc007af4d57",
     "semantic_hash": "1dd17edeb0e62a6dfd341dc007af4d57"
   },
   "src/test/java/com/evergreen/generalhospital/UserAccountServiceTest.java": {
-    "mtime": 1787359771.2544532,
-    "ast_hash": "4bb2febc0651398f49444e1d3a5f4c32",
-    "semantic_hash": ""
+    "mtime": 1783747730.6402953,
+    "ast_hash": "8788273f3e66aa67020206f14438c442",
+    "semantic_hash": "8788273f3e66aa67020206f14438c442"
   },
   "src/test/java/com/evergreen/generalhospital/logging/TestLog.java": {
-    "mtime": 1787359771.2544532,
+    "mtime": 1775319130.6084378,
     "ast_hash": "47a54a0a87fa597c90d164dba7174dd6",
     "semantic_hash": "47a54a0a87fa597c90d164dba7174dd6"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/base/AuthControllerTestSupport.java": {
-    "mtime": 1787359771.2552197,
-    "ast_hash": "6c8adc459dfaa9479dc4d55728aec3d3",
-    "semantic_hash": ""
+    "mtime": 1775319130.609297,
+    "ast_hash": "5433c099e3631d3d0133e72cc0eca1d8",
+    "semantic_hash": "5433c099e3631d3d0133e72cc0eca1d8"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/base/CrudControllerTestSupport.java": {
-    "mtime": 1787359771.255301,
-    "ast_hash": "5bd025871e4c8f81ba7549d6edc45d87",
-    "semantic_hash": ""
+    "mtime": 1775319130.6093912,
+    "ast_hash": "2eba766a0a57aebca239e1aeb1a20d88",
+    "semantic_hash": "2eba766a0a57aebca239e1aeb1a20d88"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/factories/AppointmentFactory.java": {
-    "mtime": 1787359771.255301,
+    "mtime": 1775319130.6093912,
     "ast_hash": "a07f1295d37842351325f4467a89edcf",
     "semantic_hash": "a07f1295d37842351325f4467a89edcf"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/factories/DepartmentFactory.java": {
-    "mtime": 1787359771.2554297,
+    "mtime": 1775319130.6095886,
     "ast_hash": "91e6a746fc71a4ddf224491e19e5bd2a",
     "semantic_hash": "91e6a746fc71a4ddf224491e19e5bd2a"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/factories/PatientFactory.java": {
-    "mtime": 1787359771.2554297,
+    "mtime": 1775319130.6095886,
     "ast_hash": "f7720f171add3f1d30c936dcc29479a8",
     "semantic_hash": "f7720f171add3f1d30c936dcc29479a8"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/factories/PractitionerFactory.java": {
-    "mtime": 1787359771.2554297,
+    "mtime": 1775319130.6095886,
     "ast_hash": "6f8b6ec95352030b2ac84c2d9ee4eb63",
     "semantic_hash": "6f8b6ec95352030b2ac84c2d9ee4eb63"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/factories/UserAccountFactory.java": {
-    "mtime": 1787359771.2554297,
+    "mtime": 1775319130.6095886,
     "ast_hash": "31854564f71e6131b8c919ecd552e970",
     "semantic_hash": "31854564f71e6131b8c919ecd552e970"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/fixtures/AuthFixtures.java": {
-    "mtime": 1787359771.2554297,
+    "mtime": 1775319130.6095886,
     "ast_hash": "b70e458e1fe98d10866b207ace931a62",
     "semantic_hash": "b70e458e1fe98d10866b207ace931a62"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/fixtures/DomainFixtures.java": {
-    "mtime": 1787359771.2556643,
+    "mtime": 1775319130.6099458,
     "ast_hash": "74ad5a5bf13509f1b49af74bb2d03f9c",
     "semantic_hash": "74ad5a5bf13509f1b49af74bb2d03f9c"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/util/DatabaseCleanup.java": {
-    "mtime": 1787359771.2556643,
-    "ast_hash": "424e97c294014f884fac814931029821",
-    "semantic_hash": ""
+    "mtime": 1775319130.6099458,
+    "ast_hash": "a58ec37c83d85821a90b129e4276df8a",
+    "semantic_hash": "a58ec37c83d85821a90b129e4276df8a"
   },
   "src/test/java/com/evergreen/generalhospital/testsupport/util/JsonTestHelper.java": {
-    "mtime": 1787359771.255774,
+    "mtime": 1775319130.610122,
     "ast_hash": "0463b89c5346395937d558a6c8006245",
     "semantic_hash": "0463b89c5346395937d558a6c8006245"
   },
   "AGENTS.md": {
-    "mtime": 1787359771.2397177,
+    "mtime": 1775319130.5970898,
     "ast_hash": "8b7b533ea747ff8ae7881750dfc08ce3",
     "semantic_hash": "8b7b533ea747ff8ae7881750dfc08ce3"
   },
   "CONTRIBUTING.md": {
-    "mtime": 1787359771.2397177,
+    "mtime": 1775319130.5970898,
     "ast_hash": "1519e540a09f6b73a1dd7889c26aac19",
     "semantic_hash": "1519e540a09f6b73a1dd7889c26aac19"
   },
   "PROJECT_GUIDELINES.md": {
-    "mtime": 1787359771.2404804,
+    "mtime": 1775319130.5980277,
     "ast_hash": "76b768b91066f0cb8e44a1c8fc0c17b2",
     "semantic_hash": "76b768b91066f0cb8e44a1c8fc0c17b2"
   },
   "README.md": {
-    "mtime": 1787359771.2404804,
+    "mtime": 1775319130.5980277,
     "ast_hash": "c582e2c61a08b690c59f64194611761e",
     "semantic_hash": "c582e2c61a08b690c59f64194611761e"
   },
   "ROADMAP.md": {
-    "mtime": 1787359771.2404804,
+    "mtime": 1775319130.5980277,
     "ast_hash": "acb71dc4e8252bc19c497e5b001695bb",
     "semantic_hash": "acb71dc4e8252bc19c497e5b001695bb"
   },
@@ -525,53 +525,18 @@
     "semantic_hash": "a3dfe65c50739ca99f6a79772b70a5b5"
   },
   "docker-compose.yml": {
-    "mtime": 1787359771.2404804,
+    "mtime": 1774395580.1512737,
     "ast_hash": "802c3ed4d25882eedc5eb967987d9536",
     "semantic_hash": "802c3ed4d25882eedc5eb967987d9536"
   },
   "docs/ARCHITECTURE.md": {
-    "mtime": 1787359771.2422135,
+    "mtime": 1775319130.5980277,
     "ast_hash": "11ff121a101a25dc0d1fb1d0be0349d4",
     "semantic_hash": "11ff121a101a25dc0d1fb1d0be0349d4"
   },
   "docs/openapi.yaml": {
-    "mtime": 1787359771.2422135,
-    "ast_hash": "4f0427cab83be8a821707a4eb474fbe2",
-    "semantic_hash": ""
-  },
-  "src/main/java/com/evergreen/generalhospital/errors/PatientIdentityMismatchException.java": {
-    "mtime": 1787359771.2518268,
-    "ast_hash": "6c1401e42ffa05761f0d8b6524d09137",
-    "semantic_hash": ""
-  },
-  "src/main/java/com/evergreen/generalhospital/repositories/PersonRepository.java": {
-    "mtime": 1787359771.2533164,
-    "ast_hash": "4add01f7a371ad810898b50a7cb9a878",
-    "semantic_hash": ""
-  },
-  "src/main/resources/db/migration/V6__guest_patients_partial_identity.sql": {
-    "mtime": 1787359771.2540653,
-    "ast_hash": "40482e54a80ee13e1c5f282e424aa79e",
-    "semantic_hash": ""
-  },
-  "src/main/resources/db/migration/V7__create_persons_table_and_joined_inheritance.sql": {
-    "mtime": 1787359771.2540653,
-    "ast_hash": "13d1c40da1c4af0bf302d0d3d3aeadd0",
-    "semantic_hash": ""
-  },
-  "src/main/resources/db/migration/V8__add_emergency_contact_to_patients.sql": {
-    "mtime": 1787363623.746677,
-    "ast_hash": "64a05cfb4065334b86267e2a0aed9e93",
-    "semantic_hash": ""
-  },
-  "src/main/resources/db/migration/V9__rename_person_contacts_to_emergency_contact.sql": {
-    "mtime": 1787367158.994505,
-    "ast_hash": "64f2b1c86e747a881001d5d626021bf4",
-    "semantic_hash": ""
-  },
-  "src/test/java/com/evergreen/generalhospital/PatientServiceTest.java": {
-    "mtime": 1787363898.7954988,
-    "ast_hash": "876ef791c351c5a3bebb13338e7c745e",
-    "semantic_hash": ""
+    "mtime": 1775319130.5990279,
+    "ast_hash": "79fb86a97ac13c020e20a71d2b5526d0",
+    "semantic_hash": "79fb86a97ac13c020e20a71d2b5526d0"
   }
 }

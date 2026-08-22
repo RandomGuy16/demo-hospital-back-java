@@ -23,10 +23,6 @@ public class Patient extends Person {
     @Column(nullable = false, length = 200)
     private String address;
 
-    @Schema(example = "Jane Doe (+1 555 9999)")
-    @Column(name = "emergency_contact", length = 200)
-    private String emergencyContact;
-
     @OneToMany(mappedBy = "patient", fetch = FetchType.LAZY)
     @JsonIgnore
     private List<Appointment> appointments;
@@ -74,14 +70,6 @@ public class Patient extends Person {
 
     public void setAddress(String address) {
         this.address = address;
-    }
-
-    public String getEmergencyContact() {
-        return emergencyContact;
-    }
-
-    public void setEmergencyContact(String emergencyContact) {
-        this.emergencyContact = emergencyContact;
     }
 
     public List<Appointment> getAppointments() {

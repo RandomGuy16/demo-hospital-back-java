@@ -42,9 +42,9 @@ public abstract class Person {
     @Column(name = "phone_number", nullable = false, length = 20)
     private String phoneNumber;
 
-    @Schema(example = "jane.doe@example.com")
-    @Column(length = 200)
-    private String contacts;
+    @Schema(example = "Jane Doe (+1 555 9999)")
+    @Column(name = "emergency_contact", length = 200)
+    private String emergencyContact;
 
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2026-03-17T12:30:00")
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -59,14 +59,14 @@ public abstract class Person {
     }
 
     protected Person(String firstName, String lastName, String idNumber, LocalDate dateOfBirth,
-                     String gender, String phoneNumber, String contacts) {
+                     String gender, String phoneNumber, String emergencyContact) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.idNumber = idNumber;
         this.dateOfBirth = dateOfBirth;
         this.gender = gender;
         this.phoneNumber = phoneNumber;
-        this.contacts = contacts;
+        this.emergencyContact = emergencyContact;
     }
 
     @PrePersist
@@ -117,8 +117,12 @@ public abstract class Person {
         return phoneNumber;
     }
 
+    public String getEmergencyContact() {
+        return emergencyContact;
+    }
+
     public String getContacts() {
-        return contacts;
+        return emergencyContact;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -154,7 +158,11 @@ public abstract class Person {
         this.phoneNumber = phoneNumber;
     }
 
+    public void setEmergencyContact(String emergencyContact) {
+        this.emergencyContact = emergencyContact;
+    }
+
     public void setContacts(String contacts) {
-        this.contacts = contacts;
+        this.emergencyContact = contacts;
     }
 }

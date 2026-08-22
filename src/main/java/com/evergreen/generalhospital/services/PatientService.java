@@ -169,8 +169,7 @@ public class PatientService {
 
     public Optional<Patient> getPatientByEmail(String email) {
         return userAccountRepository.findByEmail(email)
-                .map(UserAccount::getPatient)
-                .or(() -> patientRepository.findByContacts(email));
+                .map(UserAccount::getPatient);
     }
 
     public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {
