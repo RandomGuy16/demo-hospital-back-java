@@ -6,7 +6,9 @@ import com.evergreen.generalhospital.errors.ImmutableFieldException;
 import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.models.patient.Patient;
+import com.evergreen.generalhospital.models.useraccount.UserAccount;
 import com.evergreen.generalhospital.repositories.PatientRepository;
+import com.evergreen.generalhospital.repositories.UserAccountRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Transactional
 public class PatientService {
     private final PatientRepository patientRepository;
+    private final UserAccountRepository userAccountRepository;
 
     // once I had a problem because LSP didn't find the "bean" of PatientRepository,
     // it meant that spring didnt recognize it, that's why we use decorators
@@ -35,8 +38,9 @@ public class PatientService {
      * @Configuration - Configuration classes
      */
 
-    public PatientService(PatientRepository patientRepository) {
+    public PatientService(PatientRepository patientRepository, UserAccountRepository userAccountRepository) {
         this.patientRepository = patientRepository;
+        this.userAccountRepository = userAccountRepository;
     }
 
     private String generateMrn(String idNumber) {
@@ -164,8 +168,9 @@ public class PatientService {
     }
 
     public Optional<Patient> getPatientByEmail(String email) {
-        // TODO: rename "contacts" to "email" and add an emergency contact
-        return patientRepository.findByContacts(email);
+        return userAccountRepository.findByEmail(email)
+                .map(UserAccount::getPatient)
+                .or(() -> patientRepository.findByContacts(email));
     }
 
     public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {

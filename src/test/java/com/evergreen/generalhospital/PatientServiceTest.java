@@ -27,6 +27,9 @@ class PatientServiceTest {
     @Mock
     private PatientRepository patientRepository;
 
+    @Mock
+    private com.evergreen.generalhospital.repositories.UserAccountRepository userAccountRepository;
+
     @InjectMocks
     private PatientService patientService;
 

@@ -437,4 +437,39 @@ public class AuthControllerTest extends AuthControllerTestSupport {
         mockMvc.perform(get("/api/v1/me"))
             .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    /**
+     * Verifies that `/api/v1/patients/me` returns the logged-in patient's record.
+     */
+    void testPatientCanFetchTheirInfoOnPatientsMeEndpoint() throws Exception {
+        cleanDatabase();
+        UserAccountRegisterRequest register = new UserAccountRegisterRequest(
+            "Katherine",
+            "Johnson",
+            "5550000007",
+            LocalDate.of(1918, 8, 26),
+            "female",
+            "+1 555 0400",
+            "katherine.johnson@example.com",
+            "123 Main St",
+            "katherine@example.com",
+            "nasa1961"
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/v1/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(register)))
+            .andExpect(status().isCreated())
+            .andReturn();
+
+        String token = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("token").asText();
+
+        mockMvc.perform(get("/api/v1/patients/me")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.firstName").value("Katherine"))
+            .andExpect(jsonPath("$.lastName").value("Johnson"));
+    }
 }
