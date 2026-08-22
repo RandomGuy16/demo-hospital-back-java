@@ -9,6 +9,7 @@ import com.evergreen.generalhospital.testsupport.fixtures.AuthFixtures;
 import com.evergreen.generalhospital.testsupport.util.DatabaseCleanup;
 import com.evergreen.generalhospital.testsupport.util.JsonTestHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -70,6 +71,14 @@ public abstract class AuthControllerTestSupport {
                 domainFixtures.funnySubjects.practitioner(),
                 domainFixtures.funnySubjects.department()
         );
+    }
+
+    /**
+     * Resets the database after each test ends to guarantee clean state.
+     */
+    @AfterEach
+    void tearDown() {
+        databaseCleanup.cleanDatabase();
     }
 
     /**

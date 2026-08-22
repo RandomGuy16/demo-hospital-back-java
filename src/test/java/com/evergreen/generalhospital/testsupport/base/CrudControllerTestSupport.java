@@ -17,6 +17,7 @@ import com.evergreen.generalhospital.testsupport.fixtures.AuthFixtures;
 import com.evergreen.generalhospital.testsupport.util.DatabaseCleanup;
 import com.evergreen.generalhospital.testsupport.util.JsonTestHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -80,18 +81,40 @@ public abstract class CrudControllerTestSupport {
     protected TestSubjects funnySubjects;
 
     /**
-     * Resets the database and seeds the default CRUD fixtures before each test.
+     * Resets the database and seeds default CRUD fixtures before each test.
      */
     @BeforeEach
     void setUp() {
         databaseCleanup.cleanDatabase();
+        seedDefaultSubjects();
+        seedFunnySubjects();
+    }
+
+    /**
+     * Resets the database after each test ends to guarantee clean state.
+     */
+    @AfterEach
+    void tearDown() {
+        databaseCleanup.cleanDatabase();
+    }
+
+    /**
+     * Seeds default subjects (John Doe, Shoko Ieiri, Cardiology department).
+     */
+    protected void seedDefaultSubjects() {
         domainFixtures.seedDefaultSubjects();
-        domainFixtures.seedFunnySubjects();
         defaultSubjects = new TestSubjects(
                 domainFixtures.defaultSubjects.patient(),
                 domainFixtures.defaultSubjects.practitioner(),
                 domainFixtures.defaultSubjects.department()
         );
+    }
+
+    /**
+     * Seeds funny subjects (Anita Bath, Holly Day, Duckology department).
+     */
+    protected void seedFunnySubjects() {
+        domainFixtures.seedFunnySubjects();
         funnySubjects = new TestSubjects(
                 domainFixtures.funnySubjects.patient(),
                 domainFixtures.funnySubjects.practitioner(),

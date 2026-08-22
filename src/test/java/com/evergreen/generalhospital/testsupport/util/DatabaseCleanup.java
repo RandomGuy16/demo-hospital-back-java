@@ -22,6 +22,9 @@ public class DatabaseCleanup {
     @Autowired
     protected UserAccountRepository userAccountRepository;
 
+    @Autowired
+    protected PersonRepository personRepository;
+
     /**
      * Deletes test data in dependency order so foreign keys do not block cleanup.
      */
@@ -29,7 +32,8 @@ public class DatabaseCleanup {
         appointmentRepository.deleteAll();
         userAccountRepository.deleteAll();
         practitionerRepository.deleteAll();
-        departmentRepository.deleteAll();
         patientRepository.deleteAll();
+        departmentRepository.deleteAll();
+        personRepository.deleteAll();
     }
 }
