@@ -5,23 +5,33 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import java.util.UUID;
+
 @Schema(description = "Common person attributes shared by patients and practitioners")
-@MappedSuperclass
+@Entity
+@Table(name = "persons")
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Person {
+    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "person_id")
+    private UUID id;
+
     @Schema(example = "Jane")
-    @Column(nullable = false, length = 50)
+    @Column(name = "first_name", length = 50)
     private String firstName;
 
     @Schema(example = "Doe")
-    @Column(nullable = false, length = 50)
+    @Column(name = "last_name", length = 50)
     private String lastName;
 
     @Schema(example = "1234567890")
-    @Column(name = "id_number", nullable = false, length = 10, unique = true)
+    @Column(name = "id_number", nullable = false, length = 10)
     private String idNumber;
 
     @Schema(example = "1995-04-18")
-    @Column(name = "date_of_birth", nullable = false)
+    @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
     @Schema(example = "female")
@@ -71,6 +81,14 @@ public abstract class Person {
     }
 
     // Getters
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
     public String getFirstName() {
         return firstName;
     }

@@ -15,9 +15,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @Override
     List<Appointment> findAll();
 
-    List<Appointment> findByPractitioner_PractitionerId(UUID practitionerId);
+    List<Appointment> findByPractitioner_Id(UUID practitionerId);
 
-    List<Appointment> findByPatient_PatientId(UUID patientId);
+    List<Appointment> findByPatient_Id(UUID patientId);
 
     List<Appointment> findByDepartment_DepartmentId(UUID departmentId);
 
@@ -27,18 +27,18 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     Set<Appointment> findAppointmentsByEndBefore(LocalDateTime endTime);
 
     // methods to find appointment collisions for patients and practitioners
-    Set<Appointment> findByPatient_PatientIdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
-    boolean existsByPatient_PatientIdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
-    boolean existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+    Set<Appointment> findByPatient_IdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPatient_IdAndStartBeforeAndEndAfter(UUID patientId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPatient_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
             UUID patientId,
             UUID appointmentId,
             LocalDateTime requestedEnd,
             LocalDateTime requestedStart
     );
 
-    Set<Appointment> findByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
-    boolean existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
-    boolean existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+    Set<Appointment> findByPractitioner_IdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPractitioner_IdAndStartBeforeAndEndAfter(UUID practitionerId, LocalDateTime requestedEnd, LocalDateTime requestedStart);
+    boolean existsByPractitioner_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
             UUID practitionerId,
             UUID appointmentId,
             LocalDateTime requestedEnd,

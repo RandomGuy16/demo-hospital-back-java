@@ -13,16 +13,8 @@ import java.util.List;
 @Schema(name = "Patient", description = "Patient record")
 @Entity
 @Table(name = "patients")
-@AttributeOverride(name = "firstName", column = @Column(name = "first_name", nullable = true))
-@AttributeOverride(name = "lastName", column = @Column(name = "last_name", nullable = true))
-@AttributeOverride(name = "dateOfBirth", column = @Column(name = "date_of_birth", nullable = true))
+@PrimaryKeyJoinColumn(name = "patient_id")
 public class Patient extends Person {
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "3fa85f64-5717-4562-b3fc-2c963f66afa6")
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "patient_id")
-    private UUID patientId;
-
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "ShokoIeiri-1234567890ABCDEF12")
     @Column(nullable = false, unique = true, length = 50)
     private String mrn;  // Medical Record Number
@@ -57,7 +49,11 @@ public class Patient extends Person {
 
     // Getters and Setters
     public UUID getPatientId() {
-        return patientId;
+        return getId();
+    }
+
+    public void setPatientId(UUID patientId) {
+        setId(patientId);
     }
 
     public String getMrn() {

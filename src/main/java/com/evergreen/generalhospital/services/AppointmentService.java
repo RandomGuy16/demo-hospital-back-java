@@ -56,10 +56,10 @@ public class AppointmentService {
     private void validateAppointmentNoCollision(UUID patientId, UUID practitionerId,
                                                 LocalDateTime start, LocalDateTime end) throws AppointmentCollisionException {
         boolean doesPatientHaveCollision = appointmentRepository
-            .existsByPatient_PatientIdAndStartBeforeAndEndAfter(patientId, end, start);
+            .existsByPatient_IdAndStartBeforeAndEndAfter(patientId, end, start);
 
         boolean doesPractitionerHaveCollision = appointmentRepository
-            .existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(practitionerId, end, start);
+            .existsByPractitioner_IdAndStartBeforeAndEndAfter(practitionerId, end, start);
 
         if (doesPatientHaveCollision || doesPractitionerHaveCollision)
             throw new AppointmentCollisionException("Appointment time collision detected");
@@ -69,7 +69,7 @@ public class AppointmentService {
     private void validateAppointmentNoCollision(UUID appointmentId, UUID patientId, UUID practitionerId,
                                                 LocalDateTime start, LocalDateTime end) throws AppointmentCollisionException {
         boolean doesPatientHaveCollision = appointmentRepository
-            .existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+            .existsByPatient_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 patientId,
                 appointmentId,
                 end,
@@ -77,7 +77,7 @@ public class AppointmentService {
             );
 
         boolean doesPractitionerHaveCollision = appointmentRepository
-            .existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+            .existsByPractitioner_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 practitionerId,
                 appointmentId,
                 end,

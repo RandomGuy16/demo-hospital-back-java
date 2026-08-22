@@ -14,13 +14,8 @@ import java.util.UUID;
 @Schema(name = "Practitioner", description = "Practitioner record")
 @Entity
 @Table(name = "practitioners")
+@PrimaryKeyJoinColumn(name = "practitioner_id")
 public class Practitioner extends Person {
-    @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "practitioner_id")
-    private UUID practitionerId;
-
     @Schema(example = "[\"Cardiology\", \"Internal Medicine\"]")
     @ElementCollection
     @CollectionTable(name = "practitioner_specialties", 
@@ -49,11 +44,11 @@ public class Practitioner extends Person {
 
     // Getters and Setters
     public UUID getPractitionerId() {
-        return practitionerId;
+        return getId();
     }
 
     public void setPractitionerId(UUID practitionerId) {
-        this.practitionerId = practitionerId;
+        setId(practitionerId);
     }
 
     public List<String> getSpecialties() {

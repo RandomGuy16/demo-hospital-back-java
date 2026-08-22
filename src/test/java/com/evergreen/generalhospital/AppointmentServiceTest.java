@@ -109,9 +109,9 @@ class AppointmentServiceTest {
         when(patientRepository.findById(request.patientId())).thenReturn(Optional.of(patient));
         when(practitionerRepository.findById(request.practitionerId())).thenReturn(Optional.of(practitioner));
         when(departmentRepository.findById(request.departmentId())).thenReturn(Optional.of(department));
-        when(appointmentRepository.existsByPatient_PatientIdAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPatient_IdAndStartBeforeAndEndAfter(
                 eq(request.patientId()), eq(request.end()), eq(request.start()))).thenReturn(false);
-        when(appointmentRepository.existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPractitioner_IdAndStartBeforeAndEndAfter(
                 eq(request.practitionerId()), eq(request.end()), eq(request.start()))).thenReturn(false);
         when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -163,7 +163,7 @@ class AppointmentServiceTest {
         when(patientRepository.findById(request.patientId())).thenReturn(Optional.of(patient));
         when(practitionerRepository.findById(request.practitionerId())).thenReturn(Optional.of(practitioner));
         when(departmentRepository.findById(request.departmentId())).thenReturn(Optional.of(department));
-        when(appointmentRepository.existsByPatient_PatientIdAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPatient_IdAndStartBeforeAndEndAfter(
                 eq(request.patientId()), eq(request.end()), eq(request.start()))).thenReturn(true);
 
         assertThatThrownBy(() -> appointmentService.createAppointment(request))
@@ -194,9 +194,9 @@ class AppointmentServiceTest {
         when(patientRepository.findById(patient.getPatientId())).thenReturn(Optional.of(patient));
         when(practitionerRepository.findById(practitionerId)).thenReturn(Optional.of(practitioner));
         when(departmentRepository.findById(departmentId)).thenReturn(Optional.of(department));
-        when(appointmentRepository.existsByPatient_PatientIdAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPatient_IdAndStartBeforeAndEndAfter(
                 eq(patient.getPatientId()), eq(guestRequest.end()), eq(guestRequest.start()))).thenReturn(false);
-        when(appointmentRepository.existsByPractitioner_PractitionerIdAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPractitioner_IdAndStartBeforeAndEndAfter(
                 eq(practitionerId), eq(guestRequest.end()), eq(guestRequest.start()))).thenReturn(false);
         when(appointmentRepository.save(any(Appointment.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -285,9 +285,9 @@ class AppointmentServiceTest {
         when(practitionerRepository.findById(updateRequest.practitionerId())).thenReturn(Optional.of(updatedPractitioner));
         when(departmentRepository.findById(updateRequest.departmentId())).thenReturn(Optional.of(updatedDepartment));
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(existing));
-        when(appointmentRepository.existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPatient_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 eq(updateRequest.patientId()), eq(appointmentId), eq(updateRequest.end()), eq(updateRequest.start()))).thenReturn(false);
-        when(appointmentRepository.existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPractitioner_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 eq(updateRequest.practitionerId()), eq(appointmentId), eq(updateRequest.end()), eq(updateRequest.start()))).thenReturn(false);
         when(appointmentRepository.save(existing)).thenReturn(existing);
 
@@ -316,18 +316,18 @@ class AppointmentServiceTest {
         when(patientRepository.findById(request.patientId())).thenReturn(Optional.of(patient));
         when(practitionerRepository.findById(request.practitionerId())).thenReturn(Optional.of(practitioner));
         when(departmentRepository.findById(request.departmentId())).thenReturn(Optional.of(department));
-        when(appointmentRepository.existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPatient_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 eq(request.patientId()), eq(appointmentId), eq(request.end()), eq(request.start()))).thenReturn(false);
-        when(appointmentRepository.existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        when(appointmentRepository.existsByPractitioner_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 eq(request.practitionerId()), eq(appointmentId), eq(request.end()), eq(request.start()))).thenReturn(false);
         when(appointmentRepository.save(existing)).thenReturn(existing);
 
         Optional<Appointment> updated = appointmentService.updateAppointment(appointmentId, request);
 
         assertThat(updated).contains(existing);
-        verify(appointmentRepository).existsByPatient_PatientIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        verify(appointmentRepository).existsByPatient_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 request.patientId(), appointmentId, request.end(), request.start());
-        verify(appointmentRepository).existsByPractitioner_PractitionerIdAndAppointmentIdNotAndStartBeforeAndEndAfter(
+        verify(appointmentRepository).existsByPractitioner_IdAndAppointmentIdNotAndStartBeforeAndEndAfter(
                 request.practitionerId(), appointmentId, request.end(), request.start());
     }
 
