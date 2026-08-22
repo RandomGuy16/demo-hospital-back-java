@@ -163,6 +163,11 @@ public class PatientService {
         return patientRepository.findByMrn(mrn);
     }
 
+    public Optional<Patient> getPatientByEmail(String email) {
+        // TODO: rename "contacts" to "email" and add an emergency contact
+        return patientRepository.findByContacts(email);
+    }
+
     public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {
 
         return patientRepository.findById(id)

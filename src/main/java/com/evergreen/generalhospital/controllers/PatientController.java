@@ -20,6 +20,11 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import org.slf4j.Logger;
@@ -119,6 +124,39 @@ public class PatientController {
         return patient
                 .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // READ SELF - get patient its information for patients panel
+    // /api/v1/patients/me
+    @GetMapping("/me")
+    @Operation(
+        summary = "Get patient info",
+        description = "Return a patient their information"
+    )
+    public ResponseEntity<PatientResponse> getPatientInfo(
+        @AuthenticationPrincipal Jwt jwt,
+        @Schema(hidden = true) Authentication authentication) {
+
+        if (jwt == null || authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
+        }
+
+        // Sort authorities to make the response deterministic
+        List<String> authorities = authentication.getAuthorities()
+            .stream()
+            .map(GrantedAuthority::getAuthority)
+            .sorted()
+            .toList();
+
+        String email = jwt.getClaimAsString("email");
+        if (email == null || email.isBlank())
+            email = jwt.getSubject();  // email == subject at the moment
+
+        // get patient by email
+        var patient = patientService.getPatientByEmail(email);
+        return patient
+            .map(value -> ResponseEntity.ok(patientToPatientResponse(value)))
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
 

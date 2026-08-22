@@ -30,6 +30,9 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
 
     Optional<Patient> findByMrn(String mrn);
 
+    // this is wrong by now, has to be "findByEmail"
+    Optional<Patient> findByContacts(String email);
+
     List<Patient> findAll();
 
     List<Patient> findByFirstNameAndLastName(@NonNull String firstName, @NonNull String lastName);
