@@ -11,15 +11,21 @@ public class ValidUserAccountRoleLinkValidator implements ConstraintValidator<Va
 
     @Override
     public boolean isValid(UserAccount value, ConstraintValidatorContext context) {
-        if (value == null || value.getRole() == null) return true;
+        // standard behaviour: if value is null then approve it, to avoid a pesky error
+        if (value == null) return true;
 
-        boolean hasPatient = value.getPatient() != null;
-        boolean hasPractitioner = value.getPractitioner() != null;
+        if (value.getRoles() == null || value.getRoles().isEmpty()) return false;
 
-        return switch (value.getRole()) {
-            case ROLE_PATIENT -> hasPatient && !hasPractitioner;
-            case ROLE_PRACTITIONER -> hasPractitioner && !hasPatient;
-            case ROLE_ADMIN, ROLE_RECEPTIONIST -> !hasPatient && !hasPractitioner;
-        };
+        boolean hasPatient = value.getRoles().contains(Role.ROLE_PATIENT);
+        boolean hasPractitioner = value.getRoles().contains(Role.ROLE_PRACTITIONER);
+
+        // Check invariants based on the assigned roles
+        if (value.getRoles().contains(Role.ROLE_PATIENT) && !hasPatient) {
+            return false;
+        }
+        if (value.getRoles().contains(Role.ROLE_PRACTITIONER) && !hasPractitioner) {
+            return false;
+        }
+        return true;
     }
 }

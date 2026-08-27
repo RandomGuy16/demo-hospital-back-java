@@ -2,9 +2,12 @@ package com.evergreen.generalhospital.models.useraccount;
 
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
+import com.evergreen.generalhospital.models.Person;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -28,6 +31,11 @@ public class UserAccount {
 
     @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
     @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "person_id", referencedColumnName = "person_id", unique = true)
+    private Person person;
+
+    @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "practitioner_id", referencedColumnName = "practitioner_id", unique = true)
     private Practitioner practitioner;
 
@@ -44,10 +52,16 @@ public class UserAccount {
     @Column(name = "provider_subject", nullable = false, length = 100)
     private String providerSubject;
 
-    @Schema(example = "ROLE_ADMIN")
-    @Column(nullable = false, length = 50)
+    // by doing this, JPA automatically creates an intermediate table
+    // with a composite key (user_id, role)
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(
+        name = "user_roles",  // this creates the table
+        joinColumns = @JoinColumn(name="user_id", referencedColumnName = "user_id")  // this maps user_id there
+    )
     @Enumerated(EnumType.STRING)
-    private Role role;
+    @Column(name = "role", nullable = false, length = 50)  // this creates the role field there
+    private Set<Role> roles = new HashSet<>();
 
     @Schema(example = "Doe")
     @Column(nullable = false, length = 50)
@@ -126,6 +140,22 @@ public class UserAccount {
         this.id = id;
     }
 
+    public Person getPerson() {
+        return person;
+    }
+
+    public void setPerson(Person person) {
+        this.person = person;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
     public Practitioner getPractitioner() {
         return practitioner;
     }
@@ -156,14 +186,6 @@ public class UserAccount {
 
     public void setProviderSubject(String providerSubject) {
         this.providerSubject = providerSubject;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) {
-        this.role = role;
     }
 
     public String getDisplayName() {
