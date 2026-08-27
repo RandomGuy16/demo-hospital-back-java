@@ -34,16 +34,6 @@ public class UserAccount {
     @JoinColumn(name = "person_id", referencedColumnName = "person_id", unique = true)
     private Person person;
 
-    @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "practitioner_id", referencedColumnName = "practitioner_id", unique = true)
-    private Practitioner practitioner;
-
-    @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_id", referencedColumnName = "patient_id", unique = true)
-    private Patient patient;
-
     @Schema(example = "keycloak")
     @Column(nullable = false, length = 50)
     private String provider;

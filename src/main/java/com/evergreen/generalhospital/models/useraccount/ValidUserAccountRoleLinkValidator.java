@@ -16,14 +16,13 @@ public class ValidUserAccountRoleLinkValidator implements ConstraintValidator<Va
 
         if (value.getRoles() == null || value.getRoles().isEmpty()) return false;
 
-        boolean hasPatient = value.getRoles().contains(Role.ROLE_PATIENT);
-        boolean hasPractitioner = value.getRoles().contains(Role.ROLE_PRACTITIONER);
+        boolean hasPerson = value.getPerson() != null;
 
         // Check invariants based on the assigned roles
-        if (value.getRoles().contains(Role.ROLE_PATIENT) && !hasPatient) {
+        if (value.getRoles().contains(Role.ROLE_PATIENT) && !hasPerson) {
             return false;
         }
-        if (value.getRoles().contains(Role.ROLE_PRACTITIONER) && !hasPractitioner) {
+        if (value.getRoles().contains(Role.ROLE_PRACTITIONER) && !hasPerson) {
             return false;
         }
         return true;

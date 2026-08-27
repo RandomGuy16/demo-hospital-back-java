@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.services;
 
+import com.evergreen.generalhospital.models.useraccount.Role;
 import com.evergreen.generalhospital.models.useraccount.UserAccount;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +49,7 @@ public class JwtService {
     public String generateToken(UserAccount userAccount) {
         Instant now = Instant.now();
 
-        List<String> roles = List.of(userAccount.getRole().name());
+        List<String> roles = userAccount.getRoles().stream().map(Role::name).toList();
 
         return Jwts.builder()
             .subject(userAccount.getEmail())

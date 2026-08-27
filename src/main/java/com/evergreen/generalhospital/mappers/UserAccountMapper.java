@@ -12,7 +12,7 @@ public class UserAccountMapper {
                 user.getUsername(),
                 user.getProvider(),
                 user.getProviderSubject(),
-                user.getRole(),
+                user.getRoles().stream().toList(),
                 user.getEmail()
         );
     }
