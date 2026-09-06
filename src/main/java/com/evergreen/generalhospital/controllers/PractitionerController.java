@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.controllers;
 
+import com.evergreen.generalhospital.dto.practitioner.PractitionerAvailabilityResponse;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerResponse;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
@@ -22,12 +23,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -100,6 +103,19 @@ public class PractitionerController {
         return practitionerService.getPractitionerById(id)
                 .map(practitioner -> ResponseEntity.ok(practitionerToPractitionerResponse(practitioner)))
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/{id}/availability")
+    @Operation(summary = "Get practitioner availability", description = "Returns available booking slots for a practitioner on a given date")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Availability retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Practitioner not found")
+    })
+    public ResponseEntity<PractitionerAvailabilityResponse> getPractitionerAvailability(
+            @PathVariable UUID id,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        var freeTimeSlots = practitionerService.getPractitionerAvailability(id, date);
+        return ResponseEntity.ok(PractitionerMapper.practitionerFreeTimeSlotsToResponse(id, date, freeTimeSlots));
     }
 
     @PutMapping("/{id}")

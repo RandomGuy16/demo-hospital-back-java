@@ -6,11 +6,16 @@ import com.evergreen.generalhospital.models.practitioner.Practitioner;
 import com.evergreen.generalhospital.testsupport.base.CrudControllerTestSupport;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.repositories.DepartmentRepository;
+import com.evergreen.generalhospital.models.appointment.Appointment;
+import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
+import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
+import com.evergreen.generalhospital.repositories.AppointmentRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,6 +33,9 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
     @Autowired
     private DepartmentRepository departmentRepository;
+
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
     @Test
     void createPractitionerReturnsCreatedResponse() throws Exception {
@@ -441,5 +449,99 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].lastName").value("CardioDoc"));
+    }
+
+    @Test
+    void getPractitionerAvailabilityWhenNoAppointmentsReturnsAllDefaultSlots() throws Exception {
+        Practitioner practitioner = defaultSubjects.practitioner();
+        LocalDate targetDate = LocalDate.of(2026, 9, 1);
+
+        mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
+                        .param("date", targetDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.practitionerId").value(practitioner.getPractitionerId().toString()))
+                .andExpect(jsonPath("$.date").value("2026-09-01"))
+                .andExpect(jsonPath("$.availableSlots", hasSize(16)))
+                .andExpect(jsonPath("$.availableSlots[0].start").value("2026-09-01T09:00:00"))
+                .andExpect(jsonPath("$.availableSlots[0].end").value("2026-09-01T09:30:00"))
+                .andExpect(jsonPath("$.availableSlots[15].start").value("2026-09-01T16:30:00"))
+                .andExpect(jsonPath("$.availableSlots[15].end").value("2026-09-01T17:00:00"));
+    }
+
+    @Test
+    void getPractitionerAvailabilityWhenAppointmentExistsFiltersOutBookedSlot() throws Exception {
+        Practitioner practitioner = defaultSubjects.practitioner();
+        LocalDate targetDate = LocalDate.of(2026, 9, 1);
+
+        // Book 09:30 - 10:00
+        Appointment app = new Appointment(
+                defaultSubjects.patient(),
+                practitioner,
+                defaultSubjects.department(),
+                LocalDateTime.of(2026, 9, 1, 9, 30),
+                LocalDateTime.of(2026, 9, 1, 10, 0),
+                AppointmentStatus.SCHEDULED,
+                "Consultation",
+                UrgencyLevel.ROUTINE,
+                null
+        );
+        appointmentRepository.save(app);
+
+        mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
+                        .param("date", targetDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.practitionerId").value(practitioner.getPractitionerId().toString()))
+                .andExpect(jsonPath("$.date").value("2026-09-01"))
+                .andExpect(jsonPath("$.availableSlots", hasSize(15)))
+                .andExpect(jsonPath("$.availableSlots[0].start").value("2026-09-01T09:00:00"))
+                .andExpect(jsonPath("$.availableSlots[0].end").value("2026-09-01T09:30:00"))
+                // Next slot is 10:00, 09:30 slot was omitted!
+                .andExpect(jsonPath("$.availableSlots[1].start").value("2026-09-01T10:00:00"))
+                .andExpect(jsonPath("$.availableSlots[1].end").value("2026-09-01T10:30:00"));
+    }
+
+    @Test
+    void getPractitionerAvailabilityWhenAppointmentIsCancelledDoesNotFilterOutSlot() throws Exception {
+        Practitioner practitioner = defaultSubjects.practitioner();
+        LocalDate targetDate = LocalDate.of(2026, 9, 1);
+
+        // Cancelled booking at 09:30 - 10:00
+        Appointment app = new Appointment(
+                defaultSubjects.patient(),
+                practitioner,
+                defaultSubjects.department(),
+                LocalDateTime.of(2026, 9, 1, 9, 30),
+                LocalDateTime.of(2026, 9, 1, 10, 0),
+                AppointmentStatus.CANCELLED,
+                "Cancelled checkup",
+                UrgencyLevel.ROUTINE,
+                null
+        );
+        appointmentRepository.save(app);
+
+        mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
+                        .param("date", targetDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.availableSlots", hasSize(16)))
+                .andExpect(jsonPath("$.availableSlots[1].start").value("2026-09-01T09:30:00"))
+                .andExpect(jsonPath("$.availableSlots[1].end").value("2026-09-01T10:00:00"));
+    }
+
+    @Test
+    void getPractitionerAvailabilityWhenPractitionerNotFoundReturns404() throws Exception {
+        UUID randomId = UUID.randomUUID();
+
+        mockMvc.perform(get("/api/v1/practitioners/{id}/availability", randomId)
+                        .param("date", "2026-09-01"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
+    }
+
+    @Test
+    void getPractitionerAvailabilityWhenDateMissingReturns400() throws Exception {
+        Practitioner practitioner = defaultSubjects.practitioner();
+
+        mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId()))
+                .andExpect(status().isBadRequest());
     }
 }
