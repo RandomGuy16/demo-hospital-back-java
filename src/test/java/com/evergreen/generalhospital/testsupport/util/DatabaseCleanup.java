@@ -31,9 +31,9 @@ public class DatabaseCleanup {
     public void cleanDatabase() {
         appointmentRepository.deleteAll();
         userAccountRepository.deleteAll();
+        departmentRepository.deleteAll();
         practitionerRepository.deleteAll();
         patientRepository.deleteAll();
-        departmentRepository.deleteAll();
         personRepository.deleteAll();
     }
 }

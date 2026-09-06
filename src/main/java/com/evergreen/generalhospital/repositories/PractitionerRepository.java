@@ -35,7 +35,7 @@ public interface PractitionerRepository extends JpaRepository<Practitioner, UUID
         JOIN p.departments d
         JOIN p.specialties s
         WHERE d.departmentId = :departmentId
-          AND LOWER(s) LIKE LOWER(CONCAT('%', :specialty, '%'))
+          AND LOWER(s) ILIKE CONCAT('%', :specialty, '%')
     """)
     Page<Practitioner> findByDepartmentAndSpecialty(
         @Param("departmentId") UUID departmentId,

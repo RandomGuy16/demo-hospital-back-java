@@ -54,25 +54,15 @@ public class PractitionerService {
     }
 
     private Page<Practitioner> getPractitionersByDepartment(Pageable pageable, UUID departmentId) {
-        if (departmentId == null) throw new IllegalArgumentException("DepartmentId must not be null");
-        if (!departmentRepository.existsById(departmentId))
-            throw new ResourceNotFoundException("Department not found with id: " + departmentId);
-
-        // one liner
         return practitionerRepository.findByDepartments_DepartmentId(departmentId, pageable);
     }
 
-
     private Page<Practitioner> getPractitionersBySpecialty(Pageable pageable, String specialty) {
-        // guards
-        if (specialty.isBlank())
-            throw new IllegalArgumentException("Specialty filter must be not null or blank");
-
         String trimmed = specialty.trim();
         if (trimmed.length() > 100)
             throw new IllegalArgumentException("Specialty filter must not exceed 100 characters");
 
-        return practitionerRepository.findBySpecialtiesContaining(specialty, pageable);
+        return practitionerRepository.findBySpecialtiesContaining(trimmed, pageable);
     }
 
     public Page<Practitioner> getPractitioners(Pageable pageable, UUID departmentId, String specialty) {
@@ -80,16 +70,22 @@ public class PractitionerService {
         boolean hasSpecialty = specialty != null && !specialty.isBlank();
 
         // logic, fall gracefully if any parameter isnt present
-        if (hasDept && hasSpecialty) {
-            // custom repository method
-            return practitionerRepository.findByDepartmentAndSpecialty(departmentId, specialty, pageable);
-        } else if (hasDept) {
+        if (hasDept) {
+            if (!departmentRepository.existsById(departmentId)) {
+                throw new ResourceNotFoundException("Department not found with id: " + departmentId);
+            }
+            if (hasSpecialty) {
+                String trimmed = specialty.trim();
+                if (trimmed.length() > 100) {
+                    throw new IllegalArgumentException("Specialty filter must not exceed 100 characters");
+                }
+                return practitionerRepository.findByDepartmentAndSpecialty(departmentId, trimmed, pageable);
+            }
             return getPractitionersByDepartment(pageable, departmentId);
         } else if (hasSpecialty) {
             return getPractitionersBySpecialty(pageable, specialty);
         }
         return getAllPractitioners(pageable);
-
     }
 
 
