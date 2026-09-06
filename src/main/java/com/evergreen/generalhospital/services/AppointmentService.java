@@ -5,14 +5,13 @@ import com.evergreen.generalhospital.dto.appointment.GuestAppointmentRequest;
 import com.evergreen.generalhospital.errors.AppointmentCollisionException;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.errors.SelfDiagnosisConflictException;
+import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
-import com.evergreen.generalhospital.repositories.AppointmentRepository;
-import com.evergreen.generalhospital.repositories.DepartmentRepository;
-import com.evergreen.generalhospital.repositories.PatientRepository;
-import com.evergreen.generalhospital.repositories.PractitionerRepository;
+import com.evergreen.generalhospital.models.useraccount.UserAccount;
+import com.evergreen.generalhospital.repositories.*;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -30,6 +29,7 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final PractitionerRepository practitionerRepository;
     private final DepartmentRepository departmentRepository;
+    private final UserAccountRepository userRepository;
     private final PatientService patientService;
 
     // simple record to temporarily store the input after validating
@@ -44,12 +44,14 @@ public class AppointmentService {
                               PatientRepository patientRepository,
                               PractitionerRepository practitionerRepository,
                               DepartmentRepository departmentRepository,
+                              UserAccountRepository userAccountRepository,
                               PatientService patientService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.practitionerRepository = practitionerRepository;
         this.departmentRepository = departmentRepository;
         this.patientService = patientService;
+        this.userRepository = userAccountRepository;
     }
 
     // method for validating the no collision of an appointment
@@ -125,7 +127,10 @@ public class AppointmentService {
                 payload.department,
                 request.start(),
                 request.end(),
-                request.status());
+                request.status(),
+                request.chiefComplaint(),
+                UrgencyLevel.ROUTINE,
+                null);
         return appointmentRepository.save(appointment);
     }
 
@@ -158,12 +163,25 @@ public class AppointmentService {
                 payload.department,
                 request.start(),
                 request.end(),
-                request.status());
+                request.status(),
+                request.chiefComplaint(),
+                UrgencyLevel.ROUTINE,
+                null);
         return appointmentRepository.save(appointment);
     }
 
     public Page<Appointment> getAllAppointments(Pageable pageable) {
         return appointmentRepository.findAll(pageable);
+    }
+
+    // user reaching this call is considered a patient
+    public Page<Appointment> getAppointmentsByPatientEmail(String email, Pageable pageable) {
+        final Optional<UserAccount> user = userRepository.findByEmail(email);
+
+        // return empty page if nothing found
+        if (user.isEmpty()) return Page.empty();
+
+        return appointmentRepository.findByPatient_Id(user.get().getId(), pageable);
     }
 
     public Optional<Appointment> getAppointmentById(UUID id) {
@@ -182,6 +200,7 @@ public class AppointmentService {
                     appointment.setStart(request.start());
                     appointment.setEnd(request.end());
                     appointment.setStatus(request.status());
+                    appointment.setChiefComplaint(request.chiefComplaint());
                     return appointmentRepository.save(appointment);
                 });
     }

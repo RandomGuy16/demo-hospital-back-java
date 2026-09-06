@@ -168,8 +168,10 @@ public class PatientService {
     }
 
     public Optional<Patient> getPatientByEmail(String email) {
-        return userAccountRepository.findByEmail(email)
-                .map(UserAccount::getPatient);
+        final var user = userAccountRepository.findByEmail(email);
+
+        // return the patient if user is present, or return nothing
+        return user.flatMap(userAccount -> patientRepository.findById(userAccount.getId()));
     }
 
     public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {

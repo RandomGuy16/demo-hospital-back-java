@@ -21,6 +21,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -39,6 +43,11 @@ public class AppointmentController {
     public AppointmentController(AppointmentService appointmentService) {
         this.appointmentService = appointmentService;
     }
+
+
+    ///////////////
+    // ENDPOINTS //
+    ///////////////
 
 
     @PostMapping
@@ -75,24 +84,39 @@ public class AppointmentController {
         return ResponseEntity.created(location).body(appointmentToAppointmentResponse(created));
     }
 
-    @GetMapping
-    @Operation(summary = "List appointments", description = "Returns paginated appointments")
-    @ApiResponse(responseCode = "200", description = "Appointments retrieved successfully")
-    public ResponseEntity<Page<AppointmentResponse>> getAllAppointments(
-            @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
-            @RequestParam(defaultValue = "0")
-            @Min(0) int page,
-            @Parameter(description = "Number of records per page", schema = @Schema(defaultValue = "20", minimum = "1", maximum = "100"))
-            @RequestParam(defaultValue = "20")
-            @Min(1) @Max(100) int size,
-            @Parameter(description = "Sorting criteria in the format field,direction", example = "start,asc")
-            @RequestParam(required = false) List<String> sort) {
+    @GetMapping("/my")
+    @Operation(
+        summary = "Retrieve user appointments",
+        description = "Returns the appointments belonging to the user requesting them"
+    )
+    @ApiResponses({
+    })
+    public ResponseEntity<Page<AppointmentResponse>> getIdkXd(
+        @AuthenticationPrincipal Jwt jwt, // jwt
+        @Schema(hidden = true) Authentication authentication, // spring thing
+        @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
+        @RequestParam(defaultValue = "0")
+        @Min(0) int page, // pages
+        @Parameter(description = "Number of records per page", schema = @Schema(defaultValue = "20", minimum = "1", maximum = "100"))
+        @RequestParam(defaultValue = "20")
+        @Min(1) @Max(100) int size, // records per page
+        @Parameter(description = "Sorting criteria in the format field,direction", example = "start,asc")
+        @RequestParam(required = false) List<String> sort // sorting
+    ) {
+        // guard
+        if (jwt == null || authentication == null) {
+            throw new AuthenticationCredentialsNotFoundException("Authentication required");
+        }
 
+        // create the page
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
+        final String email = jwt.getClaimAsString("email"); // extract email
+
+        // reach service to return everything
         return ResponseEntity.ok(
-            appointmentService
-                .getAllAppointments(pageable)
-                .map(AppointmentMapper::appointmentToAppointmentResponse));
+            appointmentService.getAppointmentsByPatientEmail(email, pageable)
+                .map(AppointmentMapper::appointmentToAppointmentResponse) // in these cases, use the mapper
+        );
     }
 
     @GetMapping("/{id}")
@@ -131,5 +155,26 @@ public class AppointmentController {
         return appointmentService.deleteAppointment(id)
                 .map(appointment -> ResponseEntity.noContent().<Void>build())
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @GetMapping
+    @Operation(summary = "List appointments", description = "Returns paginated appointments")
+    @ApiResponse(responseCode = "200", description = "Appointments retrieved successfully")
+    public ResponseEntity<Page<AppointmentResponse>> getAllAppointments(
+        @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
+        @RequestParam(defaultValue = "0")
+        @Min(0) int page,
+        @Parameter(description = "Number of records per page", schema = @Schema(defaultValue = "20", minimum = "1", maximum = "100"))
+        @RequestParam(defaultValue = "20")
+        @Min(1) @Max(100) int size,
+        @Parameter(description = "Sorting criteria in the format field,direction", example = "start,asc")
+        @RequestParam(required = false) List<String> sort) {
+
+        Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
+        return ResponseEntity.ok(
+            appointmentService
+                .getAllAppointments(pageable)
+                .map(AppointmentMapper::appointmentToAppointmentResponse));
     }
 }

@@ -46,11 +46,11 @@ public class UserAccount {
     // with a composite key (user_id, role)
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(
-        name = "user_roles",  // this creates the table
-        joinColumns = @JoinColumn(name="user_id", referencedColumnName = "user_id")  // this maps user_id there
-    )
+        name = "user_roles",  // this specifies the collection table
+        joinColumns = @JoinColumn(name="user_id", referencedColumnName = "user_id")
+    ) // this maps the collection table to the user entity with user_id
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false, length = 50)  // this creates the role field there
+    @Column(name = "role", nullable = false, length = 50)  // specifies the column to store each role
     private Set<Role> roles = new HashSet<>();
 
     @Schema(example = "Doe")
@@ -99,23 +99,19 @@ public class UserAccount {
     /**
      * Creates a fully populated user-account aggregate.
      *
-     * @param practitioner optional practitioner link.
-     * @param patient optional patient link.
      * @param provider external or local auth provider name.
      * @param providerSubject stable subject within that provider.
-     * @param role application role.
+     * @param roles application roles.
      * @param displayName user-facing display name.
      * @param username unique application username.
      * @param email unique login email.
      * @param password encoded password hash.
      */
-    public UserAccount(Practitioner practitioner, Patient patient, String provider, String providerSubject,
-                       Role role, String displayName, String username, String email, String password) {
-        this.practitioner = practitioner;
-        this.patient = patient;
+    public UserAccount(String provider, String providerSubject,
+                       Set<Role> roles, String displayName, String username, String email, String password) {
         this.provider = provider;
         this.providerSubject = providerSubject;
-        this.role = role;
+        this.roles = roles;
         this.displayName = displayName;
         this.username = username;
         this.email = email;
@@ -144,22 +140,6 @@ public class UserAccount {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
-    }
-
-    public Practitioner getPractitioner() {
-        return practitioner;
-    }
-
-    public void setPractitioner(Practitioner practitioner) {
-        this.practitioner = practitioner;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
     }
 
     public String getProvider() {
@@ -208,10 +188,6 @@ public class UserAccount {
 
     public LocalDateTime getUpdatedAt() {
         return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
     }
 
     public String getPassword() {

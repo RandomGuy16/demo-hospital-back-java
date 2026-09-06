@@ -2,6 +2,7 @@ package com.evergreen.generalhospital.dto.appointment;
 
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,6 +19,9 @@ public record AppointmentResponse(
 
         @Schema(example = "a0b1f54e-98c4-4e4d-9412-2eaf3e0c8695")
         UUID departmentId,
+
+        @Schema(example = "blablabla")
+        String chiefComplaint,
 
         @Schema(example = "2026-04-10T09:00:00")
         LocalDateTime start,

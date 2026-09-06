@@ -11,6 +11,7 @@ public class AppointmentMapper {
             appointment.getPatient().getPatientId(),
             appointment.getPractitioner().getPractitionerId(),
             appointment.getDepartment().getDepartmentId(),
+            appointment.getChiefComplaint(),
             appointment.getStart(),
             appointment.getEnd(),
             appointment.getStatus());

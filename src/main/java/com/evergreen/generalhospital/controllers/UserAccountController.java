@@ -43,6 +43,8 @@ public class UserAccountController {
         @ApiResponse(responseCode = "400", description = "Invalid input data")
     })
     /**
+     * Future feature: Administrative account creation.
+     * Reserved for upcoming administrative functionality in the dedicated admin branch.
      * Creates a user account record from an explicit administrative request.
      *
      * @param request user-account payload.
@@ -51,7 +53,7 @@ public class UserAccountController {
      */
     public ResponseEntity<UserAccountResponse> createUserAccount(@RequestBody @Valid UserAccountRequest request,
                                                                   UriComponentsBuilder uriBuilder) {
-        UserAccount created = userAccountService.createUserAccount(request);
+        UserAccount created = userAccountService.adminCreateUserAccount(request);
         UserAccountResponse response = userAccountToUserAccountResponse(created);
         URI location = uriBuilder.path("/api/v1/user-accounts/{id}")
             .buildAndExpand(created.getId())

@@ -21,6 +21,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
@@ -154,7 +155,8 @@ public class UserAccountService implements UserDetailsService {
      * @param request registration payload.
      * @return newly created user account.
      * @throws RepeatedUsernameException        if the email is already taken or
-     *                                          the idNumber already owns an account.
+     *                                          the idNumber already owns an
+     *                                          account.
      * @throws PatientIdentityMismatchException if the demographics do not match
      *                                          an existing patient under that
      *                                          idNumber
@@ -185,22 +187,27 @@ public class UserAccountService implements UserDetailsService {
             throw new RepeatedUsernameException("A user account already exists for idNumber " + request.idNumber());
         }
 
+        // create hashset to contain roles
+        var roles = new HashSet<Role>();
+        roles.add(Role.ROLE_PATIENT);
+
         // add the user
         UserAccount newUser = new UserAccount(
-                null,
-                patient,
                 "local",
-                request.email(),
-                Role.ROLE_PATIENT,
+                username,
+                roles,
                 request.firstName() + " " + request.lastName(),
                 username,
                 request.email(),
-                passwordEncoder.encode(request.password()));  // use BCrypt to encode the password
-                                                              // this is defined in SecurityConfig
+                passwordEncoder.encode(request.password())); // use BCrypt to encode the password
+                                                             // this is defined in SecurityConfig
+        newUser.setPerson(patient);
         return userAccountRepository.save(newUser);
     }
 
     /**
+     * Future feature: Administrative account creation.
+     * Reserved for administrative provisioning in the dedicated admin branch.
      * Creates a user account after enforcing uniqueness and role-link constraints.
      *
      * @param request user-account payload.
@@ -210,7 +217,7 @@ public class UserAccountService implements UserDetailsService {
      * @throws UnclearUserRoleException  if the role and linked entities are
      *                                   inconsistent.
      */
-    public UserAccount createUserAccount(UserAccountRequest request) {
+    public UserAccount adminCreateUserAccount(UserAccountRequest request) {
         if (userAccountRepository.existsByUsername(request.username())) {
             throw new RepeatedUsernameException("User with username " + request.username() + " already exists");
         }
@@ -227,16 +234,23 @@ public class UserAccountService implements UserDetailsService {
         // writing anything.
         UserAccountRefs refs = resolveUserAccountRefs(request);
 
+        var roles = new HashSet<Role>();
+        roles.add(request.role());
+
+        // create the user account entity
         UserAccount newUser = new UserAccount(
-                refs.practitioner,
-                refs.patient,
                 request.provider(),
                 request.providerSubject(),
-                request.role(),
+                roles,
                 request.displayName(),
                 request.username(),
                 request.email(),
                 request.password() == null ? null : passwordEncoder.encode(request.password()));
+        if (refs.patient() != null) {
+            newUser.setPerson(refs.patient());
+        } else if (refs.practitioner() != null) {
+            newUser.setPerson(refs.practitioner());
+        }
         return userAccountRepository.save(newUser);
     }
 
@@ -252,9 +266,12 @@ public class UserAccountService implements UserDetailsService {
         UserAccount userAccount = userAccountRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + email + " not found"));
 
+        // stream UserAccount roles and map them to SimpleGrantedAuthority
         return User.withUsername(userAccount.getEmail())
                 .password(userAccount.getPassword())
-                .authorities(new SimpleGrantedAuthority(userAccount.getRole().name()))
+                .authorities(userAccount.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority(role.name()))
+                        .toList())
                 .build();
     }
 }

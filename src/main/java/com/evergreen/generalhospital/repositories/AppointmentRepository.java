@@ -1,8 +1,12 @@
 package com.evergreen.generalhospital.repositories;
 
 import com.evergreen.generalhospital.models.appointment.Appointment;
+import com.evergreen.generalhospital.models.patient.Patient;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,7 +21,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     List<Appointment> findByPractitioner_Id(UUID practitionerId);
 
-    List<Appointment> findByPatient_Id(UUID patientId);
+    Page<Appointment> findByPatient_Id(UUID patientId, Pageable pageable);
+
+    List<Appointment> findByPatient(Patient patient);
 
     List<Appointment> findByDepartment_DepartmentId(UUID departmentId);
 

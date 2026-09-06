@@ -50,6 +50,20 @@ public class Appointment {
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 
+    @Schema(example = "Headache")
+    @Column(nullable = false, length = 128)
+    private String chiefComplaint;
+
+    // these urgency levels for now: ROUTINE, URGENT, EMERGENCY
+    @Schema(example = "ROUTINE")
+    @Column(nullable = false, length = 10)
+    @Enumerated(EnumType.STRING)
+    private UrgencyLevel triageUrgency;
+
+    @Schema(example = "The chief describe...")
+    @Column(length = 128)
+    private String triageNotes;
+
     @Schema(accessMode = Schema.AccessMode.READ_ONLY, example = "2026-03-17T12:30:00")
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -70,14 +84,24 @@ public class Appointment {
 
     public Appointment() {}
 
-    public Appointment(Patient patient, Practitioner practitioner, Department department, LocalDateTime start,
-                       LocalDateTime end, AppointmentStatus status) {
+    public Appointment(Patient patient,
+                       Practitioner practitioner,
+                       Department department,
+                       LocalDateTime start,
+                       LocalDateTime end,
+                       AppointmentStatus status,
+                       String chiefComplaint,
+                       UrgencyLevel triageUrgency,
+                       String triageNotes) {
         this.patient = patient;
         this.practitioner = practitioner;
         this.department = department;
         this.start = start;
         this.end = end;
         this.status = status;
+        this.chiefComplaint = chiefComplaint;
+        this.triageUrgency = triageUrgency;
+        this.triageNotes = triageNotes;
     }
 
     public UUID getAppointmentId() {
@@ -131,4 +155,16 @@ public class Appointment {
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
+
+    public String getChiefComplaint() { return chiefComplaint; }
+
+    public void setChiefComplaint(String chiefComplaint) { this.chiefComplaint = chiefComplaint; }
+
+    public UrgencyLevel getTriageUrgency() { return triageUrgency; }
+
+    public void setTriageUrgency(UrgencyLevel triageUrgency) { this.triageUrgency = triageUrgency; }
+
+    public String getTriageNotes() { return triageNotes; }
+
+    public void setTriageNotes(String triageNotes) { this.triageNotes = triageNotes; }
 }

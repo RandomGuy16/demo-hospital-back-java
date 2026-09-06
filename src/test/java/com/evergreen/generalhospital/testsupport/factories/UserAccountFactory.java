@@ -48,16 +48,27 @@ public class UserAccountFactory {
                                           String email,
                                           String password) {
 
-        return userAccountRepository.save(new UserAccount(
-            practitionerId == null ? null : practitionerRepository.findById(practitionerId).orElse(null),
-            patientId == null ? null : patientRepository.findById(patientId).orElse(null),
+        var roles = new java.util.HashSet<Role>();
+        if (role != null) {
+            roles.add(role);
+        }
+
+        UserAccount userAccount = new UserAccount(
             "local",
             providerSubject,
-            role,
+            roles,
             displayName,
             username,
             email,
             passwordEncoder.encode(password)
-        ));
+        );
+
+        if (patientId != null) {
+            patientRepository.findById(patientId).ifPresent(userAccount::setPerson);
+        } else if (practitionerId != null) {
+            practitionerRepository.findById(practitionerId).ifPresent(userAccount::setPerson);
+        }
+
+        return userAccountRepository.save(userAccount);
     }
 }

@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public record GuestAppointmentRequest(
+        // identification data since the user is not registered
         @Schema(example = "9785164321")
         @NotNull String idNumber,
 
@@ -21,7 +22,11 @@ public record GuestAppointmentRequest(
         @Schema(example = "fake street")
         @NotNull String location,
         
-        
+
+        // participants data
+        @Schema(example = "blablabla")
+        @NotNull String chiefComplaint,
+
         @Schema(example = "d2719c5d-84d1-43f6-a713-eef8a694be75")
         @NotNull UUID practitionerId,
 
@@ -29,6 +34,7 @@ public record GuestAppointmentRequest(
         @NotNull UUID departmentId,
 
 
+        // metadata
         @Schema(example = "2026-04-10T09:00:00")
         @NotNull @Future LocalDateTime start,
 

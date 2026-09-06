@@ -7,6 +7,7 @@ import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.errors.SelfDiagnosisConflictException;
 import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
+import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
 import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.models.patient.Patient;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
@@ -98,6 +99,7 @@ class AppointmentServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
+                "Chest pain and fatigue",
                 LocalDateTime.now().plusDays(2),
                 LocalDateTime.now().plusDays(2).plusMinutes(45),
                 AppointmentStatus.SCHEDULED
@@ -125,6 +127,7 @@ class AppointmentServiceTest {
         assertThat(saved.getPatient()).isSameAs(patient);
         assertThat(saved.getPractitioner()).isSameAs(practitioner);
         assertThat(saved.getDepartment()).isSameAs(department);
+        assertThat(saved.getChiefComplaint()).isEqualTo(request.chiefComplaint());
         assertThat(saved.getStart()).isEqualTo(request.start());
         assertThat(saved.getEnd()).isEqualTo(request.end());
         assertThat(saved.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
@@ -182,6 +185,7 @@ class AppointmentServiceTest {
                 "+1 555 0100",
                 "guest@example.com",
                 "fake street",
+                "Fever and chills",
                 practitionerId,
                 departmentId,
                 LocalDateTime.now().plusDays(2),
@@ -205,6 +209,7 @@ class AppointmentServiceTest {
         assertThat(created.getPatient()).isSameAs(patient);
         assertThat(created.getPractitioner()).isSameAs(practitioner);
         assertThat(created.getDepartment()).isSameAs(department);
+        assertThat(created.getChiefComplaint()).isEqualTo(guestRequest.chiefComplaint());
         assertThat(created.getStatus()).isEqualTo(AppointmentStatus.SCHEDULED);
     }
 
@@ -216,6 +221,7 @@ class AppointmentServiceTest {
                 "+1 555 0100",
                 "guest@example.com",
                 "fake street",
+                "Fever and chills",
                 practitionerId,
                 UUID.randomUUID(),
                 LocalDateTime.now().plusDays(2),
@@ -243,7 +249,10 @@ class AppointmentServiceTest {
                 department,
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusMinutes(30),
-                AppointmentStatus.SCHEDULED
+                AppointmentStatus.SCHEDULED,
+                "Chest pain",
+                UrgencyLevel.ROUTINE,
+                null
         );
 
         Patient updatedPatient = new Patient(
@@ -274,6 +283,7 @@ class AppointmentServiceTest {
                 UUID.randomUUID(),
                 UUID.randomUUID(),
                 UUID.randomUUID(),
+                "Follow-up visit",
                 LocalDateTime.now().plusDays(10),
                 LocalDateTime.now().plusDays(10).plusMinutes(30),
                 AppointmentStatus.COMPLETED
@@ -297,6 +307,7 @@ class AppointmentServiceTest {
         assertThat(existing.getPatient()).isSameAs(updatedPatient);
         assertThat(existing.getPractitioner()).isSameAs(updatedPractitioner);
         assertThat(existing.getDepartment()).isSameAs(updatedDepartment);
+        assertThat(existing.getChiefComplaint()).isEqualTo("Follow-up visit");
         assertThat(existing.getStatus()).isEqualTo(AppointmentStatus.COMPLETED);
     }
 
@@ -309,7 +320,10 @@ class AppointmentServiceTest {
                 department,
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusMinutes(30),
-                AppointmentStatus.SCHEDULED
+                AppointmentStatus.SCHEDULED,
+                "Chest pain",
+                UrgencyLevel.ROUTINE,
+                null
         );
 
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(existing));
@@ -351,7 +365,10 @@ class AppointmentServiceTest {
                 department,
                 LocalDateTime.now().plusDays(1),
                 LocalDateTime.now().plusDays(1).plusMinutes(30),
-                AppointmentStatus.SCHEDULED
+                AppointmentStatus.SCHEDULED,
+                "Chest pain",
+                UrgencyLevel.ROUTINE,
+                null
         );
         when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(appointment));
 

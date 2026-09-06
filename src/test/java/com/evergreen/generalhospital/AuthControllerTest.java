@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import com.evergreen.generalhospital.models.useraccount.Role;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -412,6 +414,11 @@ public class AuthControllerTest extends AuthControllerTestSupport {
         cleanDatabase();
         TestUserSubjects guineaPigs = seedUserSubjects();
 
+        List<String> adminRoles = guineaPigs.admin().getRoles().stream().map(Role::name).toList();
+        GrantedAuthority[] authorities = adminRoles.stream()
+            .map(SimpleGrantedAuthority::new)
+            .toArray(GrantedAuthority[]::new);
+
         // Use spring-security-test to inject a JWT-backed Authentication into the secured MockMvc request.
         mockMvc.perform(get("/api/v1/me")
                 .with(jwt().jwt(jwt -> jwt
@@ -419,14 +426,14 @@ public class AuthControllerTest extends AuthControllerTestSupport {
                         .claim("email", guineaPigs.admin().getEmail())
                         .claim("name", guineaPigs.admin().getDisplayName())
                         .claim("preferred_username", guineaPigs.admin().getUsername())
-                        .claim("roles", List.of(guineaPigs.admin().getRole().name()))
-                ).authorities(new SimpleGrantedAuthority(guineaPigs.admin().getRole().name()))))
+                        .claim("roles", adminRoles)
+                ).authorities(authorities)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.subject").value(guineaPigs.admin().getEmail()))
             .andExpect(jsonPath("$.email").value(guineaPigs.admin().getEmail()))
             .andExpect(jsonPath("$.name").value(guineaPigs.admin().getDisplayName()))
             .andExpect(jsonPath("$.preferredUsername").value(guineaPigs.admin().getUsername()))
-            .andExpect(jsonPath("$.authorities[0]").value(guineaPigs.admin().getRole().name()));
+            .andExpect(jsonPath("$.authorities[0]").value(adminRoles.getFirst()));
     }
 
     @Test

@@ -15,6 +15,8 @@ public record AppointmentRequest(
 
         @Schema(example = "a0b1f54e-98c4-4e4d-9412-2eaf3e0c8695") @NotNull UUID departmentId,
 
+        @Schema(example = "blablabla") @NotNull String chiefComplaint,
+
         @Schema(example = "2026-04-10T09:00:00") @NotNull @Future LocalDateTime start,
 
         @Schema(example = "2026-04-10T09:30:00") @NotNull @Future LocalDateTime end,
