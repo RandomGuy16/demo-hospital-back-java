@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.services;
 
+import com.evergreen.generalhospital.config.HospitalProperties;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerFreeTimeSlot;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
@@ -27,14 +28,17 @@ public class PractitionerService {
     private final PractitionerRepository practitionerRepository;
     private final DepartmentRepository departmentRepository;
     private final AppointmentRepository appointmentRepository;
+    private final HospitalProperties hospitalProperties;
 
     public PractitionerService(PractitionerRepository practitionerRepository,
                                DepartmentRepository departmentRepository,
-                               AppointmentRepository appointmentRepository
+                               AppointmentRepository appointmentRepository,
+                               HospitalProperties hospitalProperties
     ) {
         this.practitionerRepository = practitionerRepository;
         this.departmentRepository = departmentRepository;
         this.appointmentRepository = appointmentRepository;
+        this.hospitalProperties = hospitalProperties;
     }
 
     public Practitioner createPractitioner(PractitionerRequest request) {
@@ -102,11 +106,9 @@ public class PractitionerService {
     }
 
 
-    // APPOINTMENT TIME LOGIC
-    // define shift start time, end time and appointment duration
-    public static final LocalTime DEFAULT_SHIFT_START = LocalTime.of(9, 0);
-    public static final LocalTime DEFAULT_SHIFT_END = LocalTime.of(17, 0);
-    public static final Duration  DEFAULT_SLOT_DURATION = Duration.ofMinutes(30);
+    /////////////////////////////////////////
+    ///////// APPOINTMENT TIME LOGIC ////////
+    /////////////////////////////////////////
 
     /**
      * Returns the practitioner availability for a given date using default shift hours (09:00 - 17:00)
@@ -118,7 +120,11 @@ public class PractitionerService {
      */
     public List<PractitionerFreeTimeSlot> getPractitionerAvailability(UUID id, LocalDate date) {
         // call the private method
-        return getPractitionerAvailability(id, date, DEFAULT_SHIFT_START, DEFAULT_SHIFT_END, DEFAULT_SLOT_DURATION);
+        HospitalProperties.Scheduling scheduling = hospitalProperties.getScheduling();
+        return getPractitionerAvailability(id, date,
+            scheduling.getDefaultShiftStart(),
+            scheduling.getDefaultShiftEnd(),
+            scheduling.getDefaultSlotDuration());
     }
 
     /**
@@ -135,7 +141,7 @@ public class PractitionerService {
                                                                       LocalTime shiftStart,
                                                                       LocalTime shiftEnd,
                                                                       Duration slotDuration) {
-        // guards
+        // guards //////////////////////////////////
         if (id == null) {
             throw new IllegalArgumentException("Id cannot be null");
         }
@@ -151,6 +157,7 @@ public class PractitionerService {
         if (slotDuration == null || slotDuration.isZero() || slotDuration.isNegative()) {
             throw new IllegalArgumentException("Slot duration must be a positive duration");
         }
+        //////////////////////////////////////////////
 
         if (!practitionerRepository.existsById(id)) {
             throw new ResourceNotFoundException("Practitioner not found with id: " + id);
