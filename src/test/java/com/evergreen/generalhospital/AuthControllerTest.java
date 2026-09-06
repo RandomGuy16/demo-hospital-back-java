@@ -4,6 +4,7 @@ import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.testsupport.base.AuthControllerTestSupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -478,5 +479,11 @@ public class AuthControllerTest extends AuthControllerTestSupport {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.firstName").value("Katherine"))
             .andExpect(jsonPath("$.lastName").value("Johnson"));
+    }
+
+    @Test
+    @Disabled("not a use case yet")
+    void testNonPatientFetchTheirInfoOnPatientsMeEndpointReturnsForbidden() throws Exception {
+        //wa
     }
 }

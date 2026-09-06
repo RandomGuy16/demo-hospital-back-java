@@ -21,6 +21,7 @@ import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -118,8 +119,9 @@ public class PatientController {
         description = "Returns a patient by its unique identifier"
     )
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "Patient retrieved successfully"),
-        @ApiResponse(responseCode = "404", description = "Patient not found"),
+        @ApiResponse(responseCode = "200", description = "Patient info retrieved successfully"),
+        @ApiResponse(responseCode = "403", description = "Access denied: caller does not have ROLE_PATIENT"),
+        @ApiResponse(responseCode = "404", description = "Patient record not found")
     })
     public ResponseEntity<PatientResponse> getPatientById(@PathVariable UUID id) {
         Optional<Patient> patient = patientService.getPatientById(id);
@@ -151,10 +153,10 @@ public class PatientController {
             .toList();
 
         // ensure request has patient role
-        // ArrayList<String> roles = jwt.getClaimAsStringList("roles");
-        // if (!roles.contains(Role.ROLE_PATIENT.name())) return //
+        if (!authorities.contains(Role.ROLE_PATIENT.name()))
+            throw new AccessDeniedException("Access denied: user is not a patient");
 
-
+        // get email
         String email = jwt.getClaimAsString("email");
         if (email == null || email.isBlank())
             email = jwt.getSubject();  // email == subject at the moment
