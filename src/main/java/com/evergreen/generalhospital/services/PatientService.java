@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -168,10 +169,12 @@ public class PatientService {
     }
 
     public Optional<Patient> getPatientByEmail(String email) {
-        final var user = userAccountRepository.findByEmail(email);
 
         // return the patient if user is present, or return nothing
-        return user.flatMap(userAccount -> patientRepository.findById(userAccount.getId()));
+        return userAccountRepository.findByEmail(email)  // a repository method returns an optional
+            .map(UserAccount::getPerson)  // unpack it
+            .filter(person -> person != null)  // guard
+            .flatMap(person -> patientRepository.findById(person.getId()));  // now contact the patientRepository
     }
 
     public Optional<Patient> updatePatient(UUID id, PatientRequest pRequest) {

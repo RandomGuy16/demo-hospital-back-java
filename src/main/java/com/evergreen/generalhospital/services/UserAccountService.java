@@ -183,7 +183,7 @@ public class UserAccountService implements UserDetailsService {
                 request.address());
 
         // checks if the patient already has a user PRIOR to adding the new user
-        if (userAccountRepository.existsByPatient(patient)) {
+        if (userAccountRepository.existsByPerson(patient)) {
             throw new RepeatedUsernameException("A user account already exists for idNumber " + request.idNumber());
         }
 

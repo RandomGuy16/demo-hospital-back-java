@@ -265,7 +265,7 @@ class UserAccountServiceTest {
         when(patientService.resolveOrCreateByIdNumber(
                 eq(request.idNumber()), anyString(), anyString(), eq(request.dateOfBirth()),
                 anyString(), anyString(), anyString(), anyString())).thenReturn(patient);
-        when(userAccountRepository.existsByPatient(patient)).thenReturn(false);
+        when(userAccountRepository.existsByPerson(patient)).thenReturn(false);
         when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -309,7 +309,7 @@ class UserAccountServiceTest {
         when(userAccountRepository.existsByUsername(request.email())).thenReturn(false);
         when(patientService.resolveOrCreateByIdNumber(any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(patient);
-        when(userAccountRepository.existsByPatient(patient)).thenReturn(true);
+        when(userAccountRepository.existsByPerson(patient)).thenReturn(true);
 
         assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
                 .isInstanceOf(RepeatedUsernameException.class)

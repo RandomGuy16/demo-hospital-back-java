@@ -4,6 +4,7 @@ import com.evergreen.generalhospital.dto.patient.PatientPatchRequest;
 import com.evergreen.generalhospital.dto.patient.PatientRequest;
 import com.evergreen.generalhospital.dto.patient.PatientResponse;
 import com.evergreen.generalhospital.models.patient.Patient;
+import com.evergreen.generalhospital.models.useraccount.Role;
 import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.PatientService;
 import com.evergreen.generalhospital.mappers.PatientMapper;
@@ -37,6 +38,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.Optional;
@@ -147,6 +149,11 @@ public class PatientController {
             .map(GrantedAuthority::getAuthority)
             .sorted()
             .toList();
+
+        // ensure request has patient role
+        // ArrayList<String> roles = jwt.getClaimAsStringList("roles");
+        // if (!roles.contains(Role.ROLE_PATIENT.name())) return //
+
 
         String email = jwt.getClaimAsString("email");
         if (email == null || email.isBlank())
