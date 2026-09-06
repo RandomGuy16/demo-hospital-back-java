@@ -3,7 +3,9 @@ package com.evergreen.generalhospital.services;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
+import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
+import com.evergreen.generalhospital.repositories.DepartmentRepository;
 import com.evergreen.generalhospital.repositories.PractitionerRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -18,9 +20,13 @@ import java.util.UUID;
 @Transactional
 public class PractitionerService {
     private final PractitionerRepository practitionerRepository;
+    private final DepartmentRepository departmentRepository;
 
-    public PractitionerService(PractitionerRepository practitionerRepository) {
+    public PractitionerService(PractitionerRepository practitionerRepository,
+                               DepartmentRepository departmentRepository
+    ) {
         this.practitionerRepository = practitionerRepository;
+        this.departmentRepository = departmentRepository;
     }
 
     public Practitioner createPractitioner(PractitionerRequest request) {
@@ -43,9 +49,49 @@ public class PractitionerService {
         return practitionerRepository.save(practitioner);
     }
 
-    public Page<Practitioner> getAllPractitioners(Pageable pageable) {
+    private Page<Practitioner> getAllPractitioners(Pageable pageable) {
         return practitionerRepository.findAll(pageable);
     }
+
+    private Page<Practitioner> getPractitionersByDepartment(Pageable pageable, UUID departmentId) {
+        if (departmentId == null) throw new IllegalArgumentException("DepartmentId must not be null");
+        if (!departmentRepository.existsById(departmentId))
+            throw new ResourceNotFoundException("Department not found with id: " + departmentId);
+
+        // one liner
+        return practitionerRepository.findByDepartments_DepartmentId(departmentId, pageable);
+    }
+
+
+    private Page<Practitioner> getPractitionersBySpecialty(Pageable pageable, String specialty) {
+        // guards
+        if (specialty.isBlank())
+            throw new IllegalArgumentException("Specialty filter must be not null or blank");
+
+        String trimmed = specialty.trim();
+        if (trimmed.length() > 100)
+            throw new IllegalArgumentException("Specialty filter must not exceed 100 characters");
+
+        return practitionerRepository.findBySpecialtiesContaining(specialty, pageable);
+    }
+
+    public Page<Practitioner> getPractitioners(Pageable pageable, UUID departmentId, String specialty) {
+        boolean hasDept = departmentId != null;
+        boolean hasSpecialty = specialty != null && !specialty.isBlank();
+
+        // logic, fall gracefully if any parameter isnt present
+        if (hasDept && hasSpecialty) {
+            // custom repository method
+            return practitionerRepository.findByDepartmentAndSpecialty(departmentId, specialty, pageable);
+        } else if (hasDept) {
+            return getPractitionersByDepartment(pageable, departmentId);
+        } else if (hasSpecialty) {
+            return getPractitionersBySpecialty(pageable, specialty);
+        }
+        return getAllPractitioners(pageable);
+
+    }
+
 
     public Optional<Practitioner> getPractitionerById(UUID id) {
         return practitionerRepository.findById(id);

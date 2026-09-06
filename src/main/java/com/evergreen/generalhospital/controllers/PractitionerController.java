@@ -62,10 +62,13 @@ public class PractitionerController {
         return ResponseEntity.created(location).body(response);
     }
 
+
     @GetMapping
-    @Operation(summary = "List practitioners", description = "Returns paginated practitioners")
+    @Operation(summary = "List practitioners", description = "Returns paginated practitioners with additional filters")
     @ApiResponse(responseCode = "200", description = "Practitioners retrieved successfully")
     public ResponseEntity<Page<PractitionerResponse>> getAllPractitioners(
+            @RequestParam(required = false) UUID departmentId,
+            @RequestParam(required = false) String specialty,
             @Parameter(description = "Zero-based page index", schema = @Schema(defaultValue = "0", minimum = "0"))
             @RequestParam(defaultValue = "0")
             @Min(0) int page,
@@ -73,11 +76,15 @@ public class PractitionerController {
             @RequestParam(defaultValue = "20")
             @Min(1) @Max(100) int size,
             @Parameter(description = "Sorting criteria in the format field,direction", example = "lastName,asc")
-            @RequestParam(required = false) List<String> sort) {
+            @RequestParam(required = false) List<String> sort)
+    {
+        logger.info("GET /api/v1/practitioners Request");
 
-        logger.info("GET /pai/v1/practitioners Request");
+        // pagination configuration
         Pageable pageable = PageRequest.of(page, size, SortParser.parse(sort));
-        Page<Practitioner> practitionerPage = practitionerService.getAllPractitioners(pageable);
+        Page<Practitioner> practitionerPage = practitionerService.getPractitioners(pageable, departmentId, specialty);
+
+        // return the page mapped to the response dto
         return ResponseEntity.ok(practitionerPage.map(
             PractitionerMapper::practitionerToPractitionerResponse));
     }
