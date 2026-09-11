@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital;
 
+import com.evergreen.generalhospital.config.HospitalProperties;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerFreeTimeSlot;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.models.appointment.Appointment;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -45,7 +47,7 @@ class PractitionerServiceTest {
     @Mock
     private AppointmentRepository appointmentRepository;
 
-    @InjectMocks
+    // instead of injecting everything we build it ourselves
     private PractitionerService practitionerService;
 
     private UUID practitionerId;
@@ -53,6 +55,19 @@ class PractitionerServiceTest {
 
     @BeforeEach
     void setUp() {
+        // we build it ourselves
+        HospitalProperties hospitalProperties = new HospitalProperties();
+        hospitalProperties.getScheduling().setDefaultShiftStart(LocalTime.of(9, 0));
+        hospitalProperties.getScheduling().setDefaultShiftEnd(LocalTime.of(17, 0));
+        hospitalProperties.getScheduling().setDefaultSlotDuration(Duration.ofMinutes(30));
+
+        practitionerService = new PractitionerService(
+                practitionerRepository,
+                departmentRepository,
+                appointmentRepository,
+                hospitalProperties
+        );
+
         practitionerId = UUID.randomUUID();
         testDate = LocalDate.of(2026, 9, 1);
     }
