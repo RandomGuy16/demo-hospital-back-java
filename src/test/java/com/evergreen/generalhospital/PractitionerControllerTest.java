@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital;
 
+import com.evergreen.generalhospital.config.HospitalProperties;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ErrorCode;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
@@ -10,17 +11,24 @@ import com.evergreen.generalhospital.models.appointment.Appointment;
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
 import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
 import com.evergreen.generalhospital.repositories.AppointmentRepository;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,6 +44,49 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
     @Autowired
     private AppointmentRepository appointmentRepository;
+
+    @Autowired
+    private HospitalProperties hospitalProperties;
+
+    private HospitalProperties.Scheduling scheduling;
+    
+    private int defaultSlots;
+
+
+    @BeforeEach
+    void setPractitionerControllerTestUp() {
+        this.scheduling = hospitalProperties.getScheduling();
+        Duration workday = Duration.between(
+            scheduling.getDefaultShiftStart(), 
+            scheduling.getDefaultShiftEnd()
+        );
+        this.defaultSlots = (int) workday.dividedBy(scheduling.getDefaultSlotDuration());
+    }
+
+
+    private static final DateTimeFormatter ISO_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
+    private LocalDateTime slotStartTime(LocalDate date, int index) {
+        return date.atTime(scheduling.getDefaultShiftStart())
+            .plus(scheduling.getDefaultSlotDuration().multipliedBy(index));
+    }
+
+    private LocalDateTime slotEndTime(LocalDate date, int index) {
+        return slotStartTime(date, index).plus(scheduling.getDefaultSlotDuration());
+    }
+
+    private String formatDateTime(LocalDateTime dateTime) {
+        return dateTime.format(ISO_FORMATTER);
+    }
+
+    private String slotStart(LocalDate date, int index) {
+        return formatDateTime(slotStartTime(date, index));
+    }
+
+    private String slotEnd(LocalDate date, int index) {
+        return formatDateTime(slotEndTime(date, index));
+    }
+
 
     @Test
     void createPractitionerReturnsCreatedResponse() throws Exception {
@@ -70,20 +121,20 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
         // now try to create a practitioner with the same id number
         PractitionerRequest request = new PractitionerRequest(
-            "Gregory",
-            "House",
-            "1234567890",
-            LocalDate.of(1970, 6, 11),
-            "male",
-            "+1 555 0200",
-            "house@example.com",
-            List.of("Diagnostics", "Nephrology"));
+                "Gregory",
+                "House",
+                "1234567890",
+                LocalDate.of(1970, 6, 11),
+                "male",
+                "+1 555 0200",
+                "house@example.com",
+                List.of("Diagnostics", "Nephrology"));
 
         mockMvc.perform(post("/api/v1/practitioners")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(json(request)))
-            .andExpect(status().isConflict())
-            .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value(ErrorCode.CONFLICT.name()));
     }
 
     @Test
@@ -99,8 +150,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 List.of());
 
         mockMvc.perform(post("/api/v1/practitioners")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value("VALIDATION_ERROR"));
     }
@@ -112,8 +163,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         savePractitioner("Stephen", "Strange", "1234567892", List.of("Neurology"));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("sort", "lastName,asc")
-                        .param("size", "10"))
+                .param("sort", "lastName,asc")
+                .param("size", "10"))
                 .andExpect(status().isOk())
                 // .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Grey"))
@@ -144,8 +195,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 List.of("Oncology"));
 
         mockMvc.perform(put("/api/v1/practitioners/{id}", practitioner.getPractitionerId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.firstName").value("James"))
                 .andExpect(jsonPath("$.lastName").value("Wilson"))
@@ -166,8 +217,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 List.of("Oncology"));
 
         mockMvc.perform(put("/api/v1/practitioners/{id}", practitioner.getPractitionerId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(json(request)))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json(request)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value("CONFLICT"));
     }
@@ -197,9 +248,9 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
         // Page 0, size 2, sorted by lastName asc (Alpha, Beta, Delta, Epsilon, Gamma)
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("page", "0")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Alpha"))
@@ -213,9 +264,9 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
         // Page 1, size 2
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("page", "1")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Delta"))
@@ -226,9 +277,9 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
 
         // Page 2, size 2
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("page", "2")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("page", "2")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Gamma"))
@@ -254,8 +305,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         departmentRepository.save(neuro);
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("sort", "lastName,asc"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Grey"))
@@ -276,10 +327,10 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         departmentRepository.save(cardio);
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("page", "0")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.totalElements").value(3))
@@ -289,10 +340,10 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 .andExpect(jsonPath("$.last").value(false));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("page", "1")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.number").value(1))
@@ -303,7 +354,7 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
     @Test
     void getPractitionersFilteredByNonExistentDepartmentReturnsNotFound() throws Exception {
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", UUID.randomUUID().toString()))
+                .param("departmentId", UUID.randomUUID().toString()))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
     }
@@ -316,8 +367,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         savePractitioner("Doctor", "Cardio2", "1000000003", List.of("Cardiology", "Internal Medicine"));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("specialty", "Cardiology")
-                        .param("sort", "lastName,asc"))
+                .param("specialty", "Cardiology")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.content[0].lastName").value("Cardio1"))
@@ -333,10 +384,10 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         savePractitioner("Doctor", "Three", "1000000003", List.of("Pediatrics"));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("specialty", "Pediatrics")
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("specialty", "Pediatrics")
+                .param("page", "0")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.totalElements").value(3))
@@ -346,10 +397,10 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 .andExpect(jsonPath("$.last").value(false));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("specialty", "Pediatrics")
-                        .param("page", "1")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("specialty", "Pediatrics")
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.number").value(1))
@@ -374,8 +425,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         departmentRepository.save(emergency);
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("specialty", "Cardiology"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("specialty", "Cardiology"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].lastName").value("CardioInDept"))
@@ -395,11 +446,11 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         departmentRepository.save(cardio);
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("specialty", "Cardiology")
-                        .param("page", "0")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("specialty", "Cardiology")
+                .param("page", "0")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)))
                 .andExpect(jsonPath("$.totalElements").value(3))
@@ -409,11 +460,11 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
                 .andExpect(jsonPath("$.last").value(false));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("specialty", "Cardiology")
-                        .param("page", "1")
-                        .param("size", "2")
-                        .param("sort", "lastName,asc"))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("specialty", "Cardiology")
+                .param("page", "1")
+                .param("size", "2")
+                .param("sort", "lastName,asc"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.number").value(1))
@@ -428,7 +479,7 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         savePractitioner("Doctor", "Two", "1000000002", List.of("Neurology"));
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("specialty", "   "))
+                .param("specialty", "   "))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(2)));
     }
@@ -444,8 +495,8 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         departmentRepository.save(cardio);
 
         mockMvc.perform(get("/api/v1/practitioners")
-                        .param("departmentId", cardio.getDepartmentId().toString())
-                        .param("specialty", "   "))
+                .param("departmentId", cardio.getDepartmentId().toString())
+                .param("specialty", "   "))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content", hasSize(1)))
                 .andExpect(jsonPath("$.content[0].lastName").value("CardioDoc"));
@@ -455,49 +506,59 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
     void getPractitionerAvailabilityWhenNoAppointmentsReturnsAllDefaultSlots() throws Exception {
         Practitioner practitioner = defaultSubjects.practitioner();
         LocalDate targetDate = LocalDate.of(2026, 9, 1);
+        int lastIndex = defaultSlots - 1;
+
+        // detail: no appointment is booked
 
         mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
-                        .param("date", targetDate.toString()))
+                .param("date", targetDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.practitionerId").value(practitioner.getPractitionerId().toString()))
-                .andExpect(jsonPath("$.date").value("2026-09-01"))
-                .andExpect(jsonPath("$.availableSlots", hasSize(16)))
-                .andExpect(jsonPath("$.availableSlots[0].start").value("2026-09-01T09:00:00"))
-                .andExpect(jsonPath("$.availableSlots[0].end").value("2026-09-01T09:30:00"))
-                .andExpect(jsonPath("$.availableSlots[15].start").value("2026-09-01T16:30:00"))
-                .andExpect(jsonPath("$.availableSlots[15].end").value("2026-09-01T17:00:00"));
+                .andExpect(jsonPath("$.date").value(targetDate.toString()))
+                .andExpect(jsonPath("$.availableSlots", hasSize(defaultSlots)))
+                .andExpect(jsonPath("$.availableSlots[0].start").value(slotStart(targetDate, 0)))
+                .andExpect(jsonPath("$.availableSlots[0].end").value(slotEnd(targetDate, 0)))
+                .andExpect(jsonPath("$.availableSlots[" + lastIndex + "].start").value(slotStart(targetDate, lastIndex)))
+                .andExpect(jsonPath("$.availableSlots[" + lastIndex + "].end").value(slotEnd(targetDate, lastIndex)));
     }
 
     @Test
     void getPractitionerAvailabilityWhenAppointmentExistsFiltersOutBookedSlot() throws Exception {
+        // define practitioner and target date
         Practitioner practitioner = defaultSubjects.practitioner();
         LocalDate targetDate = LocalDate.of(2026, 9, 1);
 
-        // Book 09:30 - 10:00
+        // Book slot 2 & 3 (e.g. 09:30 - 10:00)
+        LocalDateTime appStart = slotStartTime(targetDate, 2);
+        LocalDateTime appEnd = slotEndTime(targetDate, 3);
+        int bookedSlots = (int) Duration.between(appStart, appEnd).dividedBy(scheduling.getDefaultSlotDuration());
+
         Appointment app = new Appointment(
                 defaultSubjects.patient(),
                 practitioner,
                 defaultSubjects.department(),
-                LocalDateTime.of(2026, 9, 1, 9, 30),
-                LocalDateTime.of(2026, 9, 1, 10, 0),
+                appStart,
+                appEnd,
                 AppointmentStatus.SCHEDULED,
                 "Consultation",
                 UrgencyLevel.ROUTINE,
-                null
-        );
+                null);
         appointmentRepository.save(app);
 
         mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
-                        .param("date", targetDate.toString()))
+                .param("date", targetDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.practitionerId").value(practitioner.getPractitionerId().toString()))
-                .andExpect(jsonPath("$.date").value("2026-09-01"))
-                .andExpect(jsonPath("$.availableSlots", hasSize(15)))
-                .andExpect(jsonPath("$.availableSlots[0].start").value("2026-09-01T09:00:00"))
-                .andExpect(jsonPath("$.availableSlots[0].end").value("2026-09-01T09:30:00"))
-                // Next slot is 10:00, 09:30 slot was omitted!
-                .andExpect(jsonPath("$.availableSlots[1].start").value("2026-09-01T10:00:00"))
-                .andExpect(jsonPath("$.availableSlots[1].end").value("2026-09-01T10:30:00"));
+                .andExpect(jsonPath("$.date").value(targetDate.toString()))
+                .andExpect(jsonPath("$.availableSlots", hasSize(defaultSlots - bookedSlots)))
+                .andExpect(jsonPath("$.availableSlots[0].start").value(slotStart(targetDate, 0)))
+                .andExpect(jsonPath("$.availableSlots[0].end").value(slotEnd(targetDate, 0)))
+                // Slot 1 (09:15 - 09:30) is the last slot before appointment
+                .andExpect(jsonPath("$.availableSlots[1].start").value(slotStart(targetDate, 1)))
+                .andExpect(jsonPath("$.availableSlots[1].end").value(slotEnd(targetDate, 1)))
+                // Slot 2 resumes after the booked appointment at appEnd (10:00)
+                .andExpect(jsonPath("$.availableSlots[2].start").value(formatDateTime(appEnd)))
+                .andExpect(jsonPath("$.availableSlots[*].start", not(hasItem(formatDateTime(appStart)))));
     }
 
     @Test
@@ -505,26 +566,32 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         Practitioner practitioner = defaultSubjects.practitioner();
         LocalDate targetDate = LocalDate.of(2026, 9, 1);
 
+        LocalDateTime appStart = slotStartTime(targetDate, 2);
+        LocalDateTime appEnd = slotEndTime(targetDate, 3);
+
         // Cancelled booking at 09:30 - 10:00
         Appointment app = new Appointment(
                 defaultSubjects.patient(),
                 practitioner,
                 defaultSubjects.department(),
-                LocalDateTime.of(2026, 9, 1, 9, 30),
-                LocalDateTime.of(2026, 9, 1, 10, 0),
+                appStart,
+                appEnd,
                 AppointmentStatus.CANCELLED,
                 "Cancelled checkup",
                 UrgencyLevel.ROUTINE,
-                null
-        );
+                null);
         appointmentRepository.save(app);
 
         mockMvc.perform(get("/api/v1/practitioners/{id}/availability", practitioner.getPractitionerId())
-                        .param("date", targetDate.toString()))
+                .param("date", targetDate.toString()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.availableSlots", hasSize(16)))
-                .andExpect(jsonPath("$.availableSlots[1].start").value("2026-09-01T09:30:00"))
-                .andExpect(jsonPath("$.availableSlots[1].end").value("2026-09-01T10:00:00"));
+                .andExpect(jsonPath("$.availableSlots", hasSize(defaultSlots)))
+                .andExpect(jsonPath("$.availableSlots[1].start").value(slotStart(targetDate, 1)))
+                .andExpect(jsonPath("$.availableSlots[1].end").value(slotEnd(targetDate, 1)))
+                // Cancelled appointment slot (slot 2) is still available
+                .andExpect(jsonPath("$.availableSlots[2].start").value(slotStart(targetDate, 2)))
+                .andExpect(jsonPath("$.availableSlots[2].end").value(slotEnd(targetDate, 2)))
+                .andExpect(jsonPath("$.availableSlots[*].start", hasItem(formatDateTime(appStart))));
     }
 
     @Test
@@ -532,7 +599,7 @@ class PractitionerControllerTest extends CrudControllerTestSupport {
         UUID randomId = UUID.randomUUID();
 
         mockMvc.perform(get("/api/v1/practitioners/{id}/availability", randomId)
-                        .param("date", "2026-09-01"))
+                .param("date", "2026-09-01"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value(ErrorCode.NOT_FOUND.name()));
     }
