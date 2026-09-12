@@ -1,7 +1,7 @@
-.PHONY: help dev test build clean db-up db-down docker-dev
+.PHONY: help dev test build clean db-up db-down db-prune docker-dev down
 
 GRADLEW := ./gradlew
-JWT_SECRET := $(shell openssl rand -base64 32)
+export JWT_SECRET ?= $(shell openssl rand -base64 32)
 
 ifneq (,$(wildcard .env))
 	include .env
@@ -18,6 +18,7 @@ help:
 	@printf "  make db-down Stop PostgreSQL in Docker\n"
 	@printf "  make db-prune   Stop PostgreSQL and remove its Docker volume\n"
 	@printf "  make docker-dev Start the API and PostgreSQL with Docker Compose\n"
+	@printf "  make down   Stop all containers in Docker Compose\n"
 
 dev: db-up
 	JWT_SECRET=$(JWT_SECRET) $(GRADLEW) bootRun -t
@@ -41,4 +42,7 @@ db-prune:
 	docker compose down -v
 
 docker-dev:
-	JWT_SECRET=$(JWT_SECRET) docker compose up --build
+	JWT_SECRET=$(JWT_SECRET) docker compose up --build -d
+
+down:
+	docker compose down
