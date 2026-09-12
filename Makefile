@@ -41,4 +41,4 @@ db-prune:
 	docker compose down -v
 
 docker-dev:
-	docker compose up --build
+	JWT_SECRET=$(JWT_SECRET) docker compose up --build
