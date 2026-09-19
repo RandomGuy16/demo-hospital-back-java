@@ -27,10 +27,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-    environment:
+    environment:  # remember these variable names
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/hospitaldb
       SPRING_DATASOURCE_USERNAME: hospital
       SPRING_DATASOURCE_PASSWORD: hospital
+      # verify if the variables are applied with: docker compose config
       JWT_SECRET: ${JWT_SECRET:-MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5}
       CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://localhost:3000}
     ports:

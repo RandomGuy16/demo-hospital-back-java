@@ -1,7 +1,7 @@
 package com.evergreen.generalhospital.repositories;
 
 import com.evergreen.generalhospital.models.patient.Patient;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -22,7 +22,7 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
     // - count()
     // and many more!
 
-    Patient save(Patient patient);
+    // Patient save(Patient patient);
 
     Optional<Patient> findById(UUID id);
 

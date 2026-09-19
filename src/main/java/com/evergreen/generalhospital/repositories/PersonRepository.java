@@ -2,7 +2,7 @@ package com.evergreen.generalhospital.repositories;
 
 import com.evergreen.generalhospital.models.Person;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.lang.NonNull;
+import org.jspecify.annotations.NonNull;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;

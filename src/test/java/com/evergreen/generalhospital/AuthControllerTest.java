@@ -3,14 +3,15 @@ package com.evergreen.generalhospital;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.testsupport.base.AuthControllerTestSupport;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.evergreen.generalhospital.models.useraccount.Role;
+
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import com.evergreen.generalhospital.models.useraccount.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.test.web.servlet.MvcResult;
@@ -23,6 +24,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.hasItem;
 
 @SpringBootTest(properties = {
     "security.jwt.secret=${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6QUJDREVGR0hJSktMTU5PUFFSU1RVVldYWVowMTIzNDU2Nzg5}",
@@ -395,7 +397,7 @@ public class AuthControllerTest extends AuthControllerTestSupport {
             .andReturn();
 
         String token = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("token").asText();
+                .get("token").asString();
 
         mockMvc.perform(get("/api/v1/me")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
@@ -404,7 +406,7 @@ public class AuthControllerTest extends AuthControllerTestSupport {
             .andExpect(jsonPath("$.email").value("katherine@example.com"))
             .andExpect(jsonPath("$.name").value("Katherine Johnson"))
             .andExpect(jsonPath("$.preferredUsername").value("katherine@example.com"))
-            .andExpect(jsonPath("$.authorities[0]").value("ROLE_PATIENT"));
+            .andExpect(jsonPath("$.authorities").value(hasItem("ROLE_PATIENT")));
     }
 
     @Test
@@ -472,7 +474,7 @@ public class AuthControllerTest extends AuthControllerTestSupport {
             .andReturn();
 
         String token = objectMapper.readTree(result.getResponse().getContentAsString())
-                .get("token").asText();
+                .get("token").asString();
 
         mockMvc.perform(get("/api/v1/patients/me")
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))

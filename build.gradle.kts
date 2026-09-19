@@ -2,7 +2,7 @@ import org.gradle.buildconfiguration.tasks.UpdateDaemonJvm
 
 plugins {
     java
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.1.1"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -34,7 +34,7 @@ dependencies {
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
     // this one is for beautiful swagger docs
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1")
 
     // this one if to enable auto reload
     developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -55,6 +55,9 @@ dependencies {
 
     // properties migrator
     runtimeOnly("org.springframework.boot:spring-boot-properties-migrator")
+
+    // spring 4: modularization (adding modularized modules)
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
 }
 
 tasks.withType<Test> {
@@ -63,6 +66,10 @@ tasks.withType<Test> {
 
 tasks.named<UpdateDaemonJvm>("updateDaemonJvm") {
     languageVersion = JavaLanguageVersion.of(21)
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.compilerArgs.add("-Xlint:deprecation")
 }
 
 tasks.test {
