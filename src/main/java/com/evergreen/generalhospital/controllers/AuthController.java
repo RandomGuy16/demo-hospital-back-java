@@ -123,7 +123,7 @@ public class AuthController {
     public ResponseEntity<UserAccountAuthenticationResponse> register(
         @RequestBody @Valid UserAccountRegisterRequest request) {
 
-        UserAccount created = userAccountService.registerUserAccount(request);
+        UserAccount created = userAccountService.registerPatientAccount(request);
         String token = jwtService.generateToken(created);  // generate token
         return ResponseEntity.status(201).body(new UserAccountAuthenticationResponse(token));
     }

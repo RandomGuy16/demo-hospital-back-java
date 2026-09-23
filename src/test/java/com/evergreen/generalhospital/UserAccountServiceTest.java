@@ -269,7 +269,7 @@ class UserAccountServiceTest {
         when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
         when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        UserAccount created = userAccountService.registerUserAccount(request);
+        UserAccount created = userAccountService.registerPatientAccount(request);
 
         assertThat(created.getRoles()).contains(Role.ROLE_PATIENT);
         assertThat(created.getPerson()).isSameAs(patient);
@@ -288,7 +288,7 @@ class UserAccountServiceTest {
 
         when(userAccountRepository.existsByEmail(request.email())).thenReturn(true);
 
-        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+        assertThatThrownBy(() -> userAccountService.registerPatientAccount(request))
                 .isInstanceOf(RepeatedUsernameException.class)
                 .hasMessage("User with email john.doe@example.com already exists");
 
@@ -311,7 +311,7 @@ class UserAccountServiceTest {
                 .thenReturn(patient);
         when(userAccountRepository.existsByPerson(patient)).thenReturn(true);
 
-        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+        assertThatThrownBy(() -> userAccountService.registerPatientAccount(request))
                 .isInstanceOf(RepeatedUsernameException.class)
                 .hasMessage("A user account already exists for idNumber 1234567890");
 
@@ -331,7 +331,7 @@ class UserAccountServiceTest {
                 .thenThrow(new PatientIdentityMismatchException(
                         "Patient identity for idNumber 1234567890 does not match the provided information"));
 
-        assertThatThrownBy(() -> userAccountService.registerUserAccount(request))
+        assertThatThrownBy(() -> userAccountService.registerPatientAccount(request))
                 .isInstanceOf(PatientIdentityMismatchException.class);
 
         verify(userAccountRepository, never()).save(any());

@@ -1,12 +1,14 @@
 package com.evergreen.generalhospital.services;
 
 import com.evergreen.generalhospital.config.HospitalProperties;
+import com.evergreen.generalhospital.dto.admin.AdminPractitionerRequest;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerFreeTimeSlot;
 import com.evergreen.generalhospital.dto.practitioner.PractitionerRequest;
 import com.evergreen.generalhospital.errors.ImmutableFieldException;
 import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.errors.ResourceNotFoundException;
 import com.evergreen.generalhospital.models.appointment.Appointment;
+import com.evergreen.generalhospital.models.department.Department;
 import com.evergreen.generalhospital.models.practitioner.Practitioner;
 import com.evergreen.generalhospital.repositories.AppointmentRepository;
 import com.evergreen.generalhospital.repositories.DepartmentRepository;
@@ -23,7 +25,7 @@ import java.time.LocalTime;
 import java.util.*;
 
 @Service
-@Transactional
+@Transactional  // call save at the end of every funny method
 public class PractitionerService {
     private final PractitionerRepository practitionerRepository;
     private final DepartmentRepository departmentRepository;
@@ -41,6 +43,7 @@ public class PractitionerService {
         this.hospitalProperties = hospitalProperties;
     }
 
+    @Deprecated
     public Practitioner createPractitioner(PractitionerRequest request) {
         // check if idNumber already exists, that can't be repeated
         // person being globally sets two different idNumber columns, which agrees to reality
@@ -59,6 +62,57 @@ public class PractitionerService {
                 request.contacts());
         practitioner.setSpecialties(request.specialties() == null ? new ArrayList<>() : new ArrayList<>(request.specialties()));
         return practitionerRepository.save(practitioner);
+    }
+
+    /**
+     * Create a practitioner entity
+     *
+     * This method takes an AdminPractitionerRequest (only an admin can create a practitioner)
+     * and creates the entity.
+     * @param req Record containing the demographics and more necessary data
+     * @return the entity created
+     * @throws RepeatedIdNumberException if there's already a practitioner with the same id number
+     */
+    public Practitioner createPractitioner(AdminPractitionerRequest req) {
+        // check if it exists
+        if (practitionerRepository.existsByIdNumber(req.idNumber())) {
+            throw new RepeatedIdNumberException("Practitioner with idNumber " + req.idNumber() + " already exists");
+        }
+
+        // resolve departments
+        List<Department> departments = new ArrayList<>();
+        if (req.departmentIds() != null && !req.departmentIds().isEmpty()) {
+            departments = departmentRepository.findAllById(req.departmentIds());
+            if (departments.size() != req.departmentIds().size()) {
+                throw new ResourceNotFoundException("One or more departments not found");
+            }
+        }
+
+        // create the practitioner
+        Practitioner practitioner = new Practitioner(
+            req.firstName(),
+            req.lastName(),
+            req.idNumber(),
+            req.dateOfBirth(),
+            req.gender(),
+            req.phoneNumber(),
+            req.emergencyContact());
+        practitioner.setSpecialties(req.specialties() == null
+            ? new ArrayList<>()
+            : new ArrayList<>(req.specialties()));
+
+        // save the practitioner
+        Practitioner saved = practitionerRepository.save(practitioner);
+
+        // Add the practitioner to their respective departments and
+        // add the departments to the practitioner
+        for (Department dept : departments) {
+            dept.getPractitioners().add(saved);
+            saved.getDepartments().add(dept);  // needed for checking practitioner departments in memory (mappers)
+        }
+        departmentRepository.saveAll(departments);
+
+        return saved;
     }
 
     private Page<Practitioner> getAllPractitioners(Pageable pageable) {

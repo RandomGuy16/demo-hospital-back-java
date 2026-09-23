@@ -38,8 +38,8 @@ public class Practitioner extends Person {
     }
 
     public Practitioner(String firstName, String lastName, String idNumber, LocalDate dateOfBirth,
-                        String gender, String phoneNumber, String contacts) {
-        super(firstName, lastName, idNumber, dateOfBirth, gender, phoneNumber, contacts);
+                        String gender, String phoneNumber, String emergencyContact) {
+        super(firstName, lastName, idNumber, dateOfBirth, gender, phoneNumber, emergencyContact);
     }
 
     // Getters and Setters

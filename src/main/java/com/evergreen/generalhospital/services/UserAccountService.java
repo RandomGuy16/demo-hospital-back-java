@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.services;
 
+import com.evergreen.generalhospital.dto.admin.AdminPractitionerRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
@@ -33,6 +34,7 @@ public class UserAccountService implements UserDetailsService {
     private final PractitionerRepository practitionerRepository;
     private final PatientRepository patientRepository;
     private final PatientService patientService;
+    private final PractitionerService practitionerService;
     private final PasswordEncoder passwordEncoder;
 
     /**
@@ -43,6 +45,8 @@ public class UserAccountService implements UserDetailsService {
      * @param patientRepository      repository used to resolve patient links.
      * @param patientService         service used to resolve or create patients
      *                               during registration.
+     * @param practitionerService    service used to resolve or create practitioners
+     *                               during registration.
      * @param passwordEncoder        encoder used to hash local passwords before
      *                               persistence.
      */
@@ -50,11 +54,13 @@ public class UserAccountService implements UserDetailsService {
             PractitionerRepository practitionerRepository,
             PatientRepository patientRepository,
             PatientService patientService,
+            PractitionerService practitionerService,
             PasswordEncoder passwordEncoder) {
         this.userAccountRepository = userAccountRepository;
         this.practitionerRepository = practitionerRepository;
         this.patientRepository = patientRepository;
         this.patientService = patientService;
+        this.practitionerService = practitionerService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -161,7 +167,7 @@ public class UserAccountService implements UserDetailsService {
      *                                          an existing patient under that
      *                                          idNumber
      */
-    public UserAccount registerUserAccount(UserAccountRegisterRequest request) {
+    public UserAccount registerPatientAccount(UserAccountRegisterRequest request) {
         // username is the same as email, to avoid complications
         String username = request.email();
 
@@ -203,6 +209,69 @@ public class UserAccountService implements UserDetailsService {
                                                              // this is defined in SecurityConfig
         newUser.setPerson(patient);
         return userAccountRepository.save(newUser);
+    }
+
+    /**
+     * Creates a local practitioner account.
+     *
+     * <p>
+     * This method is about creating the practitioner account, which includes
+     * expanding an existing patient to have also practitioner permissions.
+     * Pretty much the same as registerPatientAccount.
+     * The account username mirrors the email so login stays email-based.
+     * </p>
+     *
+     * @param req registration payload.
+     * @return newly created user account.
+     * @throws RepeatedUsernameException if there's another's person account with
+     *                                   that username (a namesake).
+     */
+    public UserAccount createPractitionerAccount(AdminPractitionerRequest req) {
+        String username = (req.username() != null && !req.username().isBlank())
+            ? req.username()
+            : req.email();
+
+        Optional<UserAccount> existingByEmail = userAccountRepository.findByEmail(req.email());
+        Optional<UserAccount> existingByUsername = userAccountRepository.findByUsername(username);
+
+        // if there's someone with the same username but different id throw an error
+        if (existingByEmail.isPresent() && existingByUsername.isPresent()
+                && !existingByEmail.get().getId().equals(existingByUsername.get().getId())) {
+            throw new RepeatedUsernameException("Email and username belong to different existing accounts");
+        }
+
+        Optional<UserAccount> existingAccount = existingByEmail.or(() -> existingByUsername);
+        // if the existing account is already a practitioner throw an error
+        if (existingAccount.isPresent() && existingAccount.get().getRoles().contains(Role.ROLE_PRACTITIONER)) {
+            throw new RepeatedUsernameException("Practitioner account with this email/username already exists");
+        }
+
+        // create the practitioner with departments and specialties
+        Practitioner practitioner = practitionerService.createPractitioner(req);
+
+        UserAccount user;
+        // handle the case where a patient account exists and the person is now also a practitioner
+        if (existingAccount.isPresent()) {
+            user = existingAccount.get();
+            user.getRoles().add(Role.ROLE_PRACTITIONER);
+            user.setPerson(practitioner);
+        } else {
+            var roles = new HashSet<Role>();
+            roles.add(Role.ROLE_PRACTITIONER);
+
+            user = new UserAccount(
+                "local",
+                username,
+                roles,
+                req.firstName() + " " + req.lastName(),
+                username,
+                req.email(),
+                passwordEncoder.encode(req.password())
+            );
+            user.setPerson(practitioner);
+        }
+
+        return userAccountRepository.save(user);
     }
 
     /**

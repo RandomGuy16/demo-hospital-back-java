@@ -42,4 +42,6 @@ public interface PractitionerRepository extends JpaRepository<Practitioner, UUID
         @Param("specialty") String specialty,
         Pageable pageable
     );
+
+    Optional<Practitioner> findByIdNumber(String idNumber);
 }

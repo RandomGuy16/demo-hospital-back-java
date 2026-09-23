@@ -8,6 +8,7 @@ import com.evergreen.generalhospital.paging.SortParser;
 import com.evergreen.generalhospital.services.AppointmentService;
 import com.evergreen.generalhospital.mappers.AppointmentMapper;
 import static com.evergreen.generalhospital.mappers.AppointmentMapper.appointmentToAppointmentResponse;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Schema;
