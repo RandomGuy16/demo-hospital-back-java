@@ -82,8 +82,9 @@ public class PractitionerService {
         // resolve departments
         List<Department> departments = new ArrayList<>();
         if (req.departmentIds() != null && !req.departmentIds().isEmpty()) {
-            departments = departmentRepository.findAllById(req.departmentIds());
-            if (departments.size() != req.departmentIds().size()) {
+            Set<UUID> uniqueDeptIds = new HashSet<>(req.departmentIds());
+            departments = departmentRepository.findAllById(uniqueDeptIds);
+            if (departments.size() != uniqueDeptIds.size()) {
                 throw new ResourceNotFoundException("One or more departments not found");
             }
         }
@@ -99,7 +100,7 @@ public class PractitionerService {
             req.emergencyContact());
         practitioner.setSpecialties(req.specialties() == null
             ? new ArrayList<>()
-            : new ArrayList<>(req.specialties()));
+            : new ArrayList<>(new LinkedHashSet<>(req.specialties())));
 
         // save the practitioner
         Practitioner saved = practitionerRepository.save(practitioner);

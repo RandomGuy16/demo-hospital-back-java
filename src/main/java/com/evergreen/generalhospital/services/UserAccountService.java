@@ -3,6 +3,7 @@ package com.evergreen.generalhospital.services;
 import com.evergreen.generalhospital.dto.admin.AdminPractitionerRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
+import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
 import com.evergreen.generalhospital.errors.UnclearUserRoleException;
 import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
@@ -215,61 +216,52 @@ public class UserAccountService implements UserDetailsService {
      * Creates a local practitioner account.
      *
      * <p>
-     * This method is about creating the practitioner account, which includes
-     * expanding an existing patient to have also practitioner permissions.
-     * Pretty much the same as registerPatientAccount.
-     * The account username mirrors the email so login stays email-based.
+     * Onboards a practitioner staff member by creating their practitioner entity
+     * (with department affiliations and specialties) and provisioning a corresponding
+     * user account with ROLE_PRACTITIONER in a single transactional operation.
      * </p>
      *
      * @param req registration payload.
      * @return newly created user account.
-     * @throws RepeatedUsernameException if there's another's person account with
-     *                                   that username (a namesake).
+     * @throws RepeatedIdNumberException if a practitioner with the same idNumber already exists.
+     * @throws RepeatedUsernameException if a user account with the email or username already exists.
      */
     public UserAccount createPractitionerAccount(AdminPractitionerRequest req) {
+        // guard
         String username = (req.username() != null && !req.username().isBlank())
             ? req.username()
             : req.email();
 
-        Optional<UserAccount> existingByEmail = userAccountRepository.findByEmail(req.email());
-        Optional<UserAccount> existingByUsername = userAccountRepository.findByUsername(username);
-
-        // if there's someone with the same username but different id throw an error
-        if (existingByEmail.isPresent() && existingByUsername.isPresent()
-                && !existingByEmail.get().getId().equals(existingByUsername.get().getId())) {
-            throw new RepeatedUsernameException("Email and username belong to different existing accounts");
+        // uniqueness validation
+        if (practitionerRepository.existsByIdNumber(req.idNumber())) {
+            throw new RepeatedIdNumberException("Practitioner with idNumber " + req.idNumber() + " already exists");
         }
 
-        Optional<UserAccount> existingAccount = existingByEmail.or(() -> existingByUsername);
-        // if the existing account is already a practitioner throw an error
-        if (existingAccount.isPresent() && existingAccount.get().getRoles().contains(Role.ROLE_PRACTITIONER)) {
-            throw new RepeatedUsernameException("Practitioner account with this email/username already exists");
+        if (userAccountRepository.existsByEmail(req.email())) {
+            throw new RepeatedUsernameException("User with email " + req.email() + " already exists");
         }
 
-        // create the practitioner with departments and specialties
+        if (userAccountRepository.existsByUsername(username)) {
+            throw new RepeatedUsernameException("User with username " + username + " already exists");
+        }
+
+        // build entity and persist it
         Practitioner practitioner = practitionerService.createPractitioner(req);
 
-        UserAccount user;
-        // handle the case where a patient account exists and the person is now also a practitioner
-        if (existingAccount.isPresent()) {
-            user = existingAccount.get();
-            user.getRoles().add(Role.ROLE_PRACTITIONER);
-            user.setPerson(practitioner);
-        } else {
-            var roles = new HashSet<Role>();
-            roles.add(Role.ROLE_PRACTITIONER);
+        // provisioning user account
+        var roles = new HashSet<Role>();
+        roles.add(Role.ROLE_PRACTITIONER);
 
-            user = new UserAccount(
-                "local",
-                username,
-                roles,
-                req.firstName() + " " + req.lastName(),
-                username,
-                req.email(),
-                passwordEncoder.encode(req.password())
-            );
-            user.setPerson(practitioner);
-        }
+        UserAccount user = new UserAccount(
+            "local",
+            username,
+            roles,
+            req.firstName() + " " + req.lastName(),
+            username,
+            req.email(),
+            passwordEncoder.encode(req.password())
+        );
+        user.setPerson(practitioner);
 
         return userAccountRepository.save(user);
     }

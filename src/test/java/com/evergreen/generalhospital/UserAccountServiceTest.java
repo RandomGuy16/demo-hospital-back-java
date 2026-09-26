@@ -1,8 +1,10 @@
 package com.evergreen.generalhospital;
 
+import com.evergreen.generalhospital.dto.admin.AdminPractitionerRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRegisterRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountRequest;
 import com.evergreen.generalhospital.errors.PatientIdentityMismatchException;
+import com.evergreen.generalhospital.errors.RepeatedIdNumberException;
 import com.evergreen.generalhospital.errors.RepeatedUsernameException;
 import com.evergreen.generalhospital.errors.UnclearUserRoleException;
 import com.evergreen.generalhospital.models.patient.Patient;
@@ -13,6 +15,7 @@ import com.evergreen.generalhospital.repositories.PatientRepository;
 import com.evergreen.generalhospital.repositories.PractitionerRepository;
 import com.evergreen.generalhospital.repositories.UserAccountRepository;
 import com.evergreen.generalhospital.services.PatientService;
+import com.evergreen.generalhospital.services.PractitionerService;
 import com.evergreen.generalhospital.services.UserAccountService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -24,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -50,6 +54,9 @@ class UserAccountServiceTest {
 
     @Mock
     private PatientService patientService;
+
+    @Mock
+    private PractitionerService practitionerService;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -335,5 +342,128 @@ class UserAccountServiceTest {
                 .isInstanceOf(PatientIdentityMismatchException.class);
 
         verify(userAccountRepository, never()).save(any());
+    }
+
+    private AdminPractitionerRequest adminPractitionerRequest() {
+        return new AdminPractitionerRequest(
+                "Sarah",
+                "Connor",
+                "1000000001",
+                LocalDate.of(1980, 5, 15),
+                "female",
+                "+1 555 0101",
+                "John Connor (+1 555 0191)",
+                List.of(UUID.randomUUID()),
+                List.of("Cardiology"),
+                "sarah.connor@example.com",
+                null,
+                "password123");
+    }
+
+    @Test
+    void createPractitionerAccountCreatesPractitionerAccountWithRoleAndPersonLink() {
+        AdminPractitionerRequest request = adminPractitionerRequest();
+
+        when(practitionerRepository.existsByIdNumber(request.idNumber())).thenReturn(false);
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername(request.email())).thenReturn(false);
+        when(practitionerService.createPractitioner(request)).thenReturn(practitioner);
+        when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
+        when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserAccount created = userAccountService.createPractitionerAccount(request);
+
+        assertThat(created.getRoles()).contains(Role.ROLE_PRACTITIONER);
+        assertThat(created.getPerson()).isSameAs(practitioner);
+        assertThat(created.getUsername()).isEqualTo(request.email());
+        assertThat(created.getEmail()).isEqualTo(request.email());
+        assertThat(created.getDisplayName()).isEqualTo("Sarah Connor");
+        assertThat(created.getProvider()).isEqualTo("local");
+    }
+
+    @Test
+    void createPractitionerAccountWithExplicitUsernameUsesProvidedUsername() {
+        AdminPractitionerRequest request = new AdminPractitionerRequest(
+                "Sarah",
+                "Connor",
+                "1000000001",
+                LocalDate.of(1980, 5, 15),
+                "female",
+                "+1 555 0101",
+                "John Connor (+1 555 0191)",
+                List.of(UUID.randomUUID()),
+                List.of("Cardiology"),
+                "sarah.connor@example.com",
+                "dr.connor",
+                "password123");
+
+        when(practitionerRepository.existsByIdNumber(request.idNumber())).thenReturn(false);
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername("dr.connor")).thenReturn(false);
+        when(practitionerService.createPractitioner(request)).thenReturn(practitioner);
+        when(passwordEncoder.encode(request.password())).thenReturn("encoded-password");
+        when(userAccountRepository.save(any(UserAccount.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserAccount created = userAccountService.createPractitionerAccount(request);
+
+        assertThat(created.getUsername()).isEqualTo("dr.connor");
+        assertThat(created.getEmail()).isEqualTo("sarah.connor@example.com");
+    }
+
+    @Test
+    void createPractitionerAccountRejectsDuplicateIdNumber() {
+        AdminPractitionerRequest request = adminPractitionerRequest();
+
+        when(practitionerRepository.existsByIdNumber(request.idNumber())).thenReturn(true);
+
+        assertThatThrownBy(() -> userAccountService.createPractitionerAccount(request))
+                .isInstanceOf(RepeatedIdNumberException.class)
+                .hasMessage("Practitioner with idNumber 1000000001 already exists");
+
+        verify(userAccountRepository, never()).save(any());
+        verify(practitionerService, never()).createPractitioner(any(AdminPractitionerRequest.class));
+    }
+
+    @Test
+    void createPractitionerAccountRejectsDuplicateEmail() {
+        AdminPractitionerRequest request = adminPractitionerRequest();
+
+        when(practitionerRepository.existsByIdNumber(request.idNumber())).thenReturn(false);
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(true);
+
+        assertThatThrownBy(() -> userAccountService.createPractitionerAccount(request))
+                .isInstanceOf(RepeatedUsernameException.class)
+                .hasMessage("User with email sarah.connor@example.com already exists");
+
+        verify(userAccountRepository, never()).save(any());
+        verify(practitionerService, never()).createPractitioner(any(AdminPractitionerRequest.class));
+    }
+
+    @Test
+    void createPractitionerAccountRejectsDuplicateUsername() {
+        AdminPractitionerRequest request = new AdminPractitionerRequest(
+                "Sarah",
+                "Connor",
+                "1000000001",
+                LocalDate.of(1980, 5, 15),
+                "female",
+                "+1 555 0101",
+                "John Connor (+1 555 0191)",
+                List.of(UUID.randomUUID()),
+                List.of("Cardiology"),
+                "sarah.connor@example.com",
+                "dr.connor",
+                "password123");
+
+        when(practitionerRepository.existsByIdNumber(request.idNumber())).thenReturn(false);
+        when(userAccountRepository.existsByEmail(request.email())).thenReturn(false);
+        when(userAccountRepository.existsByUsername("dr.connor")).thenReturn(true);
+
+        assertThatThrownBy(() -> userAccountService.createPractitionerAccount(request))
+                .isInstanceOf(RepeatedUsernameException.class)
+                .hasMessage("User with username dr.connor already exists");
+
+        verify(userAccountRepository, never()).save(any());
+        verify(practitionerService, never()).createPractitioner(any(AdminPractitionerRequest.class));
     }
 }
