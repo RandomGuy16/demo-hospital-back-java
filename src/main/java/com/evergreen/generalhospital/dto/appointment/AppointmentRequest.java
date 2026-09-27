@@ -1,9 +1,11 @@
 package com.evergreen.generalhospital.dto.appointment;
 
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
+import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -21,5 +23,21 @@ public record AppointmentRequest(
 
         @Schema(example = "2026-04-10T09:30:00") @NotNull @Future LocalDateTime end,
 
-        @Schema(example = "SCHEDULED") @NotNull AppointmentStatus status) {
-};
+        @Schema(example = "SCHEDULED") @NotNull AppointmentStatus status,
+
+        @Schema(example = "ROUTINE") UrgencyLevel triageUrgency,
+
+        @Schema(example = "Patient reports mild symptoms") @Size(max = 128) String triageNotes) {
+
+    public AppointmentRequest(
+            UUID patientId,
+            UUID practitionerId,
+            UUID departmentId,
+            String chiefComplaint,
+            LocalDateTime start,
+            LocalDateTime end,
+            AppointmentStatus status
+    ) {
+        this(patientId, practitionerId, departmentId, chiefComplaint, start, end, status, UrgencyLevel.ROUTINE, null);
+    }
+}

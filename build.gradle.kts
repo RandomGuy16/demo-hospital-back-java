@@ -43,6 +43,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
 
     // implement flyway
+    implementation("org.springframework.boot:spring-boot-flyway")  // in spring 4 is now a separate module
     implementation("org.flywaydb:flyway-core")
     implementation("org.flywaydb:flyway-database-postgresql") // support for postgresql
 

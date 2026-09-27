@@ -1,6 +1,7 @@
 package com.evergreen.generalhospital.dto.appointment;
 
 import com.evergreen.generalhospital.models.appointment.AppointmentStatus;
+import com.evergreen.generalhospital.models.appointment.UrgencyLevel;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 
@@ -30,6 +31,24 @@ public record AppointmentResponse(
         LocalDateTime end,
 
         @Schema(example = "SCHEDULED")
-        AppointmentStatus status
+        AppointmentStatus status,
+
+        @Schema(example = "ROUTINE")
+        UrgencyLevel triageUrgency,
+
+        @Schema(example = "Patient reports mild symptoms")
+        String triageNotes
 ) {
+    public AppointmentResponse(
+            UUID appointmentId,
+            UUID patientId,
+            UUID practitionerId,
+            UUID departmentId,
+            String chiefComplaint,
+            LocalDateTime start,
+            LocalDateTime end,
+            AppointmentStatus status
+    ) {
+        this(appointmentId, patientId, practitionerId, departmentId, chiefComplaint, start, end, status, UrgencyLevel.ROUTINE, null);
+    }
 }

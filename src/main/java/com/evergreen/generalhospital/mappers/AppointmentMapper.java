@@ -14,7 +14,9 @@ public class AppointmentMapper {
             appointment.getChiefComplaint(),
             appointment.getStart(),
             appointment.getEnd(),
-            appointment.getStatus());
+            appointment.getStatus(),
+            appointment.getTriageUrgency(),
+            appointment.getTriageNotes());
     }
 
 }

@@ -121,6 +121,7 @@ public class AppointmentService {
         AppointmentRefs payload = validateAppointmentParticipantsExistence(request.patientId(), request.practitionerId(), request.departmentId());
         validateAppointmentNoCollision(request.patientId(), request.practitionerId(), request.start(), request.end());
 
+        UrgencyLevel urgency = request.triageUrgency() != null ? request.triageUrgency() : UrgencyLevel.ROUTINE;
         Appointment appointment = new Appointment(
                 payload.patient,
                 payload.practitioner,
@@ -129,8 +130,8 @@ public class AppointmentService {
                 request.end(),
                 request.status(),
                 request.chiefComplaint(),
-                UrgencyLevel.ROUTINE,
-                null);
+                urgency,
+                request.triageNotes());
         return appointmentRepository.save(appointment);
     }
 
@@ -181,7 +182,8 @@ public class AppointmentService {
         // return empty page if nothing found
         if (user.isEmpty()) return Page.empty();
 
-        return appointmentRepository.findByPatient_Id(user.get().getId(), pageable);
+        // not user id, user.person.id
+        return appointmentRepository.findByPatient_Id(user.get().getPerson().getId(), pageable);
     }
 
     public Optional<Appointment> getAppointmentById(UUID id) {
@@ -201,6 +203,12 @@ public class AppointmentService {
                     appointment.setEnd(request.end());
                     appointment.setStatus(request.status());
                     appointment.setChiefComplaint(request.chiefComplaint());
+                    if (request.triageUrgency() != null) {
+                        appointment.setTriageUrgency(request.triageUrgency());
+                    }
+                    if (request.triageNotes() != null) {
+                        appointment.setTriageNotes(request.triageNotes());
+                    }
                     return appointmentRepository.save(appointment);
                 });
     }
