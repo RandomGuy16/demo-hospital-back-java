@@ -65,6 +65,31 @@ public class JwtService {
     }
 
     /**
+     * Generates a signed token with data provided by google oauth
+     * method meant to be called when a user requests an onboarding
+     * session right after coming from google oauth
+     *
+     * @param email Email
+     * @param name name
+     * @param googleSub Provider subject
+     * @return token
+     *
+     */
+    public String generateOnboardingToken(String email, String name, String googleSub) {
+        Instant now = Instant.now();
+
+        return Jwts.builder()
+            .subject("email")
+            .issuer("google")
+            .claim("email", email)
+            .claim("name", name)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(now.plusMillis(expirationMillis)))
+            .signWith(secretKey, Jwts.SIG.HS256)
+            .compact();
+    }
+
+    /**
      * Extracts the subject claim from a signed JWT.
      *
      * @param token signed JWT string.

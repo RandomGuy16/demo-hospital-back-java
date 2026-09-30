@@ -49,6 +49,7 @@ dependencies {
 
     // backend validates JWTs issued by the external identity provider
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")  // handle google auth
     testImplementation("org.springframework.security:spring-security-test")
     implementation("io.jsonwebtoken:jjwt-api:0.13.0")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")

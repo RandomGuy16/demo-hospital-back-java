@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.config;
 
+import com.evergreen.generalhospital.security.OAuth2AuthenticationSuccessHandler;
 import com.evergreen.generalhospital.services.JwtService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
@@ -59,12 +60,15 @@ public class SecurityConfig {
      * @throws Exception if the chain cannot be built.
      */
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-            JwtAuthenticationConverter jwtAuthenticationConverter) throws Exception {
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtAuthenticationConverter jwtAuthenticationConverter,
+            OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler
+    ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/admin/**")
                         .hasRole("ADMIN")  // only admins there
@@ -74,10 +78,15 @@ public class SecurityConfig {
                                 "/api-docs/**",
                                 "/api/v1/login",
                                 "/api/v1/register",
-                                "/api/v1/appointments/guest")
-                        .permitAll()
-                        .anyRequest().authenticated()) // the api is stateless, so every protected request must carry a
-                                                       // bearer token.
+                                "/api/v1/appointments/guest",
+                                "/oauth2/**",
+                                "/login/oauth2/**",
+                                "/api/v1/auth/complete-profile"
+                        ).permitAll()
+                        .anyRequest().authenticated()) // every protected request must carry a bearer token.
+                // google oauth2 login
+                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
+                // jwt resource server
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
         return http.build();

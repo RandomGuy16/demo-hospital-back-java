@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.controllers;
 
+import com.evergreen.generalhospital.dto.useraccount.CompleteUserProfileRequest;
 import com.evergreen.generalhospital.dto.useraccount.CurrentUserResponse;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountLoginRequest;
 import com.evergreen.generalhospital.dto.useraccount.UserAccountAuthenticationResponse;
@@ -158,4 +159,12 @@ public class AuthController {
         UserAccountAuthenticationResponse response = new UserAccountAuthenticationResponse(token);
         return ResponseEntity.ok(response);
     }
+
+
+    /*
+    @PostMapping("/complete-profile")
+    public ResponseEntity<void> completeProfile(@RequestBody @Valid CompleteUserProfileRequest req) {
+
+    }
+    */
 }
