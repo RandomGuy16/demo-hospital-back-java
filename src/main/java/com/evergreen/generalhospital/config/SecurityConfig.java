@@ -1,5 +1,6 @@
 package com.evergreen.generalhospital.config;
 
+import com.evergreen.generalhospital.security.OAuth2AuthenticationFailureHandler;
 import com.evergreen.generalhospital.security.OAuth2AuthenticationSuccessHandler;
 import com.evergreen.generalhospital.services.JwtService;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -63,7 +64,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity http,
             JwtAuthenticationConverter jwtAuthenticationConverter,
-            OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler
+            OAuth2AuthenticationSuccessHandler oAuth2SuccessHandler,
+            OAuth2AuthenticationFailureHandler oAuth2FailureHandler
     ) throws Exception {
         http
                 .cors(Customizer.withDefaults())
@@ -85,7 +87,10 @@ public class SecurityConfig {
                         ).permitAll()
                         .anyRequest().authenticated()) // every protected request must carry a bearer token.
                 // google oauth2 login
-                .oauth2Login(oauth2 -> oauth2.successHandler(oAuth2SuccessHandler))
+                .oauth2Login(oauth2 -> oauth2
+                    .successHandler(oAuth2SuccessHandler)
+                    .failureHandler(oAuth2FailureHandler)
+            )
                 // jwt resource server
                 .oauth2ResourceServer((oauth2) -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)));
