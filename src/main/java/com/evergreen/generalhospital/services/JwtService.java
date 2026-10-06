@@ -75,18 +75,54 @@ public class JwtService {
      * @return token
      *
      */
+    public record OnboardingClaims(String email, String name, String googleSub) {}
+
+    /**
+     * Generates a signed temporary onboarding token containing Google profile data.
+     * This token is issued to new users to allow them to complete their medical profile
+     * before receiving a full API JWT.
+     *
+     * @param email Email resolved from Google.
+     * @param name Name resolved from Google.
+     * @param googleSub Google unique subject ID.
+     * @return signed onboarding JWT.
+     */
     public String generateOnboardingToken(String email, String name, String googleSub) {
         Instant now = Instant.now();
+        // Limit onboarding token lifetime to 30 minutes (or expirationMillis if shorter)
+        long onboardingTtl = Math.min(expirationMillis, 30L * 60L * 1000L);
 
         return Jwts.builder()
-            .subject("email")
-            .issuer("google")
+            .subject(email)
+            .issuer(issuer)
+            .claim("token_type", "ONBOARDING")
             .claim("email", email)
             .claim("name", name)
+            .claim("provider_subject", googleSub)
             .issuedAt(Date.from(now))
-            .expiration(Date.from(now.plusMillis(expirationMillis)))
+            .expiration(Date.from(now.plusMillis(onboardingTtl)))
             .signWith(secretKey, Jwts.SIG.HS256)
             .compact();
+    }
+
+    /**
+     * Validates an onboarding token and extracts the Google identity claims.
+     *
+     * @param token signed onboarding JWT string.
+     * @return parsed onboarding identity data.
+     * @throws IllegalArgumentException if the token is not a valid onboarding token.
+     */
+    public OnboardingClaims extractOnboardingClaims(String token) {
+        Claims claims = extractAllClaims(token);
+        String tokenType = claims.get("token_type", String.class);
+        if (!"ONBOARDING".equals(tokenType)) {
+            throw new IllegalArgumentException("Token is not an onboarding token");
+        }
+        return new OnboardingClaims(
+            claims.get("email", String.class),
+            claims.get("name", String.class),
+            claims.get("provider_subject", String.class)
+        );
     }
 
     /**

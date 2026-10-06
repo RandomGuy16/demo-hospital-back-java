@@ -3,6 +3,7 @@ package com.evergreen.generalhospital.security;
 import java.io.IOException;
 import java.util.Optional;
 
+import org.springframework.stereotype.Component;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -16,6 +17,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 
 // magic class to handle google OAuth2 authentication
+@Component
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     
     private final UserAccountRepository userAccountRepository;
@@ -65,7 +67,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
             getRedirectStrategy().sendRedirect(
                 request,
                 response,
-                "http://localhost:3000/auth/complete-profile?token?" + onboardingToken);
+                "http://localhost:3000/auth/complete-profile?token=" + onboardingToken);
         }
     }
 }
